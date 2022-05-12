@@ -14,10 +14,16 @@ body {
 .sympho-container {
   /* margin-left: var(--margin-left); */
   padding: 12px;
+  display: grid;
 }
 section {
   background-color: blue;
 }
+.table-bordered-smp {
+  font-size: 8px;
+}
+
+
 
 body::-webkit-scrollbar {
   width: 0.25rem;
@@ -121,7 +127,7 @@ main {
   transform: rotate(-180deg);
 }
 
-/* Small screens */
+/* Large screens */
 @media only screen and (min-width: 600px) {
     .navbar-smp {
       top: 0;
@@ -140,7 +146,7 @@ main {
   }
 
 }
-/* Large screens */
+/* Small screens */
 @media only screen and (max-width: 600px) {
   .navbar-smp {
     left: 0;
@@ -163,6 +169,10 @@ main {
   main {
     margin-left: 0;
     margin-bottom: var(--margin-left);
+  }
+
+  .col-1 {
+    display: none;
   }
 
 }
