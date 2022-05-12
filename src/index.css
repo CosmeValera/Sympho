@@ -7,12 +7,17 @@ body {
   --bg-secondary: #141418;
   --transition-speed: 600ms;
   --margin-left: 80px;
+  margin: 0px;
   /* padding:5rem; */
 }
 
 /* .sympho-container {
   margin-left: var(--margin-left);
 } */
+
+section {
+  background-color: blue;
+}
 
 body::-webkit-scrollbar {
   width: 0.25rem;
@@ -155,7 +160,8 @@ main {
   }
 
   main {
-    margin: 0;
+    margin-left: 0;
+    margin-bottom: var(--margin-left);
   }
 
 }
