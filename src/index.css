@@ -17,10 +17,11 @@ body {
   display: grid;
 }
 section {
-  background-color: blue;
+  background-color: #23232e;
 }
 .table-bordered-smp {
   font-size: 8px;
+  color: white;
 }
 
 
@@ -44,6 +45,7 @@ main {
   position: fixed;
   background-color: var(--bg-primary);
   transition: width 200ms ease;
+  z-index: 99;
 }
 
 .navbar-nav-smp {
