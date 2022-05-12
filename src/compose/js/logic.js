@@ -8,6 +8,8 @@ var rendererWidth;
 var rendererHeight;
 var amountOfBarsPerRow;
 var currentBar;
+var leftMargin = 0;
+
 class Bar {
     constructor(stave, notes, x, y) {
         this.stave = stave;
@@ -22,6 +24,9 @@ function setInitialData() {
     rendererHeight = 250;
     renderer.resize(rendererWidth, rendererHeight);
     amountOfBarsPerRow = 4;
+    leftMargin = getComputedStyle(
+        document.querySelector("body")
+    ).getPropertyValue("--margin-left");
 }
 
 function createNewBarFullOfSilences(barPos) {
@@ -39,7 +44,8 @@ function createNewBarFullOfSilences(barPos) {
 }
 
 function calculateWidthAndX(barPos) {
-    if (bars.length == 0) { //empty bars
+    if (bars.length == 0) {
+        //empty bars
         return 10;
     }
     let previousBar = getLastBar(barPos);
@@ -47,7 +53,7 @@ function calculateWidthAndX(barPos) {
     //If it's 0 we are in first bar of row, and 1 means the second bar of row
     // let widthAndXPosition = Math.floor(barPos % amountOfBarsPerRow);
 
-    let widthAndXPositioner = barPos % amountOfBarsPerRow
+    let widthAndXPositioner = barPos % amountOfBarsPerRow;
     if (widthAndXPositioner == 0) {
         return 10;
     } else {
@@ -56,22 +62,22 @@ function calculateWidthAndX(barPos) {
 }
 
 function calculateHeightAndY(barPos) {
-    if (bars.length == 0) { //empty bars
+    if (bars.length == 0) {
+        //empty bars
         return 40;
     }
     let previousBar = getLastBar(barPos);
     let heightAndYMultiplier = Math.floor(barPos / amountOfBarsPerRow);
-    
+
     return 40 + 100 * heightAndYMultiplier;
 }
 
 function getLastBar(posBarToCreate) {
-    return bars[posBarToCreate-1]
+    return bars[posBarToCreate - 1];
 }
 
-
 function createStave(barPos, widthAndX, heightAndY) {
-    let widthAndXPositioner = barPos % amountOfBarsPerRow
+    let widthAndXPositioner = barPos % amountOfBarsPerRow;
     let stave = new VF.Stave(
         barPos == 0 ? 10 : widthAndX,
         barPos == 0 ? 40 : heightAndY,
@@ -130,9 +136,8 @@ function currentBarHasFourNotes() {
     );
 }
 
-
 function recalculateBars() {
-    for (let barPos = 0; barPos <bars.length; barPos++) {
+    for (let barPos = 0; barPos < bars.length; barPos++) {
         let widthAndX = calculateWidthAndX(barPos);
         let heightAndY = calculateHeightAndY(barPos);
         let stave = createStave(barPos, widthAndX, heightAndY);
@@ -146,7 +151,8 @@ function recalculateBars() {
 }
 
 function changeAmountOfBarsPerRowRegardingScreenWidth() {
-    let screenWidth = window.innerWidth;
+    let screenWidth = window.innerWidth + 20 - leftMargin.slice(0,-2);
+    console.log(leftMargin)
     let screenWidthRemaining = screenWidth - 450; //1 row
     amountOfBarsPerRow = 1;
     while (true) {

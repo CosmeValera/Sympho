@@ -11,6 +11,7 @@ function initialLoad() {
     windowSizeChanged();
     
     //DRAW
+    setInitialLayout();
     draw();
 }
 

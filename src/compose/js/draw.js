@@ -1,3 +1,4 @@
+// var leftMargin = 0; 
 function drawAll() {
     for (bar of bars) {
         drawABar(bar);
@@ -25,4 +26,10 @@ function calculateRendererSize() {
     let height = (heightAndYMultiplier-1) * 100 + minimumHeight; 
 
     renderer.resize(width, height);
+}
+
+function setInitialLayout() {
+    // leftMargin = getComputedStyle(document.querySelector('body'))
+    // .getPropertyValue('--margin-left');
+    // console.log(leftMargin);
 }
