@@ -38,7 +38,6 @@ main {
 }
 
 
-
 #content-section::-webkit-scrollbar {
   width: 0.25rem;
   /* height: 0.25rem; */
@@ -53,6 +52,16 @@ main {
 /* main {
   margin-left: var(--margin-left); 
 } */
+
+
+
+.right-menu-smp {
+  position: fixed;
+  right: 0;
+  color: white;
+  background-color: var(--bg-primary);
+}
+
 
 .navbar-smp {
   position: fixed;
