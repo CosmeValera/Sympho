@@ -8,7 +8,22 @@ body {
   --transition-speed: 600ms;
   --margin-left: 80px;
   margin: 0px;
-  /* padding:5rem; */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 100vh;
+}
+
+main {
+  flex-grow: 1;
+  display: flex;
+  overflow-y: hidden;
+  position: relative;
+}
+#content-section {
+  display: flex;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .sympho-container {
@@ -24,15 +39,15 @@ body {
 
 
 
-body::-webkit-scrollbar {
+#content-section::-webkit-scrollbar {
   width: 0.25rem;
   /* height: 0.25rem; */
   height: 0rem;
 }
-body::-webkit-scrollbar-track {
+#content-section::-webkit-scrollbar-track {
   background: #1e1e24;
 }
-body::-webkit-scrollbar-thumb {
+#content-section::-webkit-scrollbar-thumb {
   background: #6649b8;
 }
 /* main {
