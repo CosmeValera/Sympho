@@ -30,7 +30,7 @@ main {
   margin-left: var(--margin-left);
   padding: 12px;
   display: grid;
-  background-color: #23232e;
+  background-color: var(--bg-primary);
 }
 .table-bordered-smp {
   font-size: 8px;
@@ -58,6 +58,8 @@ main {
 .right-menu-smp {
   position: fixed;
   right: 0;
+  height: 100%;
+  width: calc(var(--margin-left) * 1.65);
   color: white;
   background-color: var(--bg-primary);
 }
