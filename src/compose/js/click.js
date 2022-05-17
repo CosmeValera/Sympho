@@ -1,5 +1,7 @@
-var position;
-var myElement;
+let positionTopLeftDiv;
+let myStave;
+let xPositionClick;
+let yPositionClick;
 
 // Helper function to get an element's exact position
 function getTopLeftCornerPosition(el) {
@@ -23,37 +25,27 @@ function getTopLeftCornerPosition(el) {
     el = el.offsetParent;
   }
   return {
-    x: xPos,
-    y: yPos
+    //we need to add scrollTop, otherwise it would be affecting twice
+    x: xPos + myStave.scrollLeft,
+    y: yPos + myStave.scrollTop 
   };
 }
  
-function getRelativePosition(evt) {
-  var xPosition = evt.clientX + myElement.scrollLeft - position.x;
-  var yPosition = evt.clientY + myElement.scrollTop - position.y;
-  console.log("Relative position:", xPosition, yPosition)
-  // console.log("clientX:", evt.clientX, ".clientY:", evt.clientY,
-  // ".scrollHeight:", myElement.scrollHeight, ".scrollTop:", myElement.scrollTop,
-  // ".scrollLeft:", myElement.scrollLeft,
-  // ".scrollY:", myElement.yScroll)
-}
-// deal with the page getting resized or scrolled
-window.addEventListener("scroll", updatePosition, false);
-window.addEventListener("resize", updatePosition, false);
- 
 function updatePosition() {
-  // add your code to update the position when your browser
-  // is resized or scrolled
-  console.log("Hald")
-  console.log(window.getComputedStyle(element).overflowY === 'visible')
-}
-
-function updatePosition() {
-  position = getTopLeftCornerPosition(myElement);
-  // console.log(position.x, position.y)
+  positionTopLeftDiv = getTopLeftCornerPosition(myStave);
 }       
 
-position = getTopLeftCornerPosition(myElement);
-myElement = document.querySelector("#content-section"); 
-myElement.addEventListener("click", getRelativePosition);
-// alert("The image is located at: " + position.x + ", " + position.y);
+function getRelativePosition(evt) {
+  xPositionClick = evt.clientX + myStave.scrollLeft - positionTopLeftDiv.x;
+  yPositionClick = evt.clientY + myStave.scrollTop - positionTopLeftDiv.y;
+  console.log("Relative position:", xPositionClick, yPositionClick);
+}
+// deal with the page getting resized or scrolled
+window.addEventListener("scroll", updatePosition);
+window.addEventListener("resize", updatePosition);
+
+myStave = document.querySelector("#content-section"); 
+myStave.addEventListener("click", getRelativePosition);
+
+positionTopLeftDiv = getTopLeftCornerPosition(myStave);
+updatePosition();
