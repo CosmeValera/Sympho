@@ -152,7 +152,7 @@ function recalculateBars() {
 
 function changeAmountOfBarsPerRowRegardingScreenWidth() {
     let screenWidth = window.innerWidth + 20 - leftMargin.slice(0,-2);
-    console.log(leftMargin)
+    // console.log(leftMargin)
     let screenWidthRemaining = screenWidth - 450; //1 row
     amountOfBarsPerRow = 1;
     while (true) {
