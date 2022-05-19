@@ -1,10 +1,10 @@
-let positionTopLeftDiv;
+let distanceStaveAndWindow;
 let myStave;
 let xPositionClick;
 let yPositionClick;
 
 // Helper function to get an element's exact position
-function getTopLeftCornerPosition(el) {
+function getDistanceBetweenStaveAndWindow(el) {
   var xPos = 0;
   var yPos = 0;
  
@@ -32,14 +32,14 @@ function getTopLeftCornerPosition(el) {
 }
  
 function updatePosition() {
-  positionTopLeftDiv = getTopLeftCornerPosition(myStave);
+  distanceStaveAndWindow = getDistanceBetweenStaveAndWindow(myStave);
 }       
 
 function getRelativePosition(evt) {
-  xPositionClick = evt.clientX + myStave.scrollLeft - positionTopLeftDiv.x;
-  yPositionClick = evt.clientY + myStave.scrollTop - positionTopLeftDiv.y;
-  console.log("Relative position:", xPositionClick, yPositionClick);
+  xPositionClick = evt.clientX + myStave.scrollLeft - distanceStaveAndWindow.x;
+  yPositionClick = evt.clientY + myStave.scrollTop - distanceStaveAndWindow.y;
 }
+
 // deal with the page getting resized or scrolled
 window.addEventListener("scroll", updatePosition);
 window.addEventListener("resize", updatePosition);
@@ -47,5 +47,5 @@ window.addEventListener("resize", updatePosition);
 myStave = document.querySelector("#content-section"); 
 myStave.addEventListener("click", getRelativePosition);
 
-positionTopLeftDiv = getTopLeftCornerPosition(myStave);
+distanceStaveAndWindow = getDistanceBetweenStaveAndWindow(myStave);
 updatePosition();
