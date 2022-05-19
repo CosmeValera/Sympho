@@ -2,13 +2,13 @@ const VF = Vex.Flow;
 const divStave = document.getElementById("my-stave");
 const renderer = new VF.Renderer(divStave, VF.Renderer.Backends.SVG);
 const context = renderer.getContext();
-const REST = "r";
 const bars = [];
 var rendererWidth;
 var rendererHeight;
 var amountOfBarsPerRow;
 var currentBar;
 var leftMargin = 0;
+var rightMargin = 0;
 
 class Bar {
     constructor(stave, notes, x, y) {
@@ -20,13 +20,16 @@ class Bar {
 }
 
 function setInitialData() {
-    rendererWidth = 450;
-    rendererHeight = 250;
+    rendererWidth = BAR_SIZE_CLEF + 50;
+    rendererHeight = BAR_WIDTH_CLEF;
     renderer.resize(rendererWidth, rendererHeight);
     amountOfBarsPerRow = 4;
     leftMargin = getComputedStyle(
         document.querySelector("body")
-    ).getPropertyValue("--margin-left");
+    ).getPropertyValue("--margin-left").slice(0,-2);
+    rightMargin = getComputedStyle(
+        document.querySelector("body")
+    ).getPropertyValue("--margin-right").slice(0,-2);
 }
 
 function createNewBarFullOfSilences(barPos) {
@@ -81,7 +84,7 @@ function createStave(barPos, widthAndX, heightAndY) {
     let stave = new VF.Stave(
         barPos == 0 ? 10 : widthAndX,
         barPos == 0 ? 40 : heightAndY,
-        widthAndXPositioner == 0 ? 400 : 350
+        widthAndXPositioner == 0 ? BAR_SIZE_CLEF : BAR_SIZE
     ).setContext(context);
     if (barPos == 0) stave.addTimeSignature("4/4");
     if (widthAndXPositioner == 0) stave.addClef("treble");
@@ -151,13 +154,13 @@ function recalculateBars() {
 }
 
 function changeAmountOfBarsPerRowRegardingScreenWidth() {
-    let screenWidth = window.innerWidth + 20 - leftMargin.slice(0,-2);
-    // console.log(leftMargin)
-    let screenWidthRemaining = screenWidth - 450; //1 row
+     let screenWidth = window.innerWidth + 20 - leftMargin - rightMargin;
+    let firstBarSize = BAR_SIZE_CLEF + 50;
+    let screenWidthRemaining = screenWidth - firstBarSize; //1 row
     amountOfBarsPerRow = 1;
     while (true) {
-        //For each 350 px, remaining add 1 row
-        screenWidthRemaining -= 350;
+        //For each 240 px, remaining add 1 row
+        screenWidthRemaining -= BAR_SIZE;
         if (screenWidthRemaining < 0) break;
         amountOfBarsPerRow++;
     }

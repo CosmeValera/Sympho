@@ -7,6 +7,7 @@ body {
   --bg-secondary: #141418;
   --transition-speed: 600ms;
   --margin-left: 80px;
+  --margin-right: 132px;
   margin: 0px;
   display: flex;
   flex-direction: column;
@@ -24,7 +25,11 @@ main {
   display: flex;
   overflow-x: hidden;
   overflow-y: scroll;
+  width: calc(100% - (var(--margin-left) * 1.65));
 }
+/* #my-stave {
+  width: calc(100% - (var(--margin-left) * 1.65));
+} */
 
 .sympho-container {
   margin-left: var(--margin-left);
@@ -59,7 +64,7 @@ main {
   position: fixed;
   right: 0;
   height: 100%;
-  width: calc(var(--margin-left) * 1.65);
+  width: var(--margin-right);
   color: white;
   background-color: var(--bg-primary);
 }
