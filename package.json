@@ -1,6 +1,6 @@
 {
-  "name": "sympho04_integrate_in_electron",
-  "productName": "sympho04_integrate_in_electron",
+  "name": "sympho",
+  "productName": "sympho",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": "src/index.js",
@@ -24,7 +24,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "sympho04_integrate_in_electron"
+            "name": "sympho"
           }
         },
         {
