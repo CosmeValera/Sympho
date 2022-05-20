@@ -31,15 +31,16 @@ main {
   width: calc(100% - (var(--margin-left) * 1.65));
 } */
 
-.sympho-container {
+.toolbar-smp {
   margin-left: var(--margin-left);
-  padding: 12px;
+  /* padding: 12px; */
   display: grid;
   background-color: var(--bg-primary);
 }
 .table-bordered-smp {
   font-size: 8px;
   color: white;
+  margin-bottom: 0px;
 }
 
 
@@ -60,7 +61,7 @@ main {
 
 
 
-.right-menu-smp {
+.options-bar-smp {
   position: fixed;
   right: 0;
   height: 100%;
@@ -69,6 +70,9 @@ main {
   background-color: var(--bg-primary);
 }
 
+.toolbar-smp div.row {
+  margin: 0;
+}
 
 .navbar-smp {
   position: fixed;
@@ -172,9 +176,9 @@ main {
       margin-bottom: 0;
     }
     
-    .sympho-container {
+    .toolbar-smp {
       margin-left: var(--margin-left);
-      padding: 12px;
+      /* padding: 12px; */
     }
 
     .navbar-smp:hover {
@@ -212,9 +216,9 @@ main {
     margin-bottom: var(--margin-left);
   }
 
-  .sympho-container {
+  .toolbar-smp {
     margin-left: 0;
-    padding: 4px;
+    /* padding: 4px; */
   }
     
   .col-1 {
