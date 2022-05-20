@@ -5,6 +5,10 @@ body {
   --text-secondary: #ececec;
   --bg-primary: #23232e;
   --bg-secondary: #141418;
+  --scrollbar-track: #1e1e24;
+  --scrollbar-thumb: #6649b8;
+  --fa-color-primary: #ff7eee;
+  --fa-color-secondary: #df49a6;
   --transition-speed: 600ms;
   --margin-left: 80px;
   --margin-right: 132px;
@@ -60,10 +64,10 @@ main {
   height: 0rem;
 }
 #section-my-stave::-webkit-scrollbar-track {
-  background: #1e1e24;
+  background: var(--scrollbar-track);
 }
 #section-my-stave::-webkit-scrollbar-thumb {
-  background: #6649b8;
+  background: var(--scrollbar-thumb);
 }
 .table thead th, .table tbody tr th, .table tbody tr td{
   border: 1.7px solid var(--bg-secondary);
@@ -126,11 +130,11 @@ main {
 }
 
 .fa-primary {
-  color: #ff7eee;
+  color: var(--fa-color-primary);
 }
 
 .fa-secondary {
-  color: #df49a6;
+  color: var(--fa-color-secondary);
 }
 
 .fa-primary,
@@ -231,6 +235,8 @@ main {
   --text-secondary: #ececec;
   --bg-primary: #23232e;
   --bg-secondary: #141418;
+  --scrollbar-thumb: #6649b8;
+  --scrollbar-track: #1e1e24;
 }
 
 .light {
@@ -238,6 +244,8 @@ main {
   --text-secondary: #000000;
   --bg-primary: #ffffff;
   --bg-secondary: #e4e4e4;
+  --scrollbar-thumb: var(--fa-color-primary);
+  --scrollbar-track: #f0f0f0;
 }
 
 .solar {
@@ -245,6 +253,8 @@ main {
   --text-secondary: #35535c;
   --bg-primary: #fdf6e3;
   --bg-secondary: #f5e5b8;
+  --scrollbar-thumb: #fffa62;
+  --scrollbar-track: #fcf0d0;
 }
 
 .theme-icon {
