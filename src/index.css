@@ -21,52 +21,16 @@ main {
   overflow-y: hidden;
   position: relative;
 }
-#content-section {
+#section-my-stave {
   display: flex;
   overflow-x: hidden;
   overflow-y: scroll;
   width: calc(100% - (var(--margin-left) * 1.65));
 }
-/* #my-stave {
-  width: calc(100% - (var(--margin-left) * 1.65));
-} */
 
 .toolbar-smp {
   margin-left: var(--margin-left);
-  /* padding: 12px; */
   display: grid;
-  background-color: var(--bg-primary);
-}
-.table-bordered-smp {
-  font-size: 8px;
-  color: white;
-  margin-bottom: 0px;
-}
-
-
-#content-section::-webkit-scrollbar {
-  width: 0.25rem;
-  /* height: 0.25rem; */
-  height: 0rem;
-}
-#content-section::-webkit-scrollbar-track {
-  background: #1e1e24;
-}
-#content-section::-webkit-scrollbar-thumb {
-  background: #6649b8;
-}
-/* main {
-  margin-left: var(--margin-left); 
-} */
-
-
-
-.options-bar-smp {
-  position: fixed;
-  right: 0;
-  height: 100%;
-  width: var(--margin-right);
-  color: white;
   background-color: var(--bg-primary);
 }
 
@@ -74,6 +38,40 @@ main {
   margin: 0;
 }
 
+.options-bar-smp {
+  position: fixed;
+  right: 0;
+  height: 100%;
+  width: var(--margin-right);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+.table-bordered-smp {
+  font-size: 8px;
+  color: var(--text-primary);
+  margin-bottom: 0px;
+}
+
+
+#section-my-stave::-webkit-scrollbar {
+  width: 0.25rem;
+  /* height: 0.25rem; */
+  height: 0rem;
+}
+#section-my-stave::-webkit-scrollbar-track {
+  background: #1e1e24;
+}
+#section-my-stave::-webkit-scrollbar-thumb {
+  background: #6649b8;
+}
+.table thead th, .table tbody tr th, .table tbody tr td{
+  border: 1.7px solid var(--bg-secondary);
+}
+
+/*                   */
+/* BEGIN: Navbar-smp */
+/*                   */
 .navbar-smp {
   position: fixed;
   background-color: var(--bg-primary);
@@ -264,3 +262,7 @@ main {
 .solar #solarIcon {
   display: block;
 }
+
+/*                 */
+/* END: Navbar-smp */
+/*                 */

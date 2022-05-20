@@ -45,7 +45,7 @@ function getRelativePosition(evt) {
 window.addEventListener("scroll", updatePosition);
 window.addEventListener("resize", updatePosition);
 
-myStave = document.querySelector("#content-section"); 
+myStave = document.querySelector("#section-my-stave"); 
 myStave.addEventListener("click", getRelativePosition);
 
 distanceStaveAndWindow = getDistanceBetweenStaveAndWindow(myStave);
