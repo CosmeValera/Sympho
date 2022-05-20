@@ -5,10 +5,11 @@ body {
   --text-secondary: #ececec;
   --bg-primary: #23232e;
   --bg-secondary: #141418;
+  --bg-stave: #ececec;
   --scrollbar-track: #1e1e24;
   --scrollbar-thumb: #6649b8;
-  --fa-color-primary: #ff7eee;
-  --fa-color-secondary: #df49a6;
+  --fa-primary: #ff7eee;
+  --fa-secondary: #df49a6;
   --transition-speed: 600ms;
   --margin-left: 80px;
   --margin-right: 132px;
@@ -20,6 +21,7 @@ body {
 }
 
 main {
+  height: 81vh;
   flex-grow: 1;
   display: flex;
   overflow-y: hidden;
@@ -29,10 +31,13 @@ main {
   display: flex;
   overflow-x: hidden;
   overflow-y: scroll;
+  background-color: var(--bg-stave);
+  height: fill;
   width: calc(100% - (var(--margin-left) * 1.65));
 }
 
 .toolbar-smp {
+  height: 19vh;
   margin-left: var(--margin-left);
   display: grid;
   background-color: var(--bg-primary);
@@ -130,11 +135,11 @@ main {
 }
 
 .fa-primary {
-  color: var(--fa-color-primary);
+  color: var(--fa-primary);
 }
 
 .fa-secondary {
-  color: var(--fa-color-secondary);
+  color: var(--fa-secondary);
 }
 
 .fa-primary,
@@ -235,6 +240,7 @@ main {
   --text-secondary: #ececec;
   --bg-primary: #23232e;
   --bg-secondary: #141418;
+  --bg-stave: #ececec;
   --scrollbar-thumb: #6649b8;
   --scrollbar-track: #1e1e24;
 }
@@ -244,7 +250,8 @@ main {
   --text-secondary: #000000;
   --bg-primary: #ffffff;
   --bg-secondary: #e4e4e4;
-  --scrollbar-thumb: var(--fa-color-primary);
+  --bg-stave: #ffffff;
+  --scrollbar-thumb: var(--fa-primary);
   --scrollbar-track: #f0f0f0;
 }
 
@@ -253,6 +260,7 @@ main {
   --text-secondary: #35535c;
   --bg-primary: #fdf6e3;
   --bg-secondary: #f5e5b8;
+  --bg-stave: #fefbf0;
   --scrollbar-thumb: #fffa62;
   --scrollbar-track: #fcf0d0;
 }
