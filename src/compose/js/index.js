@@ -1,7 +1,3 @@
-// // You can use anything you definddex in logic or in draw.js, e.g:
-// let b = new Bar("s", "a")
-// console.log(b.notes)
-
 function initialLoad() {
     //LOGIC
     setInitialData();

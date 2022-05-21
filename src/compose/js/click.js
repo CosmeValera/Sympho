@@ -1,5 +1,5 @@
 let distanceStaveAndWindow;
-let myStave;
+let mySectionStave;
 let xPositionClick;
 let yPositionClick;
 
@@ -26,18 +26,18 @@ function getDistanceBetweenStaveAndWindow(el) {
   }
   return {
     //we need to add scrollTop, otherwise it would be affecting twice
-    x: xPos + myStave.scrollLeft,
-    y: yPos + myStave.scrollTop 
+    x: xPos + mySectionStave.scrollLeft,
+    y: yPos + mySectionStave.scrollTop 
   };
 }
  
 function updatePosition() {
-  distanceStaveAndWindow = getDistanceBetweenStaveAndWindow(myStave);
+  distanceStaveAndWindow = getDistanceBetweenStaveAndWindow(mySectionStave);
 }       
 
 function getRelativePosition(evt) {
-  xPositionClick = evt.clientX + myStave.scrollLeft - distanceStaveAndWindow.x;
-  yPositionClick = evt.clientY + myStave.scrollTop - distanceStaveAndWindow.y;
+  xPositionClick = evt.clientX + mySectionStave.scrollLeft - distanceStaveAndWindow.x;
+  yPositionClick = evt.clientY + mySectionStave.scrollTop - distanceStaveAndWindow.y;
   console.log("Relative position:", xPositionClick, yPositionClick);
 }
 
@@ -45,8 +45,8 @@ function getRelativePosition(evt) {
 window.addEventListener("scroll", updatePosition);
 window.addEventListener("resize", updatePosition);
 
-myStave = document.querySelector("#section-my-stave"); 
-myStave.addEventListener("click", getRelativePosition);
+mySectionStave = document.querySelector("#section-my-stave"); 
+mySectionStave.addEventListener("click", getRelativePosition);
 
-distanceStaveAndWindow = getDistanceBetweenStaveAndWindow(myStave);
+distanceStaveAndWindow = getDistanceBetweenStaveAndWindow(mySectionStave);
 updatePosition();

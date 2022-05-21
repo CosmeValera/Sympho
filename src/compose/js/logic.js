@@ -93,23 +93,49 @@ function createStave(barPos, widthAndX, heightAndY) {
     return stave;
 }
 
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
+function calculateNote() {
+    
+    console.log("Relative position:", xPositionClick, yPositionClick);
+    if (xPositionClick<80 || xPositionClick>100) { return null; }
+    console.log("Relative position:", xPositionClick, yPositionClick);
+    if (yPositionClick>=72.5 && yPositionClick<=77.5) {
+        return ["f/5"];
+    } else if (yPositionClick>=77.5 && yPositionClick<=82.5) {
+        return ["e/5"];
+    } else if (yPositionClick>=82.5 && yPositionClick<=87.5) {
+        return ["d/5"];
+    } else if (yPositionClick>=87.5 && yPositionClick<=92.5) {
+        return ["c/5"];
+    } else if (yPositionClick>=92.5 && yPositionClick<=97.5) {
+        return ["b/4"];
+    } else if (yPositionClick>=97.5 && yPositionClick<=102.5) {
+        return ["a/4"];
+    } else if (yPositionClick>=102.5 && yPositionClick<=107.5) {
+        return ["g/4"];
+    } else if (yPositionClick>=107.5 && yPositionClick<=112.5) {
+        return ["f/4"];
+    } else if (yPositionClick>=112.5 && yPositionClick<=117.5) {
+        return ["e/4"];
+    } else if (yPositionClick>=117.5 && yPositionClick<=122.5) {
+        return ["d/4"];
+    } else if (yPositionClick>=122.5 && yPositionClick<=127.5) {
+        return ["c/4"];
+    }
+    return null;
 }
+
 function addOneNoteToCurrentNotes() {
+    console.log("1")
+    if (!xPositionClick || !yPositionClick) return;
+    console.log("2")
+    let note = calculateNote();
+    if (!note) return;
+    console.log("3")
     let pos = findPositionOfFirstSilenceNote();
-    let noteInt = getRandomInt(4);
+
     currentBar.notes[pos] = new VF.StaveNote({
         clef: "treble",
-        keys: [
-            noteInt == 0
-                ? "e/4"
-                : noteInt == 1
-                ? "d/5"
-                : noteInt == 2
-                ? "b/4"
-                : "g/4",
-        ],
+        keys: note,
         duration: "q",
     }); //.addAccidental(0, new VF.Accidental("#")); //THIS SHOULD BE IN DRAW
 }
@@ -154,7 +180,7 @@ function recalculateBars() {
 }
 
 function changeAmountOfBarsPerRowRegardingScreenWidth() {
-     let screenWidth = window.innerWidth + 20 - leftMargin - rightMargin;
+    let screenWidth = window.innerWidth + 20 - leftMargin - rightMargin;
     let firstBarSize = BAR_SIZE_CLEF + 50;
     let screenWidthRemaining = screenWidth - firstBarSize; //1 row
     amountOfBarsPerRow = 1;
