@@ -3,6 +3,8 @@ const divStave = document.getElementById("my-stave");
 const renderer = new VF.Renderer(divStave, VF.Renderer.Backends.SVG);
 const context = renderer.getContext();
 const bars = [];
+const divToggleNoteToRest = document.getElementById("change-note-to-rest");
+var isPutRest;
 var rendererWidth;
 var rendererHeight;
 var amountOfBarsPerRow;
@@ -20,6 +22,7 @@ class Bar {
 }
 
 function setInitialData() {
+    isPutRest = false;
     rendererWidth = BAR_SIZE_CLEF + 50;
     rendererHeight = BAR_WIDTH_CLEF;
     renderer.resize(rendererWidth, rendererHeight);
@@ -125,18 +128,15 @@ function calculateNote() {
 }
 
 function addOneNoteToCurrentNotes() {
-    console.log("1")
     if (!xPositionClick || !yPositionClick) return;
-    console.log("2")
     let note = calculateNote();
     if (!note) return;
-    console.log("3")
     let pos = findPositionOfFirstSilenceNote();
 
     currentBar.notes[pos] = new VF.StaveNote({
         clef: "treble",
         keys: note,
-        duration: "q",
+        duration: (!isPutRest)?"q":"qr",
     }); //.addAccidental(0, new VF.Accidental("#")); //THIS SHOULD BE IN DRAW
 }
 

@@ -11,7 +11,7 @@ function initialLoad() {
     draw();
 }
 
-function divBarClicked(evt) {
+function divStaveClicked(evt) {
     //LOGIC
     addOneNoteToCurrentNotes();
 
@@ -43,8 +43,13 @@ function draw() {
     drawAll();
 }
 
+function divToggleNoteToRestClicked() {
+    isPutRest = !isPutRest;
+}
+
 //Listeners
-divStave.addEventListener("click", divBarClicked);
+divStave.addEventListener("click", divStaveClicked);
 window.addEventListener("resize", windowSizeChanged);
+divToggleNoteToRest.addEventListener("click", divToggleNoteToRestClicked);
 
 initialLoad();
