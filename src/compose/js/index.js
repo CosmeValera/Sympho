@@ -3,9 +3,9 @@ function initialLoad() {
     setInitialData();
     createNewBarFullOfSilences(0);
     currentBar = bars[0];
-    
+
     windowSizeChanged();
-    
+
     //DRAW
     setInitialLayout();
     draw();
@@ -19,7 +19,7 @@ function divStaveClicked(evt) {
         createNewBarFullOfSilences(bars.length);
         renderer.resize(rendererWidth, rendererHeight);
     } else if (currentBarHasFourNotes()) {
-        currentBar = bars[bars.length-1]
+        currentBar = bars[bars.length - 1];
     }
     recalculateBars();
 
@@ -34,7 +34,7 @@ function windowSizeChanged(evt) {
     recalculateBars();
 
     //DRAW
-    draw() 
+    draw();
 }
 
 function draw() {
@@ -43,13 +43,11 @@ function draw() {
     drawAll();
 }
 
-function divToggleNoteToRestClicked() {
-    isPutRest = !isPutRest;
-}
-
 //Listeners
 divStave.addEventListener("click", divStaveClicked);
 window.addEventListener("resize", windowSizeChanged);
-divToggleNoteToRest.addEventListener("click", divToggleNoteToRestClicked);
+divToggleNoteToRest.addEventListener("click", () => {
+    isPutRest = !isPutRest;
+});
 
 initialLoad();
