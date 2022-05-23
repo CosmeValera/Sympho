@@ -46,7 +46,7 @@ window.addEventListener("scroll", updatePosition);
 window.addEventListener("resize", updatePosition);
 
 mySectionStave = document.querySelector("#section-my-stave"); 
-mySectionStave.addEventListener("click", getRelativePosition);
+// mySectionStave.addEventListener("click", getRelativePosition);
 
 distanceStaveAndWindow = getDistanceBetweenStaveAndWindow(mySectionStave);
 updatePosition();

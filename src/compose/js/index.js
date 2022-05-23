@@ -12,6 +12,9 @@ function initialLoad() {
 }
 
 function divStaveClicked(evt) {
+    //CLICK
+    getRelativePosition(evt);
+
     //LOGIC
     addOneNoteToCurrentNotes();
 
@@ -44,7 +47,8 @@ function draw() {
 }
 
 //Listeners
-divStave.addEventListener("click", divStaveClicked);
+// divStave.addEventListener("click", divStaveClicked);
+mySectionStave.addEventListener("click", divStaveClicked);
 window.addEventListener("resize", windowSizeChanged);
 divToggleNoteToRest.addEventListener("click", () => {
     isPutRest = !isPutRest;
