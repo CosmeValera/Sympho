@@ -11,6 +11,25 @@ var amountOfBarsPerRow;
 var leftMargin = 0;
 var rightMargin = 0;
 
+let notesMap = new Map([
+    [17, ["c/6"]],
+    [22, ["b/5"]],
+    [27, ["a/5"]],
+    [32, ["g/5"]],
+    [37, ["f/5"]],
+    [42, ["e/5"]],
+    [47, ["d/5"]],
+    [52, ["c/5"]],
+    [57, ["b/4"]],
+    [62, ["a/4"]],
+    [67, ["g/4"]],
+    [72, ["f/4"]],
+    [77, ["e/4"]],
+    [82, ["d/4"]],
+    [87, ["c/4"]],
+    [92, ["b/3"]],
+])
+
 class Bar {
     constructor(stave, notes, x, y) {
         this.stave = stave;
@@ -96,40 +115,15 @@ function createStave(barPos, widthAndX, heightAndY) {
 
 function calculateNote() {
     let yPosInAnyBar = (yPositionClick - STAVE_MARGIN_TOP) % BAR_WIDTH;
-    if (yPosInAnyBar >= 12.5 && yPosInAnyBar <= 17.5) {
-        return ["c/6"];
-    } else if (yPosInAnyBar >= 17.5 && yPosInAnyBar <= 22.5) {
-        return ["b/5"];
-    } else if (yPosInAnyBar >= 22.5 && yPosInAnyBar <= 27.5) {
-        return ["a/5"];
-    } else if (yPosInAnyBar >= 27.5 && yPosInAnyBar <= 32.5) {
-        return ["g/5"];
-    } else if (yPosInAnyBar >= 32.5 && yPosInAnyBar <= 37.5) {
-        return ["f/5"];
-    } else if (yPosInAnyBar >= 37.5 && yPosInAnyBar <= 42.5) {
-        return ["e/5"];
-    } else if (yPosInAnyBar >= 42.5 && yPosInAnyBar <= 47.5) {
-        return ["d/5"];
-    } else if (yPosInAnyBar >= 47.5 && yPosInAnyBar <= 52.5) {
-        return ["c/5"];
-    } else if (yPosInAnyBar >= 52.5 && yPosInAnyBar <= 57.5) {
-        return ["b/4"];
-    } else if (yPosInAnyBar >= 57.5 && yPosInAnyBar <= 62.5) {
-        return ["a/4"];
-    } else if (yPosInAnyBar >= 62.5 && yPosInAnyBar <= 67.5) {
-        return ["g/4"];
-    } else if (yPosInAnyBar >= 67.5 && yPosInAnyBar <= 72.5) {
-        return ["f/4"];
-    } else if (yPosInAnyBar >= 72.5 && yPosInAnyBar <= 77.5) {
-        return ["e/4"];
-    } else if (yPosInAnyBar >= 77.5 && yPosInAnyBar <= 82.5) {
-        return ["d/4"];
-    } else if (yPosInAnyBar >= 82.5 && yPosInAnyBar <= 87.5) {
-        return ["c/4"];
-    } else if (yPosInAnyBar >= 87.5 && yPosInAnyBar <= 92.5) {
-        return ["b/3"];
+    if (yPosInAnyBar < 12 || yPosInAnyBar > 92) {
+        return null;
     }
-    return null;
+    
+    for (const [position, note] of notesMap.entries()) {
+        if (yPosInAnyBar <= position) {
+            return note;
+        }
+    }
 }
 
 function getBarPosition() {
@@ -178,8 +172,8 @@ function addNewNote() {
     }); //.addAccidental(0, new VF.Accidental("#")); //THIS SHOULD BE IN DRAW
 }
     
-    function lastBarHasOneNote(lastBar) {
-        return !(
+function lastBarHasOneNote(lastBar) {
+    return !(
         bars[lastBar].notes[0].customTypes[0] === REST &&
         bars[lastBar].notes[1].customTypes[0] === REST &&
         bars[lastBar].notes[2].customTypes[0] === REST &&
