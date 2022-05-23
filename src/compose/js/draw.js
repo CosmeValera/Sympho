@@ -18,8 +18,8 @@ function clearScreen() {
 }
 
 function calculateRendererSize() {
-    let minimumWidth = BAR_SIZE_CLEF + EXTRA_RENDERER_SPACE;
-    let minimumHeight = BAR_WIDTH + EXTRA_RENDERER_SPACE;
+    let minimumWidth = BAR_SIZE_WITH_MARGIN_X + EXTRA_RENDERER_SPACE;
+    let minimumHeight = BAR_WIDTH_WITH_MARGIN_Y + EXTRA_RENDERER_SPACE;
 
     let width = (amountOfBarsPerRow - 1) * BAR_SIZE + minimumWidth;
     let heightAndYMultiplier = Math.floor((bars.length - 1) / amountOfBarsPerRow);

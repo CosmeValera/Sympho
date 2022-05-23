@@ -95,8 +95,14 @@ function createStave(barPos, widthAndX, heightAndY) {
 }
 
 function calculateNote() {
-    let yPosInAnyBar = (yPositionClick - 40) % 100;
-    if (yPosInAnyBar >= 27.5 && yPosInAnyBar <= 32.5) {
+    let yPosInAnyBar = (yPositionClick - STAVE_MARGIN_TOP) % BAR_WIDTH;
+    if (yPosInAnyBar >= 12.5 && yPosInAnyBar <= 17.5) {
+        return ["c/6"];
+    } else if (yPosInAnyBar >= 17.5 && yPosInAnyBar <= 22.5) {
+        return ["b/5"];
+    } else if (yPosInAnyBar >= 22.5 && yPosInAnyBar <= 27.5) {
+        return ["a/5"];
+    } else if (yPosInAnyBar >= 27.5 && yPosInAnyBar <= 32.5) {
         return ["g/5"];
     } else if (yPosInAnyBar >= 32.5 && yPosInAnyBar <= 37.5) {
         return ["f/5"];
@@ -120,6 +126,8 @@ function calculateNote() {
         return ["d/4"];
     } else if (yPosInAnyBar >= 82.5 && yPosInAnyBar <= 87.5) {
         return ["c/4"];
+    } else if (yPosInAnyBar >= 87.5 && yPosInAnyBar <= 92.5) {
+        return ["b/3"];
     }
     return null;
 }
@@ -129,15 +137,15 @@ function getBarPosition() {
 }
 
 function getRowNumber() {
-    return Math.floor((yPositionClick - 40) / 100);
+    return Math.floor((yPositionClick - STAVE_MARGIN_TOP) / BAR_WIDTH);
 }
 
 function calculatePos() {
     if (xPositionClick <= BAR_SIZE_WITH_MARGIN_X) { //if (getBarPosition() == 0)
         if (getRowNumber() == 0) {
-            return Math.trunc((xPositionClick - 70) / 55) % BEATS_PER_BAR;
+            return Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - 70) / 55) % BEATS_PER_BAR;
         }
-        return Math.trunc((xPositionClick - 40) / 60) % BEATS_PER_BAR;
+        return Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - 40) / 60) % BEATS_PER_BAR;
     } else if (xPositionClick > BAR_SIZE_WITH_MARGIN_X) {
         return (
             Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / 57.5) %
@@ -150,7 +158,10 @@ function calculateBar() {
     let barPosition = getBarPosition();
     let rowNumber = getRowNumber();
     let barNumber = barPosition + rowNumber * amountOfBarsPerRow;
-    return bars[barNumber];
+    
+    return barPosition < amountOfBarsPerRow && barPosition >= 0
+        ? bars[barNumber]
+        : undefined;
 }
 
 function addNewNote() {
