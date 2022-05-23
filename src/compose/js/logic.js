@@ -97,11 +97,13 @@ function createStave(barPos, widthAndX, heightAndY) {
 }
 
 function calculateNote() {
-    
     console.log("Relative position:", xPositionClick, yPositionClick);
-    if (xPositionClick<80 || xPositionClick>100) { return null; }
-    console.log("Relative position:", xPositionClick, yPositionClick);
-    if (yPositionClick>=72.5 && yPositionClick<=77.5) {
+
+    if (xPositionClick < 70 || xPositionClick > 290) { return null; }
+
+    if (yPositionClick>=67.5 && yPositionClick<=72.5) {
+        return ["g/5"];
+    } else if (yPositionClick>=72.5 && yPositionClick<=77.5) {
         return ["f/5"];
     } else if (yPositionClick>=77.5 && yPositionClick<=82.5) {
         return ["e/5"];
@@ -127,25 +129,33 @@ function calculateNote() {
     return null;
 }
 
+
+function findPositionOfFirstSilenceNote() {
+    if (xPositionClick < 70 || xPositionClick > 290) { return null; }
+
+    if (xPositionClick >= 70 && xPositionClick <= 125) { 
+        return 0;
+    } else if (xPositionClick >= 125 && xPositionClick <= 180) {
+        return 1;
+    } else if (xPositionClick >= 180 && xPositionClick <= 235) {
+        return 2;
+    } else if (xPositionClick >= 235 && xPositionClick <= 290) {
+        return 3;
+    }
+}
+
+
 function addOneNoteToCurrentNotes() {
     if (!xPositionClick || !yPositionClick) return;
     let note = calculateNote();
-    if (!note) return;
     let pos = findPositionOfFirstSilenceNote();
+    if (!note) return;
 
-    currentBar.notes[pos] = new VF.StaveNote({
+    bars[0].notes[pos] = new VF.StaveNote({
         clef: "treble",
         keys: note,
         duration: (!isPutRest)?"q":"qr",
     }); //.addAccidental(0, new VF.Accidental("#")); //THIS SHOULD BE IN DRAW
-}
-
-function findPositionOfFirstSilenceNote() {
-    for (let notePos = 0; notePos < currentBar.notes.length; notePos++) {
-        if (currentBar.notes[notePos].customTypes[0] === REST) {
-            return notePos;
-        }
-    }
 }
 
 function currentBarHasOneNote() {
