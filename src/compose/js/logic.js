@@ -27,12 +27,12 @@ function setInitialData() {
     rendererHeight = BAR_WIDTH_CLEF;
     renderer.resize(rendererWidth, rendererHeight);
     amountOfBarsPerRow = 4;
-    leftMargin = getComputedStyle(
-        document.querySelector("body")
-    ).getPropertyValue("--margin-left").slice(0,-2);
-    rightMargin = getComputedStyle(
-        document.querySelector("body")
-    ).getPropertyValue("--margin-right").slice(0,-2);
+    leftMargin = getComputedStyle(document.querySelector("body"))
+        .getPropertyValue("--margin-left")
+        .slice(0, -2);
+    rightMargin = getComputedStyle(document.querySelector("body"))
+        .getPropertyValue("--margin-right")
+        .slice(0, -2);
 }
 
 function createNewBarFullOfSilences(barPos) {
@@ -97,106 +97,77 @@ function createStave(barPos, widthAndX, heightAndY) {
 }
 
 function calculateNote() {
-
-    if (yPositionClick>=67.5 && yPositionClick<=72.5) {
+    if (yPositionClick >= 67.5 && yPositionClick <= 72.5) {
         return ["g/5"];
-    } else if (yPositionClick>=72.5 && yPositionClick<=77.5) {
+    } else if (yPositionClick >= 72.5 && yPositionClick <= 77.5) {
         return ["f/5"];
-    } else if (yPositionClick>=77.5 && yPositionClick<=82.5) {
+    } else if (yPositionClick >= 77.5 && yPositionClick <= 82.5) {
         return ["e/5"];
-    } else if (yPositionClick>=82.5 && yPositionClick<=87.5) {
+    } else if (yPositionClick >= 82.5 && yPositionClick <= 87.5) {
         return ["d/5"];
-    } else if (yPositionClick>=87.5 && yPositionClick<=92.5) {
+    } else if (yPositionClick >= 87.5 && yPositionClick <= 92.5) {
         return ["c/5"];
-    } else if (yPositionClick>=92.5 && yPositionClick<=97.5) {
+    } else if (yPositionClick >= 92.5 && yPositionClick <= 97.5) {
         return ["b/4"];
-    } else if (yPositionClick>=97.5 && yPositionClick<=102.5) {
+    } else if (yPositionClick >= 97.5 && yPositionClick <= 102.5) {
         return ["a/4"];
-    } else if (yPositionClick>=102.5 && yPositionClick<=107.5) {
+    } else if (yPositionClick >= 102.5 && yPositionClick <= 107.5) {
         return ["g/4"];
-    } else if (yPositionClick>=107.5 && yPositionClick<=112.5) {
+    } else if (yPositionClick >= 107.5 && yPositionClick <= 112.5) {
         return ["f/4"];
-    } else if (yPositionClick>=112.5 && yPositionClick<=117.5) {
+    } else if (yPositionClick >= 112.5 && yPositionClick <= 117.5) {
         return ["e/4"];
-    } else if (yPositionClick>=117.5 && yPositionClick<=122.5) {
+    } else if (yPositionClick >= 117.5 && yPositionClick <= 122.5) {
         return ["d/4"];
-    } else if (yPositionClick>=122.5 && yPositionClick<=127.5) {
+    } else if (yPositionClick >= 122.5 && yPositionClick <= 127.5) {
         return ["c/4"];
     }
     return null;
 }
 
-
-function findPositionOfFirstSilenceNote() {
-    if (xPositionClick >= 70 && xPositionClick <= 125) { 
-        currentBar = bars[0];
+function returnBarNumber(xPosition) {
+    if (xPosition <= 290) {
         return 0;
-    } else if (xPositionClick >= 125 && xPositionClick <= 180) {
-        currentBar = bars[0];
-        return 1;
-    } else if (xPositionClick >= 180 && xPositionClick <= 235) {
-        currentBar = bars[0];
-        return 2;
-    } else if (xPositionClick >= 235 && xPositionClick <= 290) {
-        currentBar = bars[0];
-        return 3;
+    } else if (xPosition > 290) {
+        return Math.trunc((xPosition - 290) / 230) + 1;
     }
-
-    if (xPositionClick >= 290 && xPositionClick <= 352.5) { 
-        if (!bars[1]) {
-            return undefined;
-        }
-        currentBar = bars[1];
-        return 0;
-    } else if (xPositionClick >= 352.5 && xPositionClick <= 415) {
-        if (!bars[1]) {
-            return undefined;
-        }
-        currentBar = bars[1];
-        return 1;
-    } else if (xPositionClick >= 415 && xPositionClick <= 477.5) {
-        if (!bars[1]) {
-            return undefined;
-        }
-        currentBar = bars[1];
-        return 2;
-    } else if (xPositionClick >= 477.5 && xPositionClick <= 540) {
-        if (!bars[1]) {
-            return undefined;
-        }
-        currentBar = bars[1];
-        return 3;
+}
+function returnBeatNumber(xPosition) {
+    if (xPosition <= 290) {
+        return Math.trunc((xPosition - 70) / 55) % 4;
+    } else if (xPosition > 290) {
+        return Math.trunc((xPosition - 290) / 57.5) % 4;
     }
 }
 
+function calculatePos() {
+    let barNumber = returnBarNumber(xPositionClick);
+    let beatNumber = returnBeatNumber(xPositionClick);
+    console.log(barNumber, beatNumber);
 
-function addOneNoteToCurrentNotes() {
+    currentBar = bars[barNumber];
+    return beatNumber;
+}
+
+function addNewNote() {
     if (!xPositionClick || !yPositionClick) return;
     let note = calculateNote();
-    let pos = findPositionOfFirstSilenceNote();
+    let pos = calculatePos();
     if (!note) return;
 
     currentBar.notes[pos] = new VF.StaveNote({
         clef: "treble",
         keys: note,
-        duration: (!isPutRest)?"q":"qr",
+        duration: !isPutRest ? "q" : "qr",
     }); //.addAccidental(0, new VF.Accidental("#")); //THIS SHOULD BE IN DRAW
 }
 
-function currentBarHasOneNote() {
-    return (
-        currentBar.notes[0].customTypes[0] !== REST &&
-        currentBar.notes[1].customTypes[0] === REST &&
-        currentBar.notes[2].customTypes[0] === REST &&
-        currentBar.notes[3].customTypes[0] === REST
-    );
-}
-function currentBarHasFourNotes() {
-    return (
-        currentBar.notes[0].customTypes[0] !== REST &&
-        currentBar.notes[1].customTypes[0] !== REST &&
-        currentBar.notes[2].customTypes[0] !== REST &&
-        currentBar.notes[3].customTypes[0] !== REST
+function lastBarHasOneNote(lastBar) {
+    return !(
+        bars[lastBar].notes[0].customTypes[0] === REST &&
+        bars[lastBar].notes[1].customTypes[0] === REST &&
+        bars[lastBar].notes[2].customTypes[0] === REST &&
+        bars[lastBar].notes[3].customTypes[0] === REST
     );
 }
 
@@ -220,7 +191,6 @@ function changeAmountOfBarsPerRowRegardingScreenWidth() {
     let screenWidthRemaining = screenWidth - firstBarSize; //1 row
     amountOfBarsPerRow = 1;
     while (true) {
-        //For each 240 px, remaining add 1 row
         screenWidthRemaining -= BAR_SIZE;
         if (screenWidthRemaining < 0) break;
         amountOfBarsPerRow++;

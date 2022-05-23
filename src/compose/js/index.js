@@ -16,13 +16,11 @@ function divStaveClicked(evt) {
     getRelativePosition(evt);
 
     //LOGIC
-    addOneNoteToCurrentNotes();
+    addNewNote();
 
-    if (currentBarHasOneNote()) {
+    if (lastBarHasOneNote(bars.length - 1)) {
         createNewBarFullOfSilences(bars.length);
         renderer.resize(rendererWidth, rendererHeight);
-    } else if (currentBarHasFourNotes()) {
-        currentBar = bars[bars.length - 1];
     }
     recalculateBars();
 
