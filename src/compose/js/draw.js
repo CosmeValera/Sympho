@@ -1,4 +1,4 @@
-// var leftMargin = 0; 
+// var leftMargin = 0;
 function drawAll() {
     for (bar of bars) {
         drawABar(bar);
@@ -6,7 +6,7 @@ function drawAll() {
 }
 
 function drawABar(bar) {
-    let voice = new VF.Voice({ num_beats: 4, beat_value: 4 });
+    let voice = new VF.Voice({ num_beats: BEATS_PER_BAR, beat_value: BEAT_VALUE });
     voice.addTickables(bar.notes);
     new VF.Formatter().joinVoices([voice]).format([voice], BAR_SIZE);
     bar.stave.draw();
@@ -18,12 +18,12 @@ function clearScreen() {
 }
 
 function calculateRendererSize() {
-    let minimumWidth = BAR_SIZE_CLEF + 50; //First bar
-    let minimumHeight = BAR_WIDTH_CLEF; //First bar
+    let minimumWidth = BAR_SIZE_CLEF + EXTRA_RENDERER_SPACE;
+    let minimumHeight = BAR_WIDTH + EXTRA_RENDERER_SPACE;
 
-    let width = (amountOfBarsPerRow-1) * BAR_SIZE + minimumWidth;
-    let heightAndYMultiplier = Math.floor((bars.length-1) / amountOfBarsPerRow);
-    let height = (heightAndYMultiplier-1) * 100 + minimumHeight; 
+    let width = (amountOfBarsPerRow - 1) * BAR_SIZE + minimumWidth;
+    let heightAndYMultiplier = Math.floor((bars.length - 1) / amountOfBarsPerRow);
+    let height = (heightAndYMultiplier) * BAR_WIDTH + minimumHeight;
 
     renderer.resize(width, height);
 }
