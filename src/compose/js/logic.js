@@ -99,7 +99,6 @@ function calculateHeightAndY(barPos) {
     if (bars.length == 0) { //empty bars
         return STAVE_MARGIN_TOP;
     }
-    let previousBar = getLastBar(barPos);
     let heightAndYMultiplier = Math.floor(barPos / amountOfBarsPerRow);
 
     return STAVE_MARGIN_TOP + BAR_WIDTH * heightAndYMultiplier;
@@ -231,20 +230,28 @@ function mouseToggle() {
     selectedNote = isMouseTable2 ? selectedNote : null;
 }
 
+function saveAlteredNoteInBars(modifier) {
+    selectedNote.modifiers = [];
+    octaveNumber = selectedNote.keys[0].split("/").pop();
+    selectedNote.keys[0] = `${modifier}/${octaveNumber}`;
+    selectedNote.addAccidental(0, new VF.Accidental(modifier));
+}
+
 function alterNote(evt) {
     if (selectedNote) {
-        selectedNote.modifiers = [];
         if (evt.target.id === "sharp-table-2") {
-            selectedNote.addAccidental(0, new VF.Accidental("#"));
+            saveAlteredNoteInBars("#");
         } else if (evt.target.id === "flat-table-2") {
-            selectedNote.addAccidental(0, new VF.Accidental("b"));
+            saveAlteredNoteInBars("b");
         } else if (evt.target.id === "double-sharp-table-2") {
-            selectedNote.addAccidental(0, new VF.Accidental("##"));
+            saveAlteredNoteInBars("##");
         } else if (evt.target.id === "double-flat-table-2") {
-            selectedNote.addAccidental(0, new VF.Accidental("bb"));
+            saveAlteredNoteInBars("bb");
         }
         //DRAW
+        recalculateBars();
         draw();
+        console.log(bars)
     } else {
         alert("No note selected");
     }
