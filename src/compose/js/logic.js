@@ -12,22 +12,22 @@ var leftMargin = 0;
 var rightMargin = 0;
 
 let notesMap = new Map([
-    [17, ["c/6"]],
-    [22, ["b/5"]],
-    [27, ["a/5"]],
-    [32, ["g/5"]],
-    [37, ["f/5"]],
-    [42, ["e/5"]],
-    [47, ["d/5"]],
-    [52, ["c/5"]],
-    [57, ["b/4"]],
-    [62, ["a/4"]],
-    [67, ["g/4"]],
-    [72, ["f/4"]],
-    [77, ["e/4"]],
-    [82, ["d/4"]],
-    [87, ["c/4"]],
-    [92, ["b/3"]],
+    [1, ["c/6"]],
+    [2, ["b/5"]],
+    [3, ["a/5"]],
+    [4, ["g/5"]],
+    [5, ["f/5"]],
+    [6, ["e/5"]],
+    [7, ["d/5"]],
+    [8, ["c/5"]],
+    [9, ["b/4"]],
+    [10, ["a/4"]],
+    [11, ["g/4"]],
+    [12, ["f/4"]],
+    [13, ["e/4"]],
+    [14, ["d/4"]],
+    [15, ["c/4"]],
+    [16, ["b/3"]],
 ])
 
 class Bar {
@@ -114,8 +114,8 @@ function createStave(barPos, widthAndX, heightAndY) {
 }
 
 function calculateNote() {
-    let yPosInAnyBar = (yPositionClick - STAVE_MARGIN_TOP) % BAR_WIDTH;
-    if (yPosInAnyBar < 12 || yPosInAnyBar > 92) {
+    let yPosInAnyBar = Math.ceil(((yPositionClick - STAVE_MARGIN_TOP) % BAR_WIDTH - 18)/5);
+    if (yPosInAnyBar < 0 || yPosInAnyBar > 16) {
         return null;
     }
     
