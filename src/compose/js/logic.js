@@ -4,7 +4,12 @@ const renderer = new VF.Renderer(divStave, VF.Renderer.Backends.SVG);
 const context = renderer.getContext();
 const bars = [];
 const divToggleNoteToRest = document.getElementById("change-note-to-rest");
+const divMouseTable2 = document.getElementById("mouse-table-2");
+const divSharpTable2 = document.getElementById("sharp-table-2");
+const divFlatTable2 = document.getElementById("flat-table-2");
 var isPutRest;
+var isMouseTable2;
+var selectedNote;
 var rendererWidth;
 var rendererHeight;
 var amountOfBarsPerRow;
@@ -41,6 +46,8 @@ class Bar {
 
 function setInitialData() {
     isPutRest = false;
+    isMouseTable2 = false;
+    selectedNote = null;
     rendererWidth = BAR_SIZE_CLEF + EXTRA_RENDERER_SPACE;
     rendererHeight = BAR_WIDTH + EXTRA_RENDERER_SPACE;
     renderer.resize(rendererWidth, rendererHeight);
@@ -169,6 +176,7 @@ function addNewNote() {
         clef: "treble",
         keys: note,
         duration: !isPutRest ? "q" : "qr",
+        auto_stem: true,
     }); //.addAccidental(0, new VF.Accidental("#")); //THIS SHOULD BE IN DRAW
 }
     

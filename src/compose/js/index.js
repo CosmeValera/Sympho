@@ -51,5 +51,30 @@ window.addEventListener("resize", windowSizeChanged);
 divToggleNoteToRest.addEventListener("click", () => {
     isPutRest = !isPutRest;
 });
+divMouseTable2.addEventListener("click", () => {
+    isMouseTable2 = !isMouseTable2;
+})
+divSharpTable2.addEventListener("click", () => {
+    // if (!selectedNote) {
+    //     return;
+    // }
+    
+    // TODO: selectedNote add #
+    console.log(VF)
+    console.log(bars[0].notes[0])
+    // bars[0].notes[0] = new VF.StaveNote({
+    //     clef: "treble",
+    //     keys: ["a#/4"],
+    //     duration: "q",
+    // }).addAccidental("A/4", new Vex.Flow.Accidental('b'));
+    bars[0].notes[0] = new VF.StaveNote({
+        clef: "treble",
+        keys: ["f#/4"],
+        duration: "q",
+    }).addAccidental(0, new VF.Accidental("#"));
+})
+divFlatTable2.addEventListener("click", () => {
+    // selectedNote add b
+})
 
 initialLoad();
