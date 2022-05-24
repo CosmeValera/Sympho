@@ -7,6 +7,8 @@ const divToggleNoteToRest = document.getElementById("change-note-to-rest");
 const divMouseTable2 = document.getElementById("mouse-table-2");
 const divSharpTable2 = document.getElementById("sharp-table-2");
 const divFlatTable2 = document.getElementById("flat-table-2");
+const divDoubleSharpTable2 = document.getElementById("double-sharp-table-2");
+const divDoubleFlatTable2 = document.getElementById("double-flat-table-2");
 var isPutRest;
 var isMouseTable2;
 var selectedNote;
@@ -47,6 +49,8 @@ class Bar {
 function setInitialData() {
     isPutRest = false;
     isMouseTable2 = false;
+    isAddSharp = false;
+    isAddFlat = false;
     selectedNote = null;
     rendererWidth = BAR_SIZE_CLEF + EXTRA_RENDERER_SPACE;
     rendererHeight = BAR_WIDTH + EXTRA_RENDERER_SPACE;
@@ -71,11 +75,11 @@ function createNewBarFullOfSilences(barPos) {
         new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "qr" }),
     ];
     bars[barPos] = new Bar(stave, notes, widthAndX, heightAndY);
+    renderer.resize(rendererWidth, rendererHeight);
 }
 
 function calculateWidthAndX(barPos) {
-    if (bars.length == 0) {
-        //empty bars
+    if (bars.length == 0) { //empty bars
         return STAVE_MARGIN_LEFT;
     }
     let previousBar = getLastBar(barPos);
@@ -92,8 +96,7 @@ function calculateWidthAndX(barPos) {
 }
 
 function calculateHeightAndY(barPos) {
-    if (bars.length == 0) {
-        //empty bars
+    if (bars.length == 0) { //empty bars
         return STAVE_MARGIN_TOP;
     }
     let previousBar = getLastBar(barPos);
@@ -169,7 +172,6 @@ function addNewNote() {
     let bar = calculateBar();
     let note = calculateNote();
     let pos = calculatePos();
-    console.log(note, pos, bar);
     if (!note || !bar) return;
     
     bar.notes[pos] = new VF.StaveNote({
@@ -177,7 +179,16 @@ function addNewNote() {
         keys: note,
         duration: !isPutRest ? "q" : "qr",
         auto_stem: true,
-    }); //.addAccidental(0, new VF.Accidental("#")); //THIS SHOULD BE IN DRAW
+    });
+}
+    
+function selectNote() {
+    let bar = calculateBar();
+    let note = calculateNote();
+    let pos = calculatePos();
+    if (!note || !bar) return;
+    
+    selectedNote = bar.notes[pos];
 }
     
 function lastBarHasOneNote(lastBar) {
@@ -212,6 +223,30 @@ function changeAmountOfBarsPerRowRegardingScreenWidth() {
         screenWidthRemaining -= BAR_SIZE;
         if (screenWidthRemaining < 0) break;
         amountOfBarsPerRow++;
+    }
+}
+
+function mouseToggle() {
+    isMouseTable2 = !isMouseTable2;
+    selectedNote = isMouseTable2 ? selectedNote : null;
+}
+
+function alterNote(evt) {
+    if (selectedNote) {
+        selectedNote.modifiers = [];
+        if (evt.target.id === "sharp-table-2") {
+            selectedNote.addAccidental(0, new VF.Accidental("#"));
+        } else if (evt.target.id === "flat-table-2") {
+            selectedNote.addAccidental(0, new VF.Accidental("b"));
+        } else if (evt.target.id === "double-sharp-table-2") {
+            selectedNote.addAccidental(0, new VF.Accidental("##"));
+        } else if (evt.target.id === "double-flat-table-2") {
+            selectedNote.addAccidental(0, new VF.Accidental("bb"));
+        }
+        //DRAW
+        draw();
+    } else {
+        alert("No note selected");
     }
 }
 

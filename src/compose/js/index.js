@@ -2,7 +2,6 @@ function initialLoad() {
     //LOGIC
     setInitialData();
     createNewBarFullOfSilences(0);
-    currentBar = bars[0];
 
     windowSizeChanged();
 
@@ -16,11 +15,14 @@ function divStaveClicked(evt) {
     getRelativePosition(evt);
 
     //LOGIC
-    addNewNote();
+    if (isMouseTable2) {
+        selectNote();
+    } else {
+        addNewNote();
+    }
 
     if (lastBarHasOneNote(bars.length - 1)) {
         createNewBarFullOfSilences(bars.length);
-        renderer.resize(rendererWidth, rendererHeight);
     }
     recalculateBars();
 
@@ -51,30 +53,9 @@ window.addEventListener("resize", windowSizeChanged);
 divToggleNoteToRest.addEventListener("click", () => {
     isPutRest = !isPutRest;
 });
-divMouseTable2.addEventListener("click", () => {
-    isMouseTable2 = !isMouseTable2;
-})
-divSharpTable2.addEventListener("click", () => {
-    // if (!selectedNote) {
-    //     return;
-    // }
-    
-    // TODO: selectedNote add #
-    console.log(VF)
-    console.log(bars[0].notes[0])
-    // bars[0].notes[0] = new VF.StaveNote({
-    //     clef: "treble",
-    //     keys: ["a#/4"],
-    //     duration: "q",
-    // }).addAccidental("A/4", new Vex.Flow.Accidental('b'));
-    bars[0].notes[0] = new VF.StaveNote({
-        clef: "treble",
-        keys: ["f#/4"],
-        duration: "q",
-    }).addAccidental(0, new VF.Accidental("#"));
-})
-divFlatTable2.addEventListener("click", () => {
-    // selectedNote add b
-})
-
+divMouseTable2.addEventListener("click", mouseToggle);
+divSharpTable2.addEventListener("click", alterNote);
+divFlatTable2.addEventListener("click", alterNote);
+divDoubleSharpTable2.addEventListener("click", alterNote);
+divDoubleFlatTable2.addEventListener("click", alterNote);
 initialLoad();
