@@ -50,12 +50,15 @@ function draw() {
 // divStave.addEventListener("click", divStaveClicked);
 mySectionStave.addEventListener("click", divStaveClicked);
 window.addEventListener("resize", windowSizeChanged);
-divToggleNoteToRest.addEventListener("click", () => {
-    isPutRest = !isPutRest;
-});
 divMouseTable2.addEventListener("click", mouseToggle);
 divSharpTable2.addEventListener("click", alterNote);
 divFlatTable2.addEventListener("click", alterNote);
 divDoubleSharpTable2.addEventListener("click", alterNote);
 divDoubleFlatTable2.addEventListener("click", alterNote);
+divToNote.addEventListener("click", () => {
+    isPutRest = false;
+});
+divToRest.addEventListener("click", () => {
+    isPutRest = true;
+});
 initialLoad();
