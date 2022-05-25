@@ -3,15 +3,18 @@ const divStave = document.getElementById("my-stave");
 const renderer = new VF.Renderer(divStave, VF.Renderer.Backends.SVG);
 const context = renderer.getContext();
 const bars = [];
-const divToNote = document.getElementById("add-quarter-note");
-const divToRest = document.getElementById("add-quarter-rest");
-const divMouseTable2 = document.getElementById("mouse-toggle");
-const divSharpTable2 = document.getElementById("add-sharp");
-const divFlatTable2 = document.getElementById("add-flat");
-const divDoubleSharpTable2 = document.getElementById("add-double-sharp");
-const divDoubleFlatTable2 = document.getElementById("add-double-flat");
+const divQuarterNote = document.getElementById("add-quarter-note");
+const divQuarterRest = document.getElementById("add-quarter-rest");
+const divHalfNote = document.getElementById("add-half-note");
+const divHalfRest = document.getElementById("add-half-rest");
+const divMouseToggle = document.getElementById("mouse-toggle");
+const divAddSharp = document.getElementById("add-sharp");
+const divAddFlat = document.getElementById("add-flat");
+const divAddDoubleSharp = document.getElementById("add-double-sharp");
+const divAddDoubleFlat = document.getElementById("add-double-flat");
+var noteValue;
 var isPutRest;
-var isMouseTable2;
+var isMouseToggled;
 var selectedNote;
 var rendererWidth;
 var rendererHeight;
@@ -49,7 +52,8 @@ class Bar {
 
 function setInitialData() {
     isPutRest = false;
-    isMouseTable2 = false;
+    noteValue = 4;
+    isMouseToggled = false;
     isAddSharp = false;
     isAddFlat = false;
     selectedNote = null;
@@ -244,7 +248,29 @@ function changeAmountOfBarsPerRowRegardingScreenWidth() {
 }
 
 function mouseToggle() {
-    isMouseTable2 = !isMouseTable2;
+    isMouseToggled = !isMouseToggled;
+    if (isMouseToggled) {
+        divHalfNote.classList.add("is-disabled");
+        divHalfRest.classList.add("is-disabled");
+        divQuarterNote.classList.add("is-disabled");
+        divQuarterRest.classList.add("is-disabled");
+
+        divAddSharp.classList.remove("is-disabled");
+        divAddDoubleSharp.classList.remove("is-disabled");
+        divAddFlat.classList.remove("is-disabled");
+        divAddDoubleFlat.classList.remove("is-disabled");
+    } else {
+        divHalfNote.classList.remove("is-disabled");
+        divHalfRest.classList.remove("is-disabled");
+        divQuarterNote.classList.remove("is-disabled");
+        divQuarterRest.classList.remove("is-disabled");
+
+        divAddSharp.classList.add("is-disabled");
+        divAddDoubleSharp.classList.add("is-disabled");
+        divAddFlat.classList.add("is-disabled");
+        divAddDoubleFlat.classList.add("is-disabled");
+    }
+
     if (selectedNote) {
         selectedNote.setStyle({fillStyle: "Black", strokeStyle: "Black"});
         selectedNote = null;
@@ -280,7 +306,7 @@ function alterNote(evt) {
     }
 }
 
-//TODO: add a button somewhere that will call this function to delete last bar
+//TODO: add a button somewhere that will call this function to delete last bar (maybe in right panel)
 function deleteLastBar() {
     delete bars[bars.length - 1];
 }

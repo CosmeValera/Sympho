@@ -15,7 +15,7 @@ function divStaveClicked(evt) {
     getRelativePosition(evt);
 
     //LOGIC
-    if (isMouseTable2) {
+    if (isMouseToggled) {
         selectNote();
     } else {
         addNewNote();
@@ -47,18 +47,29 @@ function draw() {
 }
 
 //Listeners
-// divStave.addEventListener("click", divStaveClicked);
 mySectionStave.addEventListener("click", divStaveClicked);
 window.addEventListener("resize", windowSizeChanged);
-divMouseTable2.addEventListener("click", mouseToggle);
-divSharpTable2.addEventListener("click", alterNote);
-divFlatTable2.addEventListener("click", alterNote);
-divDoubleSharpTable2.addEventListener("click", alterNote);
-divDoubleFlatTable2.addEventListener("click", alterNote);
-divToNote.addEventListener("click", () => {
+divMouseToggle.addEventListener("click", mouseToggle);
+divAddSharp.addEventListener("click", alterNote);
+divAddFlat.addEventListener("click", alterNote);
+divAddDoubleSharp.addEventListener("click", alterNote);
+divAddDoubleFlat.addEventListener("click", alterNote);
+
+divHalfNote.addEventListener("click", () => {
     isPutRest = false;
+    noteValue = 2;
 });
-divToRest.addEventListener("click", () => {
+divHalfRest.addEventListener("click", () => {
     isPutRest = true;
+    noteValue = 2;
 });
+divQuarterNote.addEventListener("click", () => {
+    isPutRest = false;
+    noteValue = 4;
+});
+divQuarterRest.addEventListener("click", () => {
+    isPutRest = true;
+    noteValue = 4;
+});
+
 initialLoad();

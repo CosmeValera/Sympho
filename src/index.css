@@ -78,6 +78,13 @@ main {
   border: 1.7px solid var(--bg-secondary);
 }
 
+.is-disabled {
+  color: currentColor!important;
+  cursor: not-allowed;
+  opacity: 0.5;
+  text-decoration: none!important;
+}
+
 /*                   */
 /* BEGIN: Navbar-smp */
 /*                   */
