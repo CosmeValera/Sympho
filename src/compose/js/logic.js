@@ -13,7 +13,7 @@ const divAddFlat = document.getElementById("add-flat");
 const divAddDoubleSharp = document.getElementById("add-double-sharp");
 const divAddDoubleFlat = document.getElementById("add-double-flat");
 var noteValue;
-var isPutRest;
+var isRest;
 var isMouseToggled;
 var selectedNote;
 var rendererWidth;
@@ -51,7 +51,7 @@ class Bar {
 }
 
 function setInitialData() {
-    isPutRest = false;
+    isRest = false;
     noteValue = 4;
     isMouseToggled = true;
     isAddSharp = false;
@@ -197,8 +197,8 @@ function addNewNote() {
     
     if (!note || !bar || !bar.notes[pos]) return;
     
-    let previousNoteDuration = bar.notes[pos].duration;
     let newNoteDuration = noteValue == 2 ? "2" : "4";
+    let previousNoteDuration = bar.notes[pos].duration;
 
     if (newNoteDuration == previousNoteDuration) {
         // nothing
@@ -213,6 +213,11 @@ function addNewNote() {
             if (pos == bar.notes.length - 1) {
                 return;
             }
+        } else if(bar.notes[0].duration == "4" && bar.notes[1].duration == "4" && bar.notes[2].duration == "2") {
+            if (pos == 1) {
+                pos = 0;
+                bar.notes = deleteFrom(bar.notes, pos);
+            }
         } else {
 
             if (pos == bar.notes.length - 1) {
@@ -226,14 +231,13 @@ function addNewNote() {
         bar.notes.splice(pos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
     }
 
-    newNoteDuration += isPutRest ? "r" : "";
+    newNoteDuration += isRest ? "r" : "";
     bar.notes[pos] = new VF.StaveNote({
         clef: "treble",
         keys: note,
         duration: newNoteDuration,
         auto_stem: true,
-    });    
-    console.log(bar.notes)
+    });
 }
     
 function selectNote() {
@@ -322,12 +326,12 @@ function saveAlteredNoteInBars(modifier) {
     selectedNote.addAccidental(0, new VF.Accidental(modifier));
 }
 
-function isRest() {
+function checkIsRest() {
     return selectedNote.customTypes[0] === 'r' ? true : false;
 }
 
 function alterNote(evt) {
-    if (selectedNote && !isRest()) {
+    if (selectedNote && !checkIsRest()) {
         if (evt.target.id === "add-sharp") {
             saveAlteredNoteInBars("#");
         } else if (evt.target.id === "add-flat") {

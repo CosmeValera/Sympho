@@ -57,19 +57,19 @@ divAddDoubleSharp.addEventListener("click", alterNote);
 divAddDoubleFlat.addEventListener("click", alterNote);
 
 divHalfNote.addEventListener("click", () => {
-    isPutRest = false;
+    isRest = false;
     noteValue = 2;
 });
 divHalfRest.addEventListener("click", () => {
-    isPutRest = true;
+    isRest = true;
     noteValue = 2;
 });
 divQuarterNote.addEventListener("click", () => {
-    isPutRest = false;
+    isRest = false;
     noteValue = 4;
 });
 divQuarterRest.addEventListener("click", () => {
-    isPutRest = true;
+    isRest = true;
     noteValue = 4;
 });
 
