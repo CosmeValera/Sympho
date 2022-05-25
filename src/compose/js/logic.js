@@ -53,7 +53,7 @@ class Bar {
 function setInitialData() {
     isPutRest = false;
     noteValue = 4;
-    isMouseToggled = false;
+    isMouseToggled = true;
     isAddSharp = false;
     isAddFlat = false;
     selectedNote = null;
@@ -74,10 +74,10 @@ function createNewBarFullOfSilences(barPos) {
 
     let stave = createStave(barPos, widthAndX, heightAndY);
     let notes = [
-        new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "qr" }),
-        new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "qr" }),
-        new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "qr" }),
-        new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "qr" }),
+        new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }),
+        new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }),
+        new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }),
+        new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }),
     ];
     bars[barPos] = new Bar(stave, notes, widthAndX, heightAndY);
     renderer.resize(rendererWidth, rendererHeight);
@@ -159,7 +159,17 @@ function getBarPosition() {
     return Math.floor((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / BAR_SIZE) + 1;
 }
 
-function calculatePos() {
+function calculateBar() {
+    let rowNumber = getRowNumber();
+    let barPosition = getBarPosition();
+    let barNumber = barPosition + rowNumber * amountOfBarsPerRow;
+    
+    return barPosition < amountOfBarsPerRow && barPosition >= 0
+        ? bars[barNumber]
+        : undefined;
+}
+
+function calculatePos(bar) {
     if (xPositionClick <= BAR_SIZE_WITH_MARGIN_X) {
         if (xPositionClick > BAR_SIZE_WITH_MARGIN_X - SPACE_PER_NOTE) { 
             return BEATS_PER_BAR - 1;
@@ -175,28 +185,55 @@ function calculatePos() {
     }
 }
 
-function calculateBar() {
-    let rowNumber = getRowNumber();
-    let barPosition = getBarPosition();
-    let barNumber = barPosition + rowNumber * amountOfBarsPerRow;
-    
-    return barPosition < amountOfBarsPerRow && barPosition >= 0
-        ? bars[barNumber]
-        : undefined;
+function deleteFrom(notes, notePos) {
+    delete notes[notePos];
+    return notes.filter(n => n);
 }
 
 function addNewNote() {
     let bar = calculateBar();
     let note = calculateNote();
-    let pos = calculatePos();
-    if (!note || !bar) return;
+    let pos = calculatePos(bar);
     
+    if (!note || !bar || !bar.notes[pos]) return;
+    
+    let previousNoteDuration = bar.notes[pos].duration;
+    let newNoteDuration = noteValue == 2 ? "2" : "4";
+
+    if (newNoteDuration == previousNoteDuration) {
+        // nothing
+    } else if (newNoteDuration == 2 && previousNoteDuration == 4) {
+        if (bar.notes[0].duration == "4" && bar.notes[1].duration == "2" && bar.notes[2].duration == "4") {
+            if (pos == 0) {
+                bar.notes = deleteFrom(bar.notes, pos);
+                bar.notes = deleteFrom(bar.notes, pos);
+                bar.notes.splice(pos, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
+                bar.notes.splice(pos, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
+            }
+            if (pos == bar.notes.length - 1) {
+                return;
+            }
+        } else {
+
+            if (pos == bar.notes.length - 1) {
+                bar.notes = deleteFrom(bar.notes, pos-1)
+                pos--;
+            } else {
+                bar.notes = deleteFrom(bar.notes, pos+1)
+            }
+        }
+    } else if (newNoteDuration == 4 && previousNoteDuration == 2) {
+        bar.notes.splice(pos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
+    }
+
+    newNoteDuration += isPutRest ? "r" : "";
     bar.notes[pos] = new VF.StaveNote({
         clef: "treble",
         keys: note,
-        duration: !isPutRest ? "q" : "qr",
+        duration: newNoteDuration,
         auto_stem: true,
-    });
+    });    
+    console.log(bar.notes)
 }
     
 function selectNote() {
@@ -213,12 +250,11 @@ function selectNote() {
 }
     
 function lastBarHasOneNote(lastBar) {
-    return !(
-        bars[lastBar].notes[0].customTypes[0] === REST &&
-        bars[lastBar].notes[1].customTypes[0] === REST &&
-        bars[lastBar].notes[2].customTypes[0] === REST &&
-        bars[lastBar].notes[3].customTypes[0] === REST
-    );
+    return bars[lastBar].notes.some(n => {
+        if (!(n.customTypes[0][0] === 'r')) {
+            return true;
+        }
+    });
 }
 
 function recalculateBars() {
@@ -249,6 +285,7 @@ function changeAmountOfBarsPerRowRegardingScreenWidth() {
 
 function mouseToggle() {
     isMouseToggled = !isMouseToggled;
+
     if (isMouseToggled) {
         divHalfNote.classList.add("is-disabled");
         divHalfRest.classList.add("is-disabled");

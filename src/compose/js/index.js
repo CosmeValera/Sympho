@@ -4,7 +4,8 @@ function initialLoad() {
     createNewBarFullOfSilences(0);
 
     windowSizeChanged();
-
+    mouseToggle();
+    
     //DRAW
     setInitialLayout();
     draw();

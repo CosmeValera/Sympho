@@ -38,7 +38,7 @@ function updatePosition() {
 function getRelativePosition(evt) {
   xPositionClick = evt.clientX + mySectionStave.scrollLeft - distanceStaveAndWindow.x;
   yPositionClick = evt.clientY + mySectionStave.scrollTop - distanceStaveAndWindow.y;
-  console.log("Relative position:", xPositionClick, yPositionClick);
+  // console.log("Relative position:", xPositionClick, yPositionClick);
 }
 
 // deal with the page getting resized or scrolled
@@ -46,7 +46,6 @@ window.addEventListener("scroll", updatePosition);
 window.addEventListener("resize", updatePosition);
 
 mySectionStave = document.querySelector("#section-my-stave"); 
-// mySectionStave.addEventListener("click", getRelativePosition);
 
 distanceStaveAndWindow = getDistanceBetweenStaveAndWindow(mySectionStave);
 updatePosition();
