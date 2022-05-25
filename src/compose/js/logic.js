@@ -3,13 +3,13 @@ const divStave = document.getElementById("my-stave");
 const renderer = new VF.Renderer(divStave, VF.Renderer.Backends.SVG);
 const context = renderer.getContext();
 const bars = [];
-const divToNote = document.getElementById("add-note");
-const divToRest = document.getElementById("add-rest");
-const divMouseTable2 = document.getElementById("mouse-table-2");
-const divSharpTable2 = document.getElementById("sharp-table-2");
-const divFlatTable2 = document.getElementById("flat-table-2");
-const divDoubleSharpTable2 = document.getElementById("double-sharp-table-2");
-const divDoubleFlatTable2 = document.getElementById("double-flat-table-2");
+const divToNote = document.getElementById("add-quarter-note");
+const divToRest = document.getElementById("add-quarter-rest");
+const divMouseTable2 = document.getElementById("mouse-toggle");
+const divSharpTable2 = document.getElementById("add-sharp");
+const divFlatTable2 = document.getElementById("add-flat");
+const divDoubleSharpTable2 = document.getElementById("add-double-sharp");
+const divDoubleFlatTable2 = document.getElementById("add-double-flat");
 var isPutRest;
 var isMouseTable2;
 var selectedNote;
@@ -91,9 +91,8 @@ function calculateWidthAndX(barPos) {
     let widthAndXPositioner = barPos % amountOfBarsPerRow;
     if (widthAndXPositioner == 0) {
         return STAVE_MARGIN_LEFT;
-    } else {
-        return previousBar.stave.x + previousBar.stave.width;
     }
+    return previousBar.stave.x + previousBar.stave.width;
 }
 
 function calculateHeightAndY(barPos) {
@@ -254,28 +253,30 @@ function mouseToggle() {
 }
 
 function saveAlteredNoteInBars(modifier) {
-    selectedNote.modifiers = [];
-    octaveNumber = selectedNote.keys[0].split("/").pop();
+    let octaveNumber = selectedNote.keys[0].split("/").pop();
     selectedNote.keys[0] = `${modifier}/${octaveNumber}`;
+    selectedNote.modifiers = [];
     selectedNote.addAccidental(0, new VF.Accidental(modifier));
 }
 
+function isRest() {
+    return selectedNote.customTypes[0] === 'r' ? true : false;
+}
+
 function alterNote(evt) {
-    if (selectedNote) {
-        if (evt.target.id === "sharp-table-2") {
+    if (selectedNote && !isRest()) {
+        if (evt.target.id === "add-sharp") {
             saveAlteredNoteInBars("#");
-        } else if (evt.target.id === "flat-table-2") {
+        } else if (evt.target.id === "add-flat") {
             saveAlteredNoteInBars("b");
-        } else if (evt.target.id === "double-sharp-table-2") {
+        } else if (evt.target.id === "add-double-sharp") {
             saveAlteredNoteInBars("##");
-        } else if (evt.target.id === "double-flat-table-2") {
+        } else if (evt.target.id === "add-double-flat") {
             saveAlteredNoteInBars("bb");
         }
         recalculateBars();
         draw();
         console.log(bars)
-    } else {
-        alert("No note selected");
     }
 }
 
