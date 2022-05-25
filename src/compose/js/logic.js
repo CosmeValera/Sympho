@@ -141,22 +141,32 @@ function getRowNumber() {
 }
 
 function getBarPosition() {
-    console.log(getRowNumber())
-    if (getRowNumber() === 0) {
-        return Math.floor((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / BAR_SIZE) + 1;
+    if (xPositionClick < BAR_SIZE_WITH_MARGIN_X) {
+        if (getRowNumber() === 0) {
+            if (xPositionClick > STAVE_MARGIN_LEFT + CLEF_SIZE + TEMPO_SIZE ) {
+                return 0;
+            }
+        } else if (getRowNumber() !== 0) {
+            if (xPositionClick > STAVE_MARGIN_LEFT + CLEF_SIZE) {
+                return 0;
+            }
+        }
+        return undefined;
     }
-    return Math.floor((xPositionClick - BAR_SIZE_WITH_MARGIN_X + TEMPO_SIZE) / BAR_SIZE) + 1;
+    return Math.floor((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / BAR_SIZE) + 1;
 }
 
 function calculatePos() {
-    if (xPositionClick <= BAR_SIZE_WITH_MARGIN_X) { //if (getBarPosition() == 0)
-        if (getRowNumber() == 0) {
-            return Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - CLEF_SIZE - TEMPO_SIZE) / 55) % BEATS_PER_BAR;
-        }
-        return Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - TEMPO_SIZE) / 62.5) % BEATS_PER_BAR;
+    if (xPositionClick <= BAR_SIZE_WITH_MARGIN_X) {
+        if (xPositionClick > BAR_SIZE_WITH_MARGIN_X - SPACE_PER_NOTE) { 
+            return BEATS_PER_BAR - 1;
+        } 
+        return (getRowNumber() === 0)
+            ? Math.trunc((xPositionClick - CLEF_SIZE - TEMPO_SIZE) / SPACE_PER_NOTE) % BEATS_PER_BAR
+            : Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - TEMPO_SIZE) / SPACE_PER_NOTE) % BEATS_PER_BAR;
     } else if (xPositionClick > BAR_SIZE_WITH_MARGIN_X) {
         return (
-            Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / 57.5) %
+            Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / SPACE_PER_NOTE) %
             BEATS_PER_BAR
         );
     }
@@ -166,7 +176,6 @@ function calculateBar() {
     let rowNumber = getRowNumber();
     let barPosition = getBarPosition();
     let barNumber = barPosition + rowNumber * amountOfBarsPerRow;
-    console.log(barPosition, rowNumber, barNumber)
     
     return barPosition < amountOfBarsPerRow && barPosition >= 0
         ? bars[barNumber]
@@ -177,7 +186,6 @@ function addNewNote() {
     let bar = calculateBar();
     let note = calculateNote();
     let pos = calculatePos();
-    console.log(bar, note, pos)
     if (!note || !bar) return;
     
     bar.notes[pos] = new VF.StaveNote({
