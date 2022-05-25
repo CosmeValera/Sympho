@@ -136,20 +136,24 @@ function calculateNote() {
     }
 }
 
-function getBarPosition() {
-    return Math.floor((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / BAR_SIZE) + 1;
-}
-
 function getRowNumber() {
     return Math.floor((yPositionClick - STAVE_MARGIN_TOP) / BAR_WIDTH);
+}
+
+function getBarPosition() {
+    console.log(getRowNumber())
+    if (getRowNumber() === 0) {
+        return Math.floor((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / BAR_SIZE) + 1;
+    }
+    return Math.floor((xPositionClick - BAR_SIZE_WITH_MARGIN_X + TEMPO_SIZE) / BAR_SIZE) + 1;
 }
 
 function calculatePos() {
     if (xPositionClick <= BAR_SIZE_WITH_MARGIN_X) { //if (getBarPosition() == 0)
         if (getRowNumber() == 0) {
-            return Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - 70) / 55) % BEATS_PER_BAR;
+            return Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - CLEF_SIZE - TEMPO_SIZE) / 55) % BEATS_PER_BAR;
         }
-        return Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - 40) / 60) % BEATS_PER_BAR;
+        return Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - TEMPO_SIZE) / 62.5) % BEATS_PER_BAR;
     } else if (xPositionClick > BAR_SIZE_WITH_MARGIN_X) {
         return (
             Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / 57.5) %
@@ -159,9 +163,10 @@ function calculatePos() {
 }
 
 function calculateBar() {
-    let barPosition = getBarPosition();
     let rowNumber = getRowNumber();
+    let barPosition = getBarPosition();
     let barNumber = barPosition + rowNumber * amountOfBarsPerRow;
+    console.log(barPosition, rowNumber, barNumber)
     
     return barPosition < amountOfBarsPerRow && barPosition >= 0
         ? bars[barNumber]
@@ -172,6 +177,7 @@ function addNewNote() {
     let bar = calculateBar();
     let note = calculateNote();
     let pos = calculatePos();
+    console.log(bar, note, pos)
     if (!note || !bar) return;
     
     bar.notes[pos] = new VF.StaveNote({
@@ -188,7 +194,11 @@ function selectNote() {
     let pos = calculatePos();
     if (!note || !bar) return;
     
+    if (selectedNote) {
+        selectedNote.setStyle({fillStyle: "Black", strokeStyle: "Black"});
+    }
     selectedNote = bar.notes[pos];
+    selectedNote.setStyle({fillStyle: "MediumBlue", strokeStyle: "MediumBlue"});
 }
     
 function lastBarHasOneNote(lastBar) {
@@ -228,7 +238,11 @@ function changeAmountOfBarsPerRowRegardingScreenWidth() {
 
 function mouseToggle() {
     isMouseTable2 = !isMouseTable2;
-    selectedNote = isMouseTable2 ? selectedNote : null;
+    if (selectedNote) {
+        selectedNote.setStyle({fillStyle: "Black", strokeStyle: "Black"});
+        selectedNote = null;
+        draw();
+    }
 }
 
 function saveAlteredNoteInBars(modifier) {
@@ -249,7 +263,6 @@ function alterNote(evt) {
         } else if (evt.target.id === "double-flat-table-2") {
             saveAlteredNoteInBars("bb");
         }
-        //DRAW
         recalculateBars();
         draw();
         console.log(bars)
