@@ -185,12 +185,47 @@ function calculatePosIf4Quarters(bar) {
     }
 }
 
+function calculateRealPosRegardingArrayDeprecated(bar, pos) {
+    console.log("pos= ", pos)
+    let sumUntilNow = 0;
+    for (let i = 0; i <= pos; i++) {
+        if (i == pos) {
+            break;
+        }
+        let note = bar.notes[i];
+        // console.log(note)
+        if (note.duration == 4) {
+            sumUntilNow += 1;
+        } else if (note.duration == 2) {
+            sumUntilNow += 0.5;
+        }
+    }
+    return Math.floor(sumUntilNow);
+}
+
+function calculateRealPosRegardingArray(bar, pos) {
+    console.log("pos= ", pos)
+    let notes = bar.notes;
+    let notesValues = notes.map(n => 4/n.duration);
+    let sum = 0;
+    for (let i = 0; i < notesValues.length; i++) {
+        sum += notesValues[i];
+        if (pos < sum) {
+            return i;
+        }
+    }
+    console.log("notesValues", notesValues)
+    // return calculateRealPosRegardingArrayDeprecated(bar, pos);
+}
+
+
+
 function deleteFrom(notes, notePos) {
     delete notes[notePos];
     return notes.filter(n => n);
 }
 
-function specialCases(newNoteDuration, previousNoteDuration, bar, pos) {
+function alterNotesRegardingSpecialCases(newNoteDuration, previousNoteDuration, bar, pos) {
     if (newNoteDuration == previousNoteDuration) {
         return pos;
     } else if (newNoteDuration == 2 && previousNoteDuration == 4) {
@@ -210,7 +245,6 @@ function specialCases(newNoteDuration, previousNoteDuration, bar, pos) {
                 pos = 0;
             }
         } else {
-
             if (pos == bar.notes.length - 1) {
                 bar.notes = deleteFrom(bar.notes, pos-1)
                 pos--;
@@ -229,15 +263,18 @@ function addNewNote() {
     let note = calculateNote();
     let pos = calculatePosIf4Quarters(bar);
     
-    if (!note || !bar || !bar.notes[pos]) return;
+    let realPos = calculateRealPosRegardingArray(bar, pos);
+    console.log("realPos=" + realPos);
+
+    if (!note || !bar || !bar.notes[realPos]) return;
     
     let newNoteDuration = noteValue == 2 ? "2" : "4";
-    let previousNoteDuration = bar.notes[pos].duration;
+    let previousNoteDuration = bar.notes[realPos].duration;
 
-    pos = specialCases(newNoteDuration, previousNoteDuration, bar, pos);
+    realPos = alterNotesRegardingSpecialCases(newNoteDuration, previousNoteDuration, bar, realPos);
 
     newNoteDuration += isRest ? "r" : "";
-    bar.notes[pos] = new VF.StaveNote({
+    bar.notes[realPos] = new VF.StaveNote({
         clef: "treble",
         keys: note,
         duration: newNoteDuration,
