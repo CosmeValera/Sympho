@@ -185,26 +185,7 @@ function calculatePosIf4Quarters(bar) {
     }
 }
 
-function calculateRealPosRegardingArrayDeprecated(bar, pos) {
-    console.log("pos= ", pos)
-    let sumUntilNow = 0;
-    for (let i = 0; i <= pos; i++) {
-        if (i == pos) {
-            break;
-        }
-        let note = bar.notes[i];
-        // console.log(note)
-        if (note.duration == 4) {
-            sumUntilNow += 1;
-        } else if (note.duration == 2) {
-            sumUntilNow += 0.5;
-        }
-    }
-    return Math.floor(sumUntilNow);
-}
-
 function calculateRealPosRegardingArray(bar, pos) {
-    console.log("pos= ", pos)
     let notes = bar.notes;
     let notesValues = notes.map(n => 4/n.duration);
     let sum = 0;
@@ -214,59 +195,52 @@ function calculateRealPosRegardingArray(bar, pos) {
             return i;
         }
     }
-    console.log("notesValues", notesValues)
-    // return calculateRealPosRegardingArrayDeprecated(bar, pos);
 }
-
-
 
 function deleteFrom(notes, notePos) {
     delete notes[notePos];
     return notes.filter(n => n);
 }
 
-function alterNotesRegardingSpecialCases(newNoteDuration, previousNoteDuration, bar, pos) {
+function alterNotesRegardingSpecialCases(newNoteDuration, previousNoteDuration, bar, realPos) {
     if (newNoteDuration == previousNoteDuration) {
-        return pos;
+        return realPos;
     } else if (newNoteDuration == 2 && previousNoteDuration == 4) {
         if (bar.notes[0].duration == "4" && bar.notes[1].duration == "2" && bar.notes[2].duration == "4") {
-            if (pos == 0) {
-                bar.notes = deleteFrom(bar.notes, pos);
-                bar.notes = deleteFrom(bar.notes, pos);
-                bar.notes.splice(pos, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
-                bar.notes.splice(pos, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
+            if (realPos == 0) {
+                bar.notes = deleteFrom(bar.notes, realPos);
+                bar.notes = deleteFrom(bar.notes, realPos);
+                bar.notes.splice(realPos, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
+                bar.notes.splice(realPos, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
             }
-            if (pos == bar.notes.length - 1) {
+            if (realPos == bar.notes.length - 1) {
                 return;
             }
         } else if(bar.notes[0].duration == "4" && bar.notes[1].duration == "4" && bar.notes[2].duration == "2") {
-            bar.notes = deleteFrom(bar.notes, pos);
-            if (pos == 1) {
-                pos = 0;
+            bar.notes = deleteFrom(bar.notes, realPos);
+            if (realPos == 1) {
+                realPos = 0;
             }
         } else {
-            if (pos == bar.notes.length - 1) {
-                bar.notes = deleteFrom(bar.notes, pos-1)
-                pos--;
+            if (realPos == bar.notes.length - 1) {
+                bar.notes = deleteFrom(bar.notes, realPos-1)
+                realPos--;
             } else {
-                bar.notes = deleteFrom(bar.notes, pos+1)
+                bar.notes = deleteFrom(bar.notes, realPos+1)
             }
         }
     } else if (newNoteDuration == 4 && previousNoteDuration == 2) {
-        bar.notes.splice(pos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
+        bar.notes.splice(realPos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
     }
-    return pos;
+    return realPos;
 }
 
 function addNewNote() {
     let bar = calculateBar();
     let note = calculateNote();
     let pos = calculatePosIf4Quarters(bar);
-    
+    if (!note || !bar) return;
     let realPos = calculateRealPosRegardingArray(bar, pos);
-    console.log("realPos=" + realPos);
-
-    if (!note || !bar || !bar.notes[realPos]) return;
     
     let newNoteDuration = noteValue == 2 ? "2" : "4";
     let previousNoteDuration = bar.notes[realPos].duration;
