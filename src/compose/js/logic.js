@@ -210,6 +210,17 @@ function alterBarNotesRegardingSpecialCases(newNoteDuration, previousNoteDuratio
         bar.notes.splice(realPos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: newNoteDuration+"r" }));
     }
 
+    if (newNoteDuration*2 == previousNoteDuration) {
+        if (realPos != bar.notes.length - 1 && bar.notes[realPos+1].duration == previousNoteDuration) {
+            bar.notes = deleteFrom(bar.notes, realPos+1)
+        } else if (realPos != 0 && bar.notes[realPos-1].duration == previousNoteDuration) {
+            bar.notes = deleteFrom(bar.notes, realPos-1)
+            realPos--;
+        } else {
+            return;
+        }
+    }
+
     if (newNoteDuration == 2 && previousNoteDuration == 4) {
         if (bar.notes[0].duration == "4" && bar.notes[1].duration == "2" && bar.notes[2].duration == "4") {
             if (realPos == 0) {
@@ -226,15 +237,10 @@ function alterBarNotesRegardingSpecialCases(newNoteDuration, previousNoteDuratio
             if (realPos == 1) {
                 realPos = 0;
             }
-        } else {
-            if (realPos == bar.notes.length - 1) {
-                bar.notes = deleteFrom(bar.notes, realPos-1)
-                realPos--;
-            } else {
-                bar.notes = deleteFrom(bar.notes, realPos+1)
-            }
         }
     }
+    console.log("bar= ", bar, ". realpos= ", realPos);
+
     return realPos;
 }
 
