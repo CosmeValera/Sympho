@@ -22,6 +22,15 @@ var amountOfBarsPerRow;
 var leftMargin = 0;
 var rightMargin = 0;
 
+class Bar {
+    constructor(stave, notes, x, y) {
+        this.stave = stave;
+        this.notes = notes;
+        this.x = x;
+        this.y = y;
+    }
+}
+
 let notesMap = new Map([
     [1, ["c/6"]],
     [2, ["b/5"]],
@@ -39,16 +48,7 @@ let notesMap = new Map([
     [14, ["d/4"]],
     [15, ["c/4"]],
     [16, ["b/3"]],
-])
-
-class Bar {
-    constructor(stave, notes, x, y) {
-        this.stave = stave;
-        this.notes = notes;
-        this.x = x;
-        this.y = y;
-    }
-}
+]);
 
 function setInitialData() {
     isRest = false;
@@ -169,7 +169,7 @@ function calculateBar() {
         : undefined;
 }
 
-function calculatePos(bar) {
+function calculatePosIf4Quarters(bar) {
     if (xPositionClick <= BAR_SIZE_WITH_MARGIN_X) {
         if (xPositionClick > BAR_SIZE_WITH_MARGIN_X - SPACE_PER_NOTE) { 
             return BEATS_PER_BAR - 1;
@@ -190,18 +190,9 @@ function deleteFrom(notes, notePos) {
     return notes.filter(n => n);
 }
 
-function addNewNote() {
-    let bar = calculateBar();
-    let note = calculateNote();
-    let pos = calculatePos(bar);
-    
-    if (!note || !bar || !bar.notes[pos]) return;
-    
-    let newNoteDuration = noteValue == 2 ? "2" : "4";
-    let previousNoteDuration = bar.notes[pos].duration;
-
+function specialCases(newNoteDuration, previousNoteDuration, bar, pos) {
     if (newNoteDuration == previousNoteDuration) {
-        // nothing
+        return pos;
     } else if (newNoteDuration == 2 && previousNoteDuration == 4) {
         if (bar.notes[0].duration == "4" && bar.notes[1].duration == "2" && bar.notes[2].duration == "4") {
             if (pos == 0) {
@@ -214,9 +205,9 @@ function addNewNote() {
                 return;
             }
         } else if(bar.notes[0].duration == "4" && bar.notes[1].duration == "4" && bar.notes[2].duration == "2") {
+            bar.notes = deleteFrom(bar.notes, pos);
             if (pos == 1) {
                 pos = 0;
-                bar.notes = deleteFrom(bar.notes, pos);
             }
         } else {
 
@@ -230,6 +221,20 @@ function addNewNote() {
     } else if (newNoteDuration == 4 && previousNoteDuration == 2) {
         bar.notes.splice(pos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
     }
+    return pos;
+}
+
+function addNewNote() {
+    let bar = calculateBar();
+    let note = calculateNote();
+    let pos = calculatePosIf4Quarters(bar);
+    
+    if (!note || !bar || !bar.notes[pos]) return;
+    
+    let newNoteDuration = noteValue == 2 ? "2" : "4";
+    let previousNoteDuration = bar.notes[pos].duration;
+
+    pos = specialCases(newNoteDuration, previousNoteDuration, bar, pos);
 
     newNoteDuration += isRest ? "r" : "";
     bar.notes[pos] = new VF.StaveNote({
@@ -243,7 +248,7 @@ function addNewNote() {
 function selectNote() {
     let bar = calculateBar();
     let note = calculateNote();
-    let pos = calculatePos();
+    let pos = calculatePosIf4Quarters();
     if (!note || !bar) return;
     
     if (selectedNote) {
