@@ -58,19 +58,27 @@ divAddDoubleFlat.addEventListener("click", alterNote);
 
 divHalfNote.addEventListener("click", () => {
     isRest = false;
-    noteValue = 2;
+    noteDuration = 2;
 });
 divHalfRest.addEventListener("click", () => {
     isRest = true;
-    noteValue = 2;
+    noteDuration = 2;
 });
 divQuarterNote.addEventListener("click", () => {
     isRest = false;
-    noteValue = 4;
+    noteDuration = 4;
 });
 divQuarterRest.addEventListener("click", () => {
     isRest = true;
-    noteValue = 4;
+    noteDuration = 4;
+});
+divEighthNote.addEventListener("click", () => {
+    isRest = false;
+    noteDuration = 8;
+});
+divEighthRest.addEventListener("click", () => {
+    isRest = true;
+    noteDuration = 8;
 });
 
 initialLoad();

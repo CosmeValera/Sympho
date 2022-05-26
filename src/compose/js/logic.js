@@ -3,16 +3,18 @@ const divStave = document.getElementById("my-stave");
 const renderer = new VF.Renderer(divStave, VF.Renderer.Backends.SVG);
 const context = renderer.getContext();
 const bars = [];
-const divQuarterNote = document.getElementById("add-quarter-note");
-const divQuarterRest = document.getElementById("add-quarter-rest");
 const divHalfNote = document.getElementById("add-half-note");
 const divHalfRest = document.getElementById("add-half-rest");
+const divQuarterNote = document.getElementById("add-quarter-note");
+const divQuarterRest = document.getElementById("add-quarter-rest");
+const divEighthNote = document.getElementById("add-eighth-note");
+const divEighthRest = document.getElementById("add-eighth-rest");
 const divMouseToggle = document.getElementById("mouse-toggle");
 const divAddSharp = document.getElementById("add-sharp");
 const divAddFlat = document.getElementById("add-flat");
 const divAddDoubleSharp = document.getElementById("add-double-sharp");
 const divAddDoubleFlat = document.getElementById("add-double-flat");
-var noteValue;
+var noteDuration;
 var isRest;
 var isMouseToggled;
 var selectedNote;
@@ -52,7 +54,7 @@ let notesMap = new Map([
 
 function setInitialData() {
     isRest = false;
-    noteValue = 4;
+    noteDuration = 4;
     isMouseToggled = true;
     isAddSharp = false;
     isAddFlat = false;
@@ -202,10 +204,14 @@ function deleteFrom(notes, notePos) {
     return notes.filter(n => n);
 }
 
-function alterNotesRegardingSpecialCases(newNoteDuration, previousNoteDuration, bar, realPos) {
-    if (newNoteDuration == previousNoteDuration) {
-        return realPos;
-    } else if (newNoteDuration == 2 && previousNoteDuration == 4) {
+function alterBarNotesRegardingSpecialCases(newNoteDuration, previousNoteDuration, bar, realPos) {
+
+    // This note is half long than what there was
+    if (newNoteDuration == previousNoteDuration*2) {
+        bar.notes.splice(realPos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: newNoteDuration+"r" }));
+    }
+
+    if (newNoteDuration == 2 && previousNoteDuration == 4) {
         if (bar.notes[0].duration == "4" && bar.notes[1].duration == "2" && bar.notes[2].duration == "4") {
             if (realPos == 0) {
                 bar.notes = deleteFrom(bar.notes, realPos);
@@ -229,8 +235,6 @@ function alterNotesRegardingSpecialCases(newNoteDuration, previousNoteDuration, 
                 bar.notes = deleteFrom(bar.notes, realPos+1)
             }
         }
-    } else if (newNoteDuration == 4 && previousNoteDuration == 2) {
-        bar.notes.splice(realPos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
     }
     return realPos;
 }
@@ -242,10 +246,10 @@ function addNewNote() {
     if (!note || !bar) return;
     let realPos = calculateRealPosRegardingArray(bar, pos);
     
-    let newNoteDuration = noteValue == 2 ? "2" : "4";
+    let newNoteDuration = noteDuration;
     let previousNoteDuration = bar.notes[realPos].duration;
 
-    realPos = alterNotesRegardingSpecialCases(newNoteDuration, previousNoteDuration, bar, realPos);
+    realPos = alterBarNotesRegardingSpecialCases(newNoteDuration, previousNoteDuration, bar, realPos);
 
     newNoteDuration += isRest ? "r" : "";
     bar.notes[realPos] = new VF.StaveNote({
@@ -303,29 +307,41 @@ function changeAmountOfBarsPerRowRegardingScreenWidth() {
     }
 }
 
+function addClass(element, className) {
+    element.classList.add(className);
+}
+
+function removeClass(element, className) {
+    element.classList.remove(className);
+}
+
 function mouseToggle() {
     isMouseToggled = !isMouseToggled;
 
     if (isMouseToggled) {
-        divHalfNote.classList.add("is-disabled");
-        divHalfRest.classList.add("is-disabled");
-        divQuarterNote.classList.add("is-disabled");
-        divQuarterRest.classList.add("is-disabled");
+        addClass(divHalfNote, "is-disabled");
+        addClass(divHalfRest, "is-disabled");
+        addClass(divQuarterNote, "is-disabled");
+        addClass(divQuarterRest, "is-disabled");
+        addClass(divEighthNote, "is-disabled");
+        addClass(divEighthRest, "is-disabled");
 
-        divAddSharp.classList.remove("is-disabled");
-        divAddDoubleSharp.classList.remove("is-disabled");
-        divAddFlat.classList.remove("is-disabled");
-        divAddDoubleFlat.classList.remove("is-disabled");
+        removeClass(divAddSharp, "is-disabled");
+        removeClass(divAddDoubleSharp, "is-disabled");
+        removeClass(divAddFlat, "is-disabled");
+        removeClass(divAddDoubleFlat, "is-disabled");
     } else {
-        divHalfNote.classList.remove("is-disabled");
-        divHalfRest.classList.remove("is-disabled");
-        divQuarterNote.classList.remove("is-disabled");
-        divQuarterRest.classList.remove("is-disabled");
+        removeClass(divHalfRest, "is-disabled");
+        removeClass(divHalfNote, "is-disabled");
+        removeClass(divQuarterNote, "is-disabled");
+        removeClass(divQuarterRest, "is-disabled");
+        removeClass(divEighthNote, "is-disabled");
+        removeClass(divEighthRest, "is-disabled");
 
-        divAddSharp.classList.add("is-disabled");
-        divAddDoubleSharp.classList.add("is-disabled");
-        divAddFlat.classList.add("is-disabled");
-        divAddDoubleFlat.classList.add("is-disabled");
+        addClass(divAddSharp, "is-disabled");
+        addClass(divAddDoubleSharp, "is-disabled");
+        addClass(divAddFlat, "is-disabled");
+        addClass(divAddDoubleFlat, "is-disabled");
     }
 
     if (selectedNote) {
