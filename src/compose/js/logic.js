@@ -171,18 +171,17 @@ function calculateBar() {
         : undefined;
 }
 
-function calculatePosIf4Quarters(bar) {
+function calculatePosIf8Eighths() {
     if (xPositionClick <= BAR_SIZE_WITH_MARGIN_X) {
         if (xPositionClick > BAR_SIZE_WITH_MARGIN_X - SPACE_PER_NOTE) { 
-            return BEATS_PER_BAR - 1;
+            return (MAX_AMOUNT_NOTES_IN_A_BAR - 1)/2;
         } 
         return (getRowNumber() === 0)
-            ? Math.trunc((xPositionClick - CLEF_SIZE - TEMPO_SIZE) / SPACE_PER_NOTE) % BEATS_PER_BAR
-            : Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - TEMPO_SIZE) / SPACE_PER_NOTE) % BEATS_PER_BAR;
+            ? (Math.trunc((xPositionClick - CLEF_SIZE - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 2
+            : (Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 2;
     } else if (xPositionClick > BAR_SIZE_WITH_MARGIN_X) {
         return (
-            Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / SPACE_PER_NOTE) %
-            BEATS_PER_BAR
+            (Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 2
         );
     }
 }
@@ -242,7 +241,7 @@ function alterBarNotesRegardingSpecialCases(newNoteDuration, previousNoteDuratio
 function addNewNote() {
     let bar = calculateBar();
     let note = calculateNote();
-    let pos = calculatePosIf4Quarters(bar);
+    let pos = calculatePosIf8Eighths();
     if (!note || !bar) return;
     let realPos = calculateRealPosRegardingArray(bar, pos);
     
@@ -263,13 +262,14 @@ function addNewNote() {
 function selectNote() {
     let bar = calculateBar();
     let note = calculateNote();
-    let pos = calculatePosIf4Quarters();
+    let pos = calculatePosIf8Eighths();
     if (!note || !bar) return;
+    let realPos = calculateRealPosRegardingArray(bar, pos);
     
     if (selectedNote) {
         selectedNote.setStyle({fillStyle: "Black", strokeStyle: "Black"});
     }
-    selectedNote = bar.notes[pos];
+    selectedNote = bar.notes[realPos];
     selectedNote.setStyle({fillStyle: "MediumBlue", strokeStyle: "MediumBlue"});
 }
     
