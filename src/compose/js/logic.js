@@ -228,6 +228,7 @@ function alterBarNotesRegardingSpecialCases(newNoteDuration, previousNoteDuratio
                     bar.notes = deleteFrom(bar.notes, realPos);
                     bar.notes.splice(realPos, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
                     bar.notes.splice(realPos, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
+                    bar.notes.splice(realPos, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
                 }
                 if (realPos == bar.notes.length - 1) {
                     return;
