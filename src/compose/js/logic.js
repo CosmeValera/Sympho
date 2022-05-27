@@ -93,8 +93,6 @@ function calculateWidthAndX(barPos) {
     let previousBar = getLastBar(barPos);
 
     //If it's 0 we are in first bar of row, and 1 means the second bar of row
-    // let widthAndXPosition = Math.floor(barPos % amountOfBarsPerRow);
-
     let widthAndXPositioner = barPos % amountOfBarsPerRow;
     if (widthAndXPositioner == 0) {
         return STAVE_MARGIN_LEFT;
@@ -128,79 +126,6 @@ function createStave(barPos, widthAndX, heightAndY) {
         stave.setEndBarType(Vex.Flow.Barline.type.END);
     return stave;
 }
-
-function calculateNote() {
-    let yPosInAnyBar = Math.ceil(((yPositionClick - STAVE_MARGIN_TOP) % BAR_WIDTH - 18)/5);
-    if (yPosInAnyBar < 0 || yPosInAnyBar > 16) {
-        return null;
-    }
-    
-    for (const [position, note] of notesMap.entries()) {
-        if (yPosInAnyBar <= position) {
-            return note;
-        }
-    }
-}
-
-function getRowNumber() {
-    return Math.floor((yPositionClick - STAVE_MARGIN_TOP) / BAR_WIDTH);
-}
-
-function getBarPosition() {
-    if (xPositionClick < BAR_SIZE_WITH_MARGIN_X) {
-        if (getRowNumber() === 0) {
-            if (xPositionClick > STAVE_MARGIN_LEFT + CLEF_SIZE + TEMPO_SIZE ) {
-                return 0;
-            }
-        } else if (getRowNumber() !== 0) {
-            if (xPositionClick > STAVE_MARGIN_LEFT + CLEF_SIZE) {
-                return 0;
-            }
-        }
-        return undefined;
-    }
-    return Math.floor((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / BAR_SIZE) + 1;
-}
-
-function calculateBar() {
-    let rowNumber = getRowNumber();
-    let barPosition = getBarPosition();
-    let barNumber = barPosition + rowNumber * amountOfBarsPerRow;
-    
-    return barPosition < amountOfBarsPerRow && barPosition >= 0
-        ? bars[barNumber]
-        : undefined;
-}
-
-function calculatePosIf8Eighths() {
-    if (xPositionClick <= BAR_SIZE_WITH_MARGIN_X) {
-        if (xPositionClick > BAR_SIZE_WITH_MARGIN_X - SPACE_PER_NOTE) { 
-            return (MAX_AMOUNT_NOTES_IN_A_BAR - 1)/2;
-        } 
-        return (getRowNumber() === 0)
-            ? (Math.trunc((xPositionClick - CLEF_SIZE - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 2
-            : (Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 2;
-    } else if (xPositionClick > BAR_SIZE_WITH_MARGIN_X) {
-        return (
-            (Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 2
-        );
-    }
-}
-
-function calculateNotePosInArray(bar, fakePos) {
-    let notes = bar.notes;
-    let notesValues = notes.map(n => 4/n.duration);
-    let sum = 0;
-    for (let i = 0; i < notesValues.length; i++) {
-        sum += notesValues[i];
-        console.log(fakePos, sum)
-        if (fakePos < sum) {
-            notePosInArray =  i;
-            return;
-        }
-    }
-}
-
 
 function deleteFrom(notes, notePos) {
     notes.splice(notePos, 1);
@@ -242,6 +167,78 @@ function deletePreviousNoteIfSameDuration(notes, previousPos, previouseNoteDurat
         return true;
     }
     return false;
+}
+
+function getRowNumber() {
+    return Math.floor((yPositionClick - STAVE_MARGIN_TOP) / BAR_WIDTH);
+}
+
+function getBarPosition() {
+    if (xPositionClick < BAR_SIZE_WITH_MARGIN_X) {
+        if (getRowNumber() === 0) {
+            if (xPositionClick > STAVE_MARGIN_LEFT + CLEF_SIZE + TEMPO_SIZE ) {
+                return 0;
+            }
+        } else if (getRowNumber() !== 0) {
+            if (xPositionClick > STAVE_MARGIN_LEFT + CLEF_SIZE) {
+                return 0;
+            }
+        }
+        return undefined;
+    }
+    return Math.floor((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / BAR_SIZE) + 1;
+}
+
+function calculateBar() {
+    let rowNumber = getRowNumber();
+    let barPosition = getBarPosition();
+    let barNumber = barPosition + rowNumber * amountOfBarsPerRow;
+    
+    return barPosition < amountOfBarsPerRow && barPosition >= 0
+        ? bars[barNumber]
+        : undefined;
+}
+
+function calculateNote() {
+    let yPosInAnyBar = Math.ceil(((yPositionClick - STAVE_MARGIN_TOP) % BAR_WIDTH - 18)/5);
+    if (yPosInAnyBar < 0 || yPosInAnyBar > 16) {
+        return null;
+    }
+    
+    for (const [position, note] of notesMap.entries()) {
+        if (yPosInAnyBar <= position) {
+            return note;
+        }
+    }
+}
+
+function calculatePosIf8Eighths() {
+    if (xPositionClick <= BAR_SIZE_WITH_MARGIN_X) {
+        if (xPositionClick > BAR_SIZE_WITH_MARGIN_X - SPACE_PER_NOTE) { 
+            return (MAX_AMOUNT_NOTES_IN_A_BAR - 1)/2;
+        } 
+        return (getRowNumber() === 0)
+            ? (Math.trunc((xPositionClick - CLEF_SIZE - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 2
+            : (Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 2;
+    } else if (xPositionClick > BAR_SIZE_WITH_MARGIN_X) {
+        return (
+            (Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 2
+        );
+    }
+}
+
+function calculateNotePosInArray(bar, fakePos) {
+    let notes = bar.notes;
+    let notesValues = notes.map(n => 4/n.duration);
+    let sum = 0;
+    for (let i = 0; i < notesValues.length; i++) {
+        sum += notesValues[i];
+        console.log(fakePos, sum)
+        if (fakePos < sum) {
+            notePosInArray =  i;
+            return;
+        }
+    }
 }
 
 function newNoteValueIsFourTimesLess(bar) {
@@ -303,7 +300,6 @@ function alterBarNotes(bar) {
             return null;
         }
     }
-    // debugger;
     if (newNoteValue == previousNoteValue * 2) {
         if (newNoteValueIsTwoTimesBigger(bar, olderNoteDuration) === null) {
             return null;
