@@ -187,7 +187,7 @@ function calculatePosIf8Eighths() {
     }
 }
 
-function calculateRealPosRegardingArray(bar, fakePos) {
+function calculateNotePosInArray(bar, fakePos) {
     let notes = bar.notes;
     let notesValues = notes.map(n => 4/n.duration);
     let sum = 0;
@@ -244,47 +244,24 @@ function deletePreviousNoteIfSameDuration(notes, previousPos, previouseNoteDurat
     return false;
 }
 
+function newNoteValueIsFourTimesLess(bar) {
+    bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
+    bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
+    bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
+}
 
-function specialCases(bar) {
-    let olderNoteDuration = bar.notes[notePosInArray].duration;
+function newNoteValueIsTwoTimesLess(bar) {
+    bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
+}
 
-    // This note is forth long than what there was
-    if (noteDuration == olderNoteDuration*4) {
-        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
-        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
-        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
-    }
-
-    // This note is half long than what there was
-    if (noteDuration == olderNoteDuration*2) {
-        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
-    }
-
-    // This note is double long
-    if (noteDuration*2 == olderNoteDuration) {
-
-        // TODO: REFACTOR THIS TO MAKE IT GENERAL
-        if (noteDuration == 2 && olderNoteDuration == 4) {
-            if (bar.notes[0].duration == "4" && bar.notes[1].duration == "2" && bar.notes[2].duration == "4") {
-                if (notePosInArray == 0) {
-                    bar.notes = deleteFrom(bar.notes, notePosInArray);
-                    bar.notes = deleteFrom(bar.notes, notePosInArray);
-                    bar.notes.splice(notePosInArray, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
-                    bar.notes.splice(notePosInArray, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
-                    bar.notes.splice(notePosInArray, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
-                }
-                if (notePosInArray == bar.notes.length - 1) {
-                    return;
-                }
-            } else if(bar.notes[0].duration == "4" && bar.notes[1].duration == "4" && bar.notes[2].duration == "2") {
-                bar.notes = deleteFrom(bar.notes, notePosInArray);
-                if (notePosInArray == 1) {
-                    notePosInArray = 0;
-                }
-                return;
-            }
+function newNoteValueIsTwoTimesBigger(bar, olderNoteDuration) {
+    if (noteDuration * 2 == olderNoteDuration) {
+        let result = specialCaseTwoTimesBigger(bar, olderNoteDuration);
+        if (result === null) {
+            return null;
+        } else if (result === true) {
+            return;
         }
-        // END: REFACTOR THIS TO MAKE IT GENERAL
 
         if (notePosInArray != bar.notes.length - 1 && bar.notes[notePosInArray+1].duration == olderNoteDuration) {
             bar.notes = deleteFrom(bar.notes, notePosInArray+1)
@@ -295,39 +272,87 @@ function specialCases(bar) {
             return;
         }
     }
+}
 
+function specialCaseTwoTimesBigger(bar, olderNoteDuration) {
+        // TODO: REFACTOR THIS TO MAKE IT GENERAL
+        if (noteDuration == 2 && olderNoteDuration == 4) {
+            if (bar.notes[0].duration == "4" && bar.notes[1].duration == "2" && bar.notes[2].duration == "4") {
+                console.log("SLKjsalkdls")
+                if (notePosInArray == 0) {
+                    console.log("SLKjsalkdasdsadsals")
+                    bar.notes = deleteFrom(bar.notes, notePosInArray);
+                    bar.notes = deleteFrom(bar.notes, notePosInArray);
+                    bar.notes.splice(notePosInArray, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
+                    bar.notes.splice(notePosInArray, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
+                    bar.notes.splice(notePosInArray, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
+                }
+                if (notePosInArray == bar.notes.length - 1) {
+                    return null;
+                }
+            } else if(bar.notes[0].duration == "4" && bar.notes[1].duration == "4" && bar.notes[2].duration == "2") {
+                bar.notes = deleteFrom(bar.notes, notePosInArray);
+                if (notePosInArray == 1) {
+                    notePosInArray = 0;
+                }
+                return true;
+            } else if (bar.notes[0].duration == "8" && bar.notes[1].duration == "8" && bar.notes[2].duration == "4"
+            && bar.notes[3].duration == "2") {
+                return null;
+            }
+        }
+        // END: REFACTOR THIS TO MAKE IT GENERAL
     console.log("bar= ", bar, ". pos= ", notePosInArray);
-    return;
+    return false; //This means that no specific case, was so in the function above the general case is applied
+}
+
+function newNoteValueIsFourTimesBigger(bar, olderNoteDuration) {
+    let amountOfNotesToDelete = 0;
+    let tmpNotes = cloneNotes(bar.notes);
+    for(let i = 0; i < 3; i++) {
+        if (deleteNextNoteIfSameDuration(tmpNotes, notePosInArray+1, olderNoteDuration)) {
+            amountOfNotesToDelete++;
+            continue;
+        }
+        if (deletePreviousNoteIfSameDuration(tmpNotes, notePosInArray-1, olderNoteDuration)) {
+            amountOfNotesToDelete++;
+            continue;
+        }
+        return null;
+    }
+    if (amountOfNotesToDelete == 3) {
+        bar.notes = tmpNotes;
+        return;
+    }
 }
 
 function alterBarNotes(bar) {
-    let tmpNotes = cloneNotes(bar.notes);
     let newNoteDuration = noteDuration;
     let olderNoteDuration = bar.notes[notePosInArray].duration;
     let newNoteValue = 4/newNoteDuration;
     let previousNoteValue = 4/olderNoteDuration;
-
-    if (newNoteValue == previousNoteValue*4) {
-        let amountOfNotesToDelete = 0;
-        for(let i = 0; i < 3; i++) {
-            if (deleteNextNoteIfSameDuration(tmpNotes, notePosInArray+1, olderNoteDuration)) {
-                amountOfNotesToDelete++;
-                continue;
-            }
-            if (deletePreviousNoteIfSameDuration(tmpNotes, notePosInArray-1, olderNoteDuration)) {
-                amountOfNotesToDelete++;
-                continue;
-            }
+    
+    if (newNoteValue == previousNoteValue / 4) {
+        if (newNoteValueIsFourTimesLess(bar) === null) {
             return null;
         }
-        if (amountOfNotesToDelete == 3) {
-            bar.notes = tmpNotes;
-            return;
+    }
+    if (newNoteValue == previousNoteValue / 2) {
+        if (newNoteValueIsTwoTimesLess(bar) === null) {
+            return null;
         }
     }
-
-    console.log(notePosInArray)
-    specialCases(bar);
+    // debugger;
+    if (newNoteValue == previousNoteValue * 2) {
+        if (newNoteValueIsTwoTimesBigger(bar, olderNoteDuration) === null) {
+            return null;
+        }
+    }
+    if (newNoteValue == previousNoteValue * 4) {
+        if (newNoteValueIsFourTimesBigger(bar, olderNoteDuration) === null) {
+            return null;
+        }
+    }
 }
 
 function addNewNote() {
@@ -335,7 +360,7 @@ function addNewNote() {
     let note = calculateNote();
     let fakePos = calculatePosIf8Eighths();
     if (!note || !bar) return;
-    calculateRealPosRegardingArray(bar, fakePos);
+    calculateNotePosInArray(bar, fakePos);
     
     if (alterBarNotes(bar) === null) {
         return;
@@ -356,7 +381,7 @@ function selectNote() {
     let note = calculateNote();
     let fakePos = calculatePosIf8Eighths();
     if (!note || !bar) return;
-    calculateRealPosRegardingArray(bar, fakePos);
+    calculateNotePosInArray(bar, fakePos);
     
     if (alterBarNotes(bar) === null) {
         return;
