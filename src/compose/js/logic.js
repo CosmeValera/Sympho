@@ -198,30 +198,70 @@ function calculateRealPosRegardingArray(bar, pos) {
     }
 }
 
+
 function deleteFrom(notes, notePos) {
-    delete notes[notePos];
-    return notes.filter(n => n);
+    notes.splice(notePos, 1);
+    return notes;
 }
 
-function alterBarNotesRegardingSpecialCases(newNoteDuration, previousNoteDuration, bar, realPos) {
+function cloneNotes(notes) {
+    return [...notes];
+}
+
+// remove note next to the clicked note
+function removeNote(notes, realPos) {
+    let noteToRemove = notes[realPos];
+    let noteToRemoveValue = 4/noteToRemove.duration;
+    let sum = 0;
+    for (let i = 0; i < notes.length; i++) {
+        sum += 4/notes[i].duration;
+        if (sum > noteToRemoveValue) {
+            notes.splice(i, 1);
+            return notes;
+        }
+    }
+}
+
+// Returns boolean
+// If true, the next note is removed
+function deleteNextNoteIfSameDuration(notes, nextPos, nextNoteDuration) {
+    if (nextPos < notes.length && notes[nextPos].duration == nextNoteDuration) {
+        notes.splice(nextPos, 1);
+        return true;
+    }
+    return false;
+}
+
+function deletePreviousNoteIfSameDuration(notes, previousPos, previouseNoteDuration) {
+    if (previousPos >= 0 && notes[previousPos].duration == previouseNoteDuration) {
+        notes.splice(previousPos, 1);
+        return true;
+    }
+    return false;
+}
+
+
+function alterBarNotesRegardingSpecialCases(bar, realPos) {
+
+    let previousNoteDuration = bar.notes[realPos].duration;
 
     // This note is forth long than what there was
-    if (newNoteDuration == previousNoteDuration*4) {
-        bar.notes.splice(realPos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: newNoteDuration+"r" }));
-        bar.notes.splice(realPos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: newNoteDuration+"r" }));
-        bar.notes.splice(realPos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: newNoteDuration+"r" }));
+    if (noteDuration == previousNoteDuration*4) {
+        bar.notes.splice(realPos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
+        bar.notes.splice(realPos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
+        bar.notes.splice(realPos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
     }
 
     // This note is half long than what there was
-    if (newNoteDuration == previousNoteDuration*2) {
-        bar.notes.splice(realPos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: newNoteDuration+"r" }));
+    if (noteDuration == previousNoteDuration*2) {
+        bar.notes.splice(realPos + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
     }
 
     // This note is double long
-    if (newNoteDuration*2 == previousNoteDuration) {
+    if (noteDuration*2 == previousNoteDuration) {
 
         // TODO: REFACTOR THIS TO MAKE IT GENERAL
-        if (newNoteDuration == 2 && previousNoteDuration == 4) {
+        if (noteDuration == 2 && previousNoteDuration == 4) {
             if (bar.notes[0].duration == "4" && bar.notes[1].duration == "2" && bar.notes[2].duration == "4") {
                 if (realPos == 0) {
                     bar.notes = deleteFrom(bar.notes, realPos);
@@ -258,7 +298,7 @@ function alterBarNotesRegardingSpecialCases(newNoteDuration, previousNoteDuratio
     // how many notes are after this one with same duration, and if there arent 4 in total, searches
     // backwards too. Right now this seems too many lines
 
-    if (newNoteDuration*4 == previousNoteDuration) {
+    if (noteDuration*4 == previousNoteDuration) {
         if (realPos <= bar.notes.length - 4 && bar.notes[realPos+1].duration == previousNoteDuration
             && bar.notes[realPos+2].duration == previousNoteDuration
             && bar.notes[realPos+3].duration == previousNoteDuration) {
@@ -301,6 +341,36 @@ function alterBarNotesRegardingSpecialCases(newNoteDuration, previousNoteDuratio
     return realPos;
 }
 
+function alterBarNotesRegardingSpecialCases2(bar, realPos) {
+    let tmpNotes = cloneNotes(bar.notes);
+    let newNoteDuration = bar.notes[realPos].duration;
+    let previousNoteDuration = noteDuration;
+    let newNoteValue = 4/newNoteDuration;
+    let previousNoteValue = 4/previousNoteDuration;
+
+
+
+    
+    // if (newNoteDuration*4 == previousNoteDuration) {
+    //     // try to delete 4 notes with duration == previouseNoteDuration
+    //     let amountOfNotesToDelete = 0;
+    //     for(let i = 0; i < 3; i++) {
+    //         if (deleteNextNoteIfSameDuration(tmpNotes, realPos, previousNoteDuration)) {
+    //             amountOfNotesToDelete++;
+    //         } else if (deletePreviousNoteIfSameDuration(tmpNotes, realPos-i, previousNoteDuration)) {
+    //             amountOfNotesToDelete++;
+    //         } else {
+    //             return;
+    //         }
+    //     }
+    //     if (!amountOfNotesToDelete == 3) {
+    //         return;
+    //     }
+    // }
+
+    return alterBarNotesRegardingSpecialCases(bar, realPos);
+}
+
 function addNewNote() {
     let bar = calculateBar();
     let note = calculateNote();
@@ -308,12 +378,10 @@ function addNewNote() {
     if (!note || !bar) return;
     let realPos = calculateRealPosRegardingArray(bar, pos);
     
-    let newNoteDuration = noteDuration;
-    let previousNoteDuration = bar.notes[realPos].duration;
+    realPos = alterBarNotesRegardingSpecialCases(bar, realPos);
 
-    realPos = alterBarNotesRegardingSpecialCases(newNoteDuration, previousNoteDuration, bar, realPos);
-
-    newNoteDuration += isRest ? "r" : "";
+    let newNoteDuration = noteDuration + (isRest ? "r" : "");
+    console.log(newNoteDuration, noteDuration)
     bar.notes[realPos] = new VF.StaveNote({
         clef: "treble",
         keys: note,
