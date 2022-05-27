@@ -255,55 +255,16 @@ function newNoteValueIsTwoTimesLess(bar) {
 }
 
 function newNoteValueIsTwoTimesBigger(bar, olderNoteDuration) {
-    if (noteDuration * 2 == olderNoteDuration) {
-        let result = specialCaseTwoTimesBigger(bar, olderNoteDuration);
-        if (result === null) {
-            return null;
-        } else if (result === true) {
-            return;
-        }
-
-        if (notePosInArray != bar.notes.length - 1 && bar.notes[notePosInArray+1].duration == olderNoteDuration) {
-            bar.notes = deleteFrom(bar.notes, notePosInArray+1)
-        } else if (notePosInArray != 0 && bar.notes[notePosInArray-1].duration == olderNoteDuration) {
-            bar.notes = deleteFrom(bar.notes, notePosInArray-1)
-            notePosInArray--;
-        } else {
-            return;
-        }
+    let tmpNotes = cloneNotes(bar.notes);
+    if (deleteNextNoteIfSameDuration(tmpNotes, notePosInArray+1, olderNoteDuration)) {
+        bar.notes = tmpNotes;
+        return;
     }
-}
-
-function specialCaseTwoTimesBigger(bar, olderNoteDuration) {
-        // TODO: REFACTOR THIS TO MAKE IT GENERAL
-        if (noteDuration == 2 && olderNoteDuration == 4) {
-            if (bar.notes[0].duration == "4" && bar.notes[1].duration == "2" && bar.notes[2].duration == "4") {
-                console.log("SLKjsalkdls")
-                if (notePosInArray == 0) {
-                    console.log("SLKjsalkdasdsadsals")
-                    bar.notes = deleteFrom(bar.notes, notePosInArray);
-                    bar.notes = deleteFrom(bar.notes, notePosInArray);
-                    bar.notes.splice(notePosInArray, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
-                    bar.notes.splice(notePosInArray, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
-                    bar.notes.splice(notePosInArray, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }));
-                }
-                if (notePosInArray == bar.notes.length - 1) {
-                    return null;
-                }
-            } else if(bar.notes[0].duration == "4" && bar.notes[1].duration == "4" && bar.notes[2].duration == "2") {
-                bar.notes = deleteFrom(bar.notes, notePosInArray);
-                if (notePosInArray == 1) {
-                    notePosInArray = 0;
-                }
-                return true;
-            } else if (bar.notes[0].duration == "8" && bar.notes[1].duration == "8" && bar.notes[2].duration == "4"
-            && bar.notes[3].duration == "2") {
-                return null;
-            }
-        }
-        // END: REFACTOR THIS TO MAKE IT GENERAL
-    console.log("bar= ", bar, ". pos= ", notePosInArray);
-    return false; //This means that no specific case, was so in the function above the general case is applied
+    if (deletePreviousNoteIfSameDuration(tmpNotes, notePosInArray-1, olderNoteDuration)) {
+        bar.notes = tmpNotes;
+        return;
+    }
+    return null;
 }
 
 function newNoteValueIsFourTimesBigger(bar, olderNoteDuration) {
