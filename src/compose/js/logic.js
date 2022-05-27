@@ -193,8 +193,10 @@ function calculateRealPosRegardingArray(bar, fakePos) {
     let sum = 0;
     for (let i = 0; i < notesValues.length; i++) {
         sum += notesValues[i];
+        console.log(fakePos, sum)
         if (fakePos < sum) {
-            return i;
+            notePosInArray =  i;
+            return;
         }
     }
 }
@@ -234,7 +236,6 @@ function deleteNextNoteIfSameDuration(notes, nextPos, nextNoteDuration) {
 }
 
 function deletePreviousNoteIfSameDuration(notes, previousPos, previouseNoteDuration) {
-    console.log("asdjask")
     if (previousPos >= 0 && notes[previousPos].duration == previouseNoteDuration) {
         notes.splice(previousPos, 1);
         notePosInArray--;
@@ -244,27 +245,26 @@ function deletePreviousNoteIfSameDuration(notes, previousPos, previouseNoteDurat
 }
 
 
-function alterBarNotesRegardingSpecialCases(bar) {
-
-    let previousNoteDuration = bar.notes[notePosInArray].duration;
+function specialCases(bar) {
+    let olderNoteDuration = bar.notes[notePosInArray].duration;
 
     // This note is forth long than what there was
-    if (noteDuration == previousNoteDuration*4) {
+    if (noteDuration == olderNoteDuration*4) {
         bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
         bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
         bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
     }
 
     // This note is half long than what there was
-    if (noteDuration == previousNoteDuration*2) {
+    if (noteDuration == olderNoteDuration*2) {
         bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
     }
 
     // This note is double long
-    if (noteDuration*2 == previousNoteDuration) {
+    if (noteDuration*2 == olderNoteDuration) {
 
         // TODO: REFACTOR THIS TO MAKE IT GENERAL
-        if (noteDuration == 2 && previousNoteDuration == 4) {
+        if (noteDuration == 2 && olderNoteDuration == 4) {
             if (bar.notes[0].duration == "4" && bar.notes[1].duration == "2" && bar.notes[2].duration == "4") {
                 if (notePosInArray == 0) {
                     bar.notes = deleteFrom(bar.notes, notePosInArray);
@@ -281,14 +281,14 @@ function alterBarNotesRegardingSpecialCases(bar) {
                 if (notePosInArray == 1) {
                     notePosInArray = 0;
                 }
-                return notePosInArray;
+                return;
             }
         }
         // END: REFACTOR THIS TO MAKE IT GENERAL
 
-        if (notePosInArray != bar.notes.length - 1 && bar.notes[notePosInArray+1].duration == previousNoteDuration) {
+        if (notePosInArray != bar.notes.length - 1 && bar.notes[notePosInArray+1].duration == olderNoteDuration) {
             bar.notes = deleteFrom(bar.notes, notePosInArray+1)
-        } else if (notePosInArray != 0 && bar.notes[notePosInArray-1].duration == previousNoteDuration) {
+        } else if (notePosInArray != 0 && bar.notes[notePosInArray-1].duration == olderNoteDuration) {
             bar.notes = deleteFrom(bar.notes, notePosInArray-1)
             notePosInArray--;
         } else {
@@ -297,20 +297,17 @@ function alterBarNotesRegardingSpecialCases(bar) {
     }
 
     console.log("bar= ", bar, ". pos= ", notePosInArray);
-    return notePosInArray;
+    return;
 }
 
-function alterBarNotesRegardingSpecialCases2(bar) {
+function alterBarNotes(bar) {
     let tmpNotes = cloneNotes(bar.notes);
     let newNoteDuration = noteDuration;
     let olderNoteDuration = bar.notes[notePosInArray].duration;
-    let olderNoteValue = 4/newNoteDuration;
+    let newNoteValue = 4/newNoteDuration;
     let previousNoteValue = 4/olderNoteDuration;
 
-
-    console.log(olderNoteValue, previousNoteValue);
-    if (olderNoteValue == previousNoteValue*4) {
-        // try to delete 4 notes with duration == previouseNoteDuration
+    if (newNoteValue == previousNoteValue*4) {
         let amountOfNotesToDelete = 0;
         for(let i = 0; i < 3; i++) {
             if (deleteNextNoteIfSameDuration(tmpNotes, notePosInArray+1, olderNoteDuration)) {
@@ -320,17 +317,17 @@ function alterBarNotesRegardingSpecialCases2(bar) {
             if (deletePreviousNoteIfSameDuration(tmpNotes, notePosInArray-1, olderNoteDuration)) {
                 amountOfNotesToDelete++;
                 continue;
-            } 
-            return;
+            }
+            return null;
         }
         if (amountOfNotesToDelete == 3) {
             bar.notes = tmpNotes;
-            console.log(bar.notes);
-            return notePosInArray;
+            return;
         }
     }
 
-    return alterBarNotesRegardingSpecialCases(bar);
+    console.log(notePosInArray)
+    specialCases(bar);
 }
 
 function addNewNote() {
@@ -338,12 +335,14 @@ function addNewNote() {
     let note = calculateNote();
     let fakePos = calculatePosIf8Eighths();
     if (!note || !bar) return;
-    notePosInArray = calculateRealPosRegardingArray(bar, fakePos);
+    calculateRealPosRegardingArray(bar, fakePos);
     
-    notePosInArray = alterBarNotesRegardingSpecialCases2(bar);
+    if (alterBarNotes(bar) === null) {
+        return;
+    }
 
     let newNoteDuration = noteDuration + (isRest ? "r" : "");
-    console.log(newNoteDuration, noteDuration)
+    console.log(notePosInArray)
     bar.notes[notePosInArray] = new VF.StaveNote({
         clef: "treble",
         keys: note,
@@ -357,8 +356,12 @@ function selectNote() {
     let note = calculateNote();
     let fakePos = calculatePosIf8Eighths();
     if (!note || !bar) return;
-    notePosInArray = calculateRealPosRegardingArray(bar, fakePos);
+    calculateRealPosRegardingArray(bar, fakePos);
     
+    if (alterBarNotes(bar) === null) {
+        return;
+    }
+
     if (selectedNote) {
         selectedNote.setStyle({fillStyle: "Black", strokeStyle: "Black"});
     }
@@ -472,7 +475,10 @@ function alterNote(evt) {
     }
 }
 
-//TODO: add a button somewhere that will call this function to delete last bar (maybe in right panel)
+// TODO: add a button somewhere that will call this function to delete last bar (maybe in right panel)
 function deleteLastBar() {
-    delete bars[bars.length - 1];
+    if (bars.length > 1) {
+        bars.pop();
+        draw();
+    }
 }
