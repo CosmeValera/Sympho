@@ -215,17 +215,17 @@ function calculateNote() {
     }
 }
 
-function calculatePosIf8Eighths() {
+function calculatePosIf16Sixteenths() {
     if (xPositionClick <= BAR_SIZE_WITH_MARGIN_X) {
-        if (xPositionClick > BAR_SIZE_WITH_MARGIN_X - SPACE_PER_NOTE) { 
-            return (MAX_AMOUNT_NOTES_IN_A_BAR - 1)/2;
+        if (xPositionClick > BAR_SIZE_WITH_MARGIN_X - SPACE_PER_NOTE * 1.5) { 
+            return (MAX_AMOUNT_NOTES_IN_A_BAR - 1)/4;
         } 
         return (getRowNumber() === 0)
-            ? (Math.trunc((xPositionClick - CLEF_SIZE - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 2
-            : (Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 2;
+            ? (Math.trunc((xPositionClick - CLEF_SIZE - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR - 1) / 4
+            : (Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR - 1) / 4;
     } else if (xPositionClick > BAR_SIZE_WITH_MARGIN_X) {
         return (
-            (Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 2
+            (Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 4
         );
     }
 }
@@ -359,7 +359,7 @@ function alterBarNotes(bar) {
 function addNewNote() {
     let bar = calculateBar();
     let note = calculateNote();
-    let fakePos = calculatePosIf8Eighths();
+    let fakePos = calculatePosIf16Sixteenths();
     if (!note || !bar) return;
     calculateNotePosInArray(bar, fakePos);
     
@@ -380,7 +380,7 @@ function addNewNote() {
 function selectNote() {
     let bar = calculateBar();
     let note = calculateNote();
-    let fakePos = calculatePosIf8Eighths();
+    let fakePos = calculatePosIf16Sixteenths();
     if (!note || !bar) return;
     calculateNotePosInArray(bar, fakePos);
     
