@@ -56,6 +56,14 @@ divAddFlat.addEventListener("click", alterNote);
 divAddDoubleSharp.addEventListener("click", alterNote);
 divAddDoubleFlat.addEventListener("click", alterNote);
 
+divWholeNote.addEventListener("click", () => {
+    isRest = false;
+    noteDuration = 1;
+});
+divWholeRest.addEventListener("click", () => {
+    isRest = true;
+    noteDuration = 1;
+});
 divHalfNote.addEventListener("click", () => {
     isRest = false;
     noteDuration = 2;

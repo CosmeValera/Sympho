@@ -3,6 +3,8 @@ const divStave = document.getElementById("my-stave");
 const renderer = new VF.Renderer(divStave, VF.Renderer.Backends.SVG);
 const context = renderer.getContext();
 const bars = [];
+const divWholeNote = document.getElementById("add-whole-note");
+const divWholeRest = document.getElementById("add-whole-rest");
 const divHalfNote = document.getElementById("add-half-note");
 const divHalfRest = document.getElementById("add-half-rest");
 const divQuarterNote = document.getElementById("add-quarter-note");
@@ -150,7 +152,6 @@ function removeNote(notes, pos) {
     }
 }
 
-// Returns boolean
 // If true, the next note is removed
 function deleteNextNoteIfSameDuration(notes, nextPos, nextNoteDuration) {
     if (nextPos < notes.length && notes[nextPos].duration == nextNoteDuration) {
@@ -233,7 +234,6 @@ function calculateNotePosInArray(bar, fakePos) {
     let sum = 0;
     for (let i = 0; i < notesValues.length; i++) {
         sum += notesValues[i];
-        console.log(fakePos, sum)
         if (fakePos < sum) {
             notePosInArray =  i;
             return;
@@ -241,47 +241,58 @@ function calculateNotePosInArray(bar, fakePos) {
     }
 }
 
-function newNoteValueIsFourTimesLess(bar) {
-    bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
-    bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
-    bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
-}
-
-function newNoteValueIsTwoTimesLess(bar) {
-    bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));
-}
-
-function newNoteValueIsTwoTimesBigger(bar, olderNoteDuration) {
-    let tmpNotes = cloneNotes(bar.notes);
-    if (deleteNextNoteIfSameDuration(tmpNotes, notePosInArray+1, olderNoteDuration)) {
-        bar.notes = tmpNotes;
-        return;
+function spliceNotes(bar, amountOfSplices){
+    for (let i = 0; i < amountOfSplices; i++) {
+        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: noteDuration+"r" }));    
     }
-    if (deletePreviousNoteIfSameDuration(tmpNotes, notePosInArray-1, olderNoteDuration)) {
-        bar.notes = tmpNotes;
-        return;
-    }
-    return null;
 }
 
-function newNoteValueIsFourTimesBigger(bar, olderNoteDuration) {
-    let amountOfNotesToDelete = 0;
+function deleteNotes(bar, olderNoteDuration, amountOfNotesToDelete) {
     let tmpNotes = cloneNotes(bar.notes);
-    for(let i = 0; i < 3; i++) {
-        if (deleteNextNoteIfSameDuration(tmpNotes, notePosInArray+1, olderNoteDuration)) {
-            amountOfNotesToDelete++;
+    for (let i = 0; i < amountOfNotesToDelete; i++) {
+        if (deleteNextNoteIfSameDuration(tmpNotes, notePosInArray + 1, olderNoteDuration)) {
             continue;
         }
-        if (deletePreviousNoteIfSameDuration(tmpNotes, notePosInArray-1, olderNoteDuration)) {
-            amountOfNotesToDelete++;
+        if (deletePreviousNoteIfSameDuration(tmpNotes, notePosInArray - 1, olderNoteDuration)) {
             continue;
         }
         return null;
     }
-    if (amountOfNotesToDelete == 3) {
-        bar.notes = tmpNotes;
-        return;
+    bar.notes = tmpNotes;
+    return;
+}
+
+function newNoteValueIsEightTimesLess(bar) {
+    spliceNotes(bar, 7);
+}
+
+function newNoteValueIsFourTimesLess(bar) {
+    spliceNotes(bar, 3);
+}
+
+function newNoteValueIsTwoTimesLess(bar) {
+    spliceNotes(bar, 1);
+}
+
+function newNoteValueIsTwoTimesBigger(bar, olderNoteDuration) {
+    if (deleteNotes(bar, olderNoteDuration, 1) === null) {
+        return null;
     }
+    return;
+}
+
+function newNoteValueIsFourTimesBigger(bar, olderNoteDuration) {
+    if (deleteNotes(bar, olderNoteDuration, 3) === null) {
+        return null;
+    }
+    return;
+}
+
+function newNoteValueIsEightTimesBigger(bar, olderNoteDuration) {
+    if (deleteNotes(bar, olderNoteDuration, 7) === null) {
+        return null;
+    }
+    return;
 }
 
 function alterBarNotes(bar) {
@@ -290,6 +301,11 @@ function alterBarNotes(bar) {
     let newNoteValue = 4/newNoteDuration;
     let previousNoteValue = 4/olderNoteDuration;
     
+    if (newNoteValue == previousNoteValue / 8) {
+        if (newNoteValueIsEightTimesLess(bar) === null) {
+            return null;
+        }
+    }
     if (newNoteValue == previousNoteValue / 4) {
         if (newNoteValueIsFourTimesLess(bar) === null) {
             return null;
@@ -307,6 +323,11 @@ function alterBarNotes(bar) {
     }
     if (newNoteValue == previousNoteValue * 4) {
         if (newNoteValueIsFourTimesBigger(bar, olderNoteDuration) === null) {
+            return null;
+        }
+    }
+    if (newNoteValue == previousNoteValue * 8) {
+        if (newNoteValueIsEightTimesBigger(bar, olderNoteDuration) === null) {
             return null;
         }
     }
@@ -397,6 +418,8 @@ function mouseToggle() {
     isMouseToggled = !isMouseToggled;
 
     if (isMouseToggled) {
+        addClass(divWholeNote, "is-disabled");
+        addClass(divWholeRest, "is-disabled");
         addClass(divHalfNote, "is-disabled");
         addClass(divHalfRest, "is-disabled");
         addClass(divQuarterNote, "is-disabled");
@@ -409,6 +432,8 @@ function mouseToggle() {
         removeClass(divAddFlat, "is-disabled");
         removeClass(divAddDoubleFlat, "is-disabled");
     } else {
+        removeClass(divWholeNote, "is-disabled");
+        removeClass(divWholeRest, "is-disabled");
         removeClass(divHalfRest, "is-disabled");
         removeClass(divHalfNote, "is-disabled");
         removeClass(divQuarterNote, "is-disabled");
