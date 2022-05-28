@@ -88,5 +88,13 @@ divEighthRest.addEventListener("click", () => {
     isRest = true;
     noteDuration = 8;
 });
+divSixteenthNote.addEventListener("click", () => {
+    isRest = false;
+    noteDuration = 16;
+});
+divSixteenthRest.addEventListener("click", () => {
+    isRest = true;
+    noteDuration = 16;
+});
 
 initialLoad();

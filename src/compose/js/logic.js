@@ -11,6 +11,8 @@ const divQuarterNote = document.getElementById("add-quarter-note");
 const divQuarterRest = document.getElementById("add-quarter-rest");
 const divEighthNote = document.getElementById("add-eighth-note");
 const divEighthRest = document.getElementById("add-eighth-rest");
+const divSixteenthNote = document.getElementById("add-sixteenth-note");
+const divSixteenthRest = document.getElementById("add-sixteenth-rest");
 const divMouseToggle = document.getElementById("mouse-toggle");
 const divAddSharp = document.getElementById("add-sharp");
 const divAddFlat = document.getElementById("add-flat");
@@ -138,21 +140,21 @@ function cloneNotes(notes) {
     return [...notes];
 }
 
-// remove note next to the clicked note
-function removeNote(notes, pos) {
-    let noteToRemove = notes[pos];
-    let noteToRemoveValue = 4/noteToRemove.duration;
-    let sum = 0;
-    for (let i = 0; i < notes.length; i++) {
-        sum += 4/notes[i].duration;
-        if (sum > noteToRemoveValue) {
-            notes.splice(i, 1);
-            return notes;
-        }
-    }
-}
+// function removeNote(notes, pos) {
+//     let noteToRemove = notes[pos];
+//     let noteToRemoveValue = 4/noteToRemove.duration;
+//     let sum = 0;
+//     for (let i = 0; i < notes.length; i++) {
+//         sum += 4/notes[i].duration;
+//         if (sum > noteToRemoveValue) {
+//             notes.splice(i, 1);
+//             return notes;
+//         }
+//     }
+// }
 
 // If true, the next note is removed
+
 function deleteNextNoteIfSameDuration(notes, nextPos, nextNoteDuration) {
     if (nextPos < notes.length && notes[nextPos].duration == nextNoteDuration) {
         notes.splice(nextPos, 1);
@@ -262,6 +264,10 @@ function deleteNotes(bar, olderNoteDuration, amountOfNotesToDelete) {
     return;
 }
 
+function newNoteValueIsSixteenTimesLess(bar) {
+    spliceNotes(bar, 15);
+}
+
 function newNoteValueIsEightTimesLess(bar) {
     spliceNotes(bar, 7);
 }
@@ -295,12 +301,24 @@ function newNoteValueIsEightTimesBigger(bar, olderNoteDuration) {
     return;
 }
 
+function newNoteValueIsSixteenTimesBigger(bar, olderNoteDuration) {
+    if (deleteNotes(bar, olderNoteDuration, 15) === null) {
+        return null;
+    }
+    return;
+}
+
 function alterBarNotes(bar) {
     let newNoteDuration = noteDuration;
     let olderNoteDuration = bar.notes[notePosInArray].duration;
     let newNoteValue = 4/newNoteDuration;
     let previousNoteValue = 4/olderNoteDuration;
     
+    if (newNoteValue == previousNoteValue / 16) {
+        if (newNoteValueIsSixteenTimesLess(bar) === null) {
+            return null;
+        }
+    }
     if (newNoteValue == previousNoteValue / 8) {
         if (newNoteValueIsEightTimesLess(bar) === null) {
             return null;
@@ -328,6 +346,11 @@ function alterBarNotes(bar) {
     }
     if (newNoteValue == previousNoteValue * 8) {
         if (newNoteValueIsEightTimesBigger(bar, olderNoteDuration) === null) {
+            return null;
+        }
+    }
+    if (newNoteValue == previousNoteValue * 16) {
+        if (newNoteValueIsSixteenTimesBigger(bar, olderNoteDuration) === null) {
             return null;
         }
     }
@@ -426,6 +449,8 @@ function mouseToggle() {
         addClass(divQuarterRest, "is-disabled");
         addClass(divEighthNote, "is-disabled");
         addClass(divEighthRest, "is-disabled");
+        addClass(divSixteenthNote, "is-disabled");
+        addClass(divSixteenthRest, "is-disabled");
 
         removeClass(divAddSharp, "is-disabled");
         removeClass(divAddDoubleSharp, "is-disabled");
@@ -440,6 +465,8 @@ function mouseToggle() {
         removeClass(divQuarterRest, "is-disabled");
         removeClass(divEighthNote, "is-disabled");
         removeClass(divEighthRest, "is-disabled");
+        removeClass(divSixteenthNote, "is-disabled");
+        removeClass(divSixteenthRest, "is-disabled");
 
         addClass(divAddSharp, "is-disabled");
         addClass(divAddDoubleSharp, "is-disabled");
