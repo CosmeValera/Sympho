@@ -51,10 +51,6 @@ function draw() {
 mySectionStave.addEventListener("click", divStaveClicked);
 window.addEventListener("resize", windowSizeChanged);
 divMouseToggle.addEventListener("click", mouseToggle);
-divAddSharp.addEventListener("click", alterNote);
-divAddFlat.addEventListener("click", alterNote);
-divAddDoubleSharp.addEventListener("click", alterNote);
-divAddDoubleFlat.addEventListener("click", alterNote);
 
 divWholeNote.addEventListener("click", () => {
     isRest = false;
@@ -96,5 +92,13 @@ divSixteenthRest.addEventListener("click", () => {
     isRest = true;
     noteDuration = 16;
 });
+
+divAddSharp.addEventListener("click", alterNote);
+divAddFlat.addEventListener("click", alterNote);
+divAddDoubleSharp.addEventListener("click", alterNote);
+divAddDoubleFlat.addEventListener("click", alterNote);
+divAddDot.addEventListener("click", addDot);
+divAddTriplet.addEventListener("click", addTriplet);
+divAddTie.addEventListener("click", addTie);
 
 initialLoad();

@@ -18,6 +18,9 @@ const divAddSharp = document.getElementById("add-sharp");
 const divAddFlat = document.getElementById("add-flat");
 const divAddDoubleSharp = document.getElementById("add-double-sharp");
 const divAddDoubleFlat = document.getElementById("add-double-flat");
+const divAddTie = document.getElementById("add-tie");
+const divAddDot = document.getElementById("add-dot");
+const divAddTriplet = document.getElementById("add-triplet");
 var notePosInArray;
 var noteDuration;
 var isRest;
@@ -456,6 +459,9 @@ function mouseToggle() {
         removeClass(divAddDoubleSharp, "is-disabled");
         removeClass(divAddFlat, "is-disabled");
         removeClass(divAddDoubleFlat, "is-disabled");
+        removeClass(divAddDot, "is-disabled");
+        removeClass(divAddTriplet, "is-disabled");
+        removeClass(divAddTie, "is-disabled");
     } else {
         removeClass(divWholeNote, "is-disabled");
         removeClass(divWholeRest, "is-disabled");
@@ -472,6 +478,9 @@ function mouseToggle() {
         addClass(divAddDoubleSharp, "is-disabled");
         addClass(divAddFlat, "is-disabled");
         addClass(divAddDoubleFlat, "is-disabled");
+        addClass(divAddDot, "is-disabled");
+        addClass(divAddTriplet, "is-disabled");
+        addClass(divAddTie, "is-disabled");
     }
 
     if (selectedNote) {
@@ -507,6 +516,26 @@ function alterNote(evt) {
         draw();
         console.log(bars)
     }
+}
+
+// TODO: add triplet, add tie and add dot
+function addTriplet() {
+    if (selectedNote) {
+        console.log("TO IMPLEMENT: add triplet");
+    }
+    console.log("always showing when click addTriplet");
+}
+function addTie() {
+    if (selectedNote) {
+        console.log("TO IMPLEMENT: add tie");
+    }
+    console.log("always showing when click addTie");
+}
+function addDot() {
+    if (selectedNote) {
+        console.log("TO IMPLEMENT: add dot");
+    }
+    console.log("always showing when click addDot");
 }
 
 // TODO: add a button somewhere that will call this function to delete last bar (maybe in right panel)
