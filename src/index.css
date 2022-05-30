@@ -85,6 +85,13 @@ main {
   text-decoration: none!important;
 }
 
+tbody tr td {
+  display: table-cell;
+  vertical-align: middle!important;
+  text-align: center;
+  position: relative;
+}
+
 /*                   */
 /* BEGIN: Navbar-smp */
 /*                   */
@@ -192,9 +199,14 @@ main {
     
     .toolbar-smp {
       margin-left: var(--margin-left);
+      overflow: scroll;
       /* padding: 12px; */
     }
-
+    .toolbar-smp-child {
+      display: flex;
+      justify-content: center;
+      overflow: auto!important;
+    }
     .navbar-smp:hover {
       width: 16rem;
     }
