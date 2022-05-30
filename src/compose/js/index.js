@@ -5,7 +5,7 @@ function initialLoad() {
 
     windowSizeChanged();
     mouseToggle();
-    
+
     //DRAW
     setInitialLayout();
     draw();
@@ -53,44 +53,64 @@ window.addEventListener("resize", windowSizeChanged);
 divMouseToggle.addEventListener("click", mouseToggle);
 
 divWholeNote.addEventListener("click", () => {
-    isRest = false;
-    noteDuration = 1;
+    if (!isMouseToggled) {
+        isRest = false;
+        noteDuration = 1;
+    }
 });
 divWholeRest.addEventListener("click", () => {
-    isRest = true;
-    noteDuration = 1;
+    if (!isMouseToggled) {
+        isRest = true;
+        noteDuration = 1;
+    }
 });
 divHalfNote.addEventListener("click", () => {
-    isRest = false;
-    noteDuration = 2;
+    if (!isMouseToggled) {
+        isRest = false;
+        noteDuration = 2;
+    }
 });
 divHalfRest.addEventListener("click", () => {
-    isRest = true;
-    noteDuration = 2;
+    if (!isMouseToggled) {
+        isRest = true;
+        noteDuration = 2;
+    }
 });
 divQuarterNote.addEventListener("click", () => {
-    isRest = false;
-    noteDuration = 4;
+    if (!isMouseToggled) {
+        isRest = false;
+        noteDuration = 4;
+    }
 });
 divQuarterRest.addEventListener("click", () => {
-    isRest = true;
-    noteDuration = 4;
+    if (!isMouseToggled) {
+        isRest = true;
+        noteDuration = 4;
+    }
 });
 divEighthNote.addEventListener("click", () => {
-    isRest = false;
-    noteDuration = 8;
+    if (!isMouseToggled) {
+        isRest = false;
+        noteDuration = 8;
+    }
 });
 divEighthRest.addEventListener("click", () => {
-    isRest = true;
-    noteDuration = 8;
+    if (!isMouseToggled) {
+        isRest = true;
+        noteDuration = 8;
+    }
 });
 divSixteenthNote.addEventListener("click", () => {
-    isRest = false;
-    noteDuration = 16;
+    if (!isMouseToggled) {
+        isRest = false;
+        noteDuration = 16;
+    }
 });
 divSixteenthRest.addEventListener("click", () => {
-    isRest = true;
-    noteDuration = 16;
+    if (!isMouseToggled) {
+        isRest = true;
+        noteDuration = 16;
+    }
 });
 
 divAddSharp.addEventListener("click", alterNote);

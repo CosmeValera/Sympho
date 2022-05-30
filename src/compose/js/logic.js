@@ -234,7 +234,7 @@ function calculatePosIf16Sixteenths() {
             : (Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR - 1) / 4;
     } else if (xPositionClick > BAR_SIZE_WITH_MARGIN_X) {
         return (
-            (Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / (SPACE_PER_NOTE + 1) ) % MAX_AMOUNT_NOTES_IN_A_BAR ) / 4
+            (Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / (SPACE_PER_NOTE + 1) ) % MAX_AMOUNT_NOTES_IN_A_BAR) / 4
         );
     }
 }
