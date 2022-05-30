@@ -13,6 +13,30 @@ body {
   --transition-speed: 600ms;
   --margin-left: 80px;
   --margin-right: 132px;
+
+  --add-whole-note-url: url('/icons/1_note.png');
+  --add-half-note-url: url('/icons/2_note.png');
+  --add-quarter-note-url: url('/icons/4_note.png');
+  --add-eighth-note-url: url('/icons/8_note.png');
+  --add-sixteenth-note-url: url('/icons/16_note.png');
+  --add-thirty-second-note-url: url('/icons/32_note.png');
+  
+  --add-whole-rest-url: url('/icons/1_rest.png');
+  --add-half-rest-url: url('/icons/2_rest.png');
+  --add-quarter-rest-url: url('/icons/4_rest.png');
+  --add-eighth-rest-url: url('/icons/8_rest.png');
+  --add-sixteenth-rest-url: url('/icons/16_rest.png');
+  --add-thirty-second-rest-url: url('/icons/32_rest.png');
+
+  --toggle-mouse-url: url('/icons/mouse.png');
+  --add-flat: url('/icons/flat.png');
+  --add-sharp: url('/icons/sharp.png');
+  --add-double-flat: url('/icons/double_flat.png');
+  --add-double-sharp: url('/icons/double_sharp.png');
+  --add-tie-url: url('/icons/tie.png');
+  --add-dot-url: url('/icons/dot.png');
+  --add-triplet-url: url('/icons/triplet.png');
+  
   margin: 0px;
   display: flex;
   flex-direction: column;
@@ -254,6 +278,80 @@ tbody tr td {
 
 }
 
+/* THEMIFY */
+
+#add-whole-note {
+  content: var(--add-whole-note-url);
+}
+
+#add-half-note {
+  content: var(--add-half-note-url);
+}
+
+#add-quarter-note {
+  content: var(--add-quarter-note-url);
+}
+
+#add-eighth-note {
+  content: var(--add-eighth-note-url);
+}
+
+#add-sixteenth-note {
+  content: var(--add-sixteenth-note-url);
+}
+
+#add-whole-rest {
+  content: var(--add-whole-rest-url);
+}
+
+#add-half-rest {
+  content: var(--add-half-rest-url);
+}
+
+#add-quarter-rest {
+  content: var(--add-quarter-rest-url);
+}
+
+#add-eighth-rest {
+  content: var(--add-eighth-rest-url);
+}
+
+#add-sixteenth-rest {
+  content: var(--add-sixteenth-rest-url);
+}
+
+#mouse-toggle {
+  content: var(--toggle-mouse-url);
+}
+
+#add-flat {
+  content: var(--add-flat);
+}
+
+#add-sharp {
+  content: var(--add-sharp);
+}
+
+#add-double-flat {
+  content: var(--add-double-flat);
+}
+
+#add-double-sharp {
+  content: var(--add-double-sharp);
+}
+
+#add-tie {
+  content: var(--add-tie-url);
+}
+
+#add-dot {
+  content: var(--add-dot-url);
+}
+
+#add-triplet {
+  content: var(--add-triplet-url);
+}
+
 
 .dark {
   --text-primary: #b6b6b6;
@@ -263,6 +361,31 @@ tbody tr td {
   --bg-stave: #ececec;
   --scrollbar-thumb: #6649b8;
   --scrollbar-track: #1e1e24;
+
+
+  --add-whole-note-url: url('/icons/1_note_white.png');
+  --add-half-note-url: url('/icons/2_note_white.png');
+  --add-quarter-note-url: url('/icons/4_note_white.png');
+  --add-eighth-note-url: url('/icons/8_note_white.png');
+  --add-sixteenth-note-url: url('/icons/16_note_white.png');
+  --add-thirty-second-note-url: url('/icons/32_note_white.png');
+  
+  --add-whole-rest-url: url('/icons/1_rest_white.png');
+  --add-half-rest-url: url('/icons/2_rest_white.png');
+  --add-quarter-rest-url: url('/icons/4_rest_white.png');
+  --add-eighth-rest-url: url('/icons/8_rest_white.png');
+  --add-sixteenth-rest-url: url('/icons/16_rest_white.png');
+  --add-thirty-second-rest-url: url('/icons/32_rest_white.png');
+
+  --toggle-mouse-url: url('/icons/mouse_white.png');
+  --add-flat: url('/icons/flat_white.png');
+  --add-sharp: url('/icons/sharp_white.png');
+  --add-double-flat: url('/icons/double_flat_white.png');
+  --add-double-sharp: url('/icons/double_sharp_white.png');
+  --add-tie-url: url('/icons/tie_white.png');
+  --add-dot-url: url('/icons/dot_white.png');
+  --add-triplet-url: url('/icons/triplet_white.png');
+  
 }
 
 .light {
@@ -273,6 +396,31 @@ tbody tr td {
   --bg-stave: #ffffff;
   --scrollbar-thumb: var(--fa-primary);
   --scrollbar-track: #f0f0f0;
+
+
+  --add-whole-note-url: url('/icons/1_note.png');
+  --add-half-note-url: url('/icons/2_note.png');
+  --add-quarter-note-url: url('/icons/4_note.png');
+  --add-eighth-note-url: url('/icons/8_note.png');
+  --add-sixteenth-note-url: url('/icons/16_note.png');
+  --add-thirty-second-note-url: url('/icons/32_note.png');
+  
+  --add-whole-rest-url: url('/icons/1_rest.png');
+  --add-half-rest-url: url('/icons/2_rest.png');
+  --add-quarter-rest-url: url('/icons/4_rest.png');
+  --add-eighth-rest-url: url('/icons/8_rest.png');
+  --add-sixteenth-rest-url: url('/icons/16_rest.png');
+  --add-thirty-second-rest-url: url('/icons/32_rest.png');
+
+  --toggle-mouse-url: url('/icons/mouse.png');
+  --add-flat: url('/icons/flat.png');
+  --add-sharp: url('/icons/sharp.png');
+  --add-double-flat: url('/icons/double_flat.png');
+  --add-double-sharp: url('/icons/double_sharp.png');
+  --add-tie-url: url('/icons/tie.png');
+  --add-dot-url: url('/icons/dot.png');
+  --add-triplet-url: url('/icons/triplet.png');
+  
 }
 
 .solar {
@@ -283,6 +431,31 @@ tbody tr td {
   --bg-stave: #fefbf0;
   --scrollbar-thumb: #fffa62;
   --scrollbar-track: #fcf0d0;
+
+  
+  --add-whole-note-url: url('/icons/1_note.png');
+  --add-half-note-url: url('/icons/2_note.png');
+  --add-quarter-note-url: url('/icons/4_note.png');
+  --add-eighth-note-url: url('/icons/8_note.png');
+  --add-sixteenth-note-url: url('/icons/16_note.png');
+  --add-thirty-second-note-url: url('/icons/32_note.png');
+  
+  --add-whole-rest-url: url('/icons/1_rest.png');
+  --add-half-rest-url: url('/icons/2_rest.png');
+  --add-quarter-rest-url: url('/icons/4_rest.png');
+  --add-eighth-rest-url: url('/icons/8_rest.png');
+  --add-sixteenth-rest-url: url('/icons/16_rest.png');
+  --add-thirty-second-rest-url: url('/icons/32_rest.png');
+
+  --toggle-mouse-url: url('/icons/mouse.png');
+  --add-flat: url('/icons/flat.png');
+  --add-sharp: url('/icons/sharp.png');
+  --add-double-flat: url('/icons/double_flat.png');
+  --add-double-sharp: url('/icons/double_sharp.png');
+  --add-tie-url: url('/icons/tie.png');
+  --add-dot-url: url('/icons/dot.png');
+  --add-triplet-url: url('/icons/triplet.png');
+  
 }
 
 .theme-icon {
@@ -300,6 +473,8 @@ tbody tr td {
 .solar #solarIcon {
   display: block;
 }
+
+/* END: THEMIFY */
 
 /*                 */
 /* END: Navbar-smp */
