@@ -387,10 +387,6 @@ function selectNote() {
     if (!note || !bar) return;
     calculateNotePosInArray(bar, fakePos);
     
-    if (alterBarNotes(bar) === null) {
-        return;
-    }
-
     if (selectedNote) {
         selectedNote.setStyle({fillStyle: "Black", strokeStyle: "Black"});
     }
