@@ -220,15 +220,21 @@ function calculateNote() {
 
 function calculatePosIf16Sixteenths() {
     if (xPositionClick <= BAR_SIZE_WITH_MARGIN_X) {
-        if (xPositionClick > BAR_SIZE_WITH_MARGIN_X - SPACE_PER_NOTE * 1.5) { 
-            return (MAX_AMOUNT_NOTES_IN_A_BAR - 1)/4;
-        } 
+        if (getRowNumber() === 0) {
+            if (xPositionClick > BAR_SIZE_WITH_MARGIN_X - SPACE_PER_NOTE * 1.5) { 
+                return (MAX_AMOUNT_NOTES_IN_A_BAR - 1)/4;
+            } 
+        } else if (getRowNumber() !== 0) {
+            if (xPositionClick > BAR_SIZE_WITH_MARGIN_X - SPACE_PER_NOTE * 2.5) { 
+                return (MAX_AMOUNT_NOTES_IN_A_BAR - 1)/4;
+            } 
+        }
         return (getRowNumber() === 0)
             ? (Math.trunc((xPositionClick - CLEF_SIZE - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR - 1) / 4
             : (Math.trunc((xPositionClick - STAVE_MARGIN_LEFT - TEMPO_SIZE) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR - 1) / 4;
     } else if (xPositionClick > BAR_SIZE_WITH_MARGIN_X) {
         return (
-            (Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / SPACE_PER_NOTE) % MAX_AMOUNT_NOTES_IN_A_BAR) / 4
+            (Math.trunc((xPositionClick - BAR_SIZE_WITH_MARGIN_X) / (SPACE_PER_NOTE + 1) ) % MAX_AMOUNT_NOTES_IN_A_BAR ) / 4
         );
     }
 }
