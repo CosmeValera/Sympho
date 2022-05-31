@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sympho-api-chart
+  labels:
+    name: sympho-api
+    app: sympho-api
+spec:
+  selector:
+    matchLabels:
+      app: sympho-api
+  template:
+    metadata:
+      labels:
+        app: sympho-api
+    spec:
+      containers:
+      - name: sympho-api
+        image: {{.Values.containers.image}}
+        env:
+          - name: "MONGO_CONN"
+            value: {{.Values.spec.MONGO_CONN}}
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+          - name: http 
+            containerPort: {{.Values.ports.API_PORT}}
+          
+        

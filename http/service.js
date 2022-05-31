@@ -67,9 +67,9 @@ async function deleteOne(id) {
 
 async function login(id, obj) {
     try {
-        const dbResponse = await users.findOne(id)
+        const dbResponse = await users.findOne(id, obj)
         if (dbResponse) {
-            return dbResponse.pass == obj.pass
+            return dbResponse
         } else {
             return null
         }

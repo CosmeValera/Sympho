@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-svc-chart
+spec:
+  selector:
+    app: mongodb
+  ports:
+  - port: 27017
+    targetPort: {{.Values.ports.MONGO_PORT}}

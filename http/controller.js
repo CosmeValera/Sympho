@@ -73,11 +73,11 @@ async function deleteController(req, res) {
 async function loginController(req, res) {
     try {
         const response = await service.login(req.params.id, req.body)
-        if (response == true) {
+        if (response == 0) {
             res.send(200)
-        }else if (response == false){
+        }else if (response == 1){
             res.sendStatus(401)
-        }else {
+        }else if (response == 2){
             res.sendStatus(404)
         }        
     }catch(err) {
