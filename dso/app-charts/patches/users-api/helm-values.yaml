@@ -1,0 +1,24 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nodejs-chart
+  namespace: sympho-ns
+spec:
+  interval: 1m
+  chart:
+    spec:
+      chart: ../../../charts/sympho-api/
+      version: 0.0.1
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      interval: 1m
+  values:
+    spec:
+      MONGO_CONN: "mongodb://mongo-svc-chart.sympho-api.svc.cluster.local:27017/api"
+    containers:
+      image: europe-southwest1-docker.pkg.dev/sympho-db/sympho/sympho-api:latest 
+    ports:
+      API_PORT: 9495
+      

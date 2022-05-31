@@ -1,10 +1,13 @@
 const express = require("express");
 const app = express();
-const PORT = 9495
+const PORT = 9494
 const controller = require('./controller.js')
-const db = require('./db.js')
+const dbSheets = require('./dbSheets')
+const dbUsers = require('./dbUsers')
 
-db.conn()
+dbUsers.conn()
+dbSheets.conn()
+
 app.use(express.json())
 
 app.get("/login/:id", controller.loginController);
