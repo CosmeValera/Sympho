@@ -6,13 +6,22 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Sympho</title>
         <link rel="icon" type="image/x-icon" href="/icons/favicon.png" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <link rel="stylesheet" href="index.css" />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+            integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+            crossorigin="anonymous"
+        />
+        <link rel="stylesheet" href="../general.css" />
+        <link rel="stylesheet" href="repository.css" />
         <link
             href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap"
             rel="stylesheet"
         />
-        <script src="https://kit.fontawesome.com/9f8963b749.js" crossorigin="anonymous"></script>
+        <script
+            src="https://kit.fontawesome.com/9f8963b749.js"
+            crossorigin="anonymous"
+        ></script>
     </head>
     <body>
         <!-- navbar-smp -->
@@ -48,7 +57,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="../compose/compose.html" class="nav-link">
                         <svg
                             aria-hidden="true"
                             focusable="false"
@@ -77,7 +86,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="../search/search.html" class="nav-link">
                         <svg
                             aria-hidden="true"
                             focusable="false"
@@ -135,7 +144,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="../account/account.html" class="nav-link">
                         <svg
                             aria-hidden="true"
                             focusable="false"
@@ -246,157 +255,10 @@
             </ul>
         </nav>
 
-        <!-- Toolbar top menu -->
-        <header class="toolbar-smp">
-            <div class="row d-flex justify-content-center toolbar-smp-child">
-                <table class="table table-bordered table-bordered-smp col-sm-6 col-5">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <a href="#" id="add-whole-note">
-                                    <img src="../icons/1_note.png" alt="1">
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#" id="add-half-note">
-                                    <img src="../icons/2_note.png" alt="2">
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#" id="add-quarter-note">
-                                    <img src="../icons/4_note.png" alt="4">
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#" id="add-eighth-note">
-                                    <img src="../icons/8_note.png" alt="8">
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#" id="add-sixteenth-note">
-                                    <img src="../icons/16_note.png" alt="16">
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#" id="add-whole-rest">
-                                    <img src="../icons/1_rest.png" alt="1-r">
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#" id="add-half-rest">
-                                    <img src="../icons/2_rest.png" alt="2-r">
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#" id="add-quarter-rest">
-                                    <img src="../icons/4_rest.png" alt="4-r">
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#" id="add-eighth-rest">
-                                    <img src="../icons/8_rest.png" alt="8-r">
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#" id="add-sixteenth-rest">
-                                    <img src="../icons/16_rest.png" alt="16-r">
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table class="table table-bordered table-bordered-smp col-sm-6 col-5">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <a href="#" id="mouse-toggle">
-                                    <img src="../icons/mouse.png" alt="mouse">
-                                </a>
-                            </td>
-                            <!-- Dot -->
-                            <td>
-                                <a href="#">
-                                    <img  id="add-dot" src="../icons/dot.png" alt="dot">
-                                </a>   
-                            </td>
-                            <td>
-                                <a href="#">
-                                    <img  id="add-tie" src="../icons/tie.png" alt="tie">
-                                </a>   
-                            </td>
-                            <td>
-                                <a href="#">
-                                    <img id="add-triplet" src="../icons/triplet.png" alt="triplet">
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#">
-                                    <img id="add-flat" src="../icons/flat.png" alt="b">
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#">
-                                    <img id="add-double-flat" src="../icons/double_flat.png" alt="bb">
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#">
-                                    <img id="add-sharp" src="../icons/sharp.png" alt="#">
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#">
-                                    <img id="add-double-sharp" src="../icons/double_sharp.png" alt="##">
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <!-- <table class="table table-bordered table-bordered-smp col-4">
-                    <tbody>
-                        <tr>
-                        <td>ligature</td>
-                        <td>First</td>
-                        <td>X</td>
-                        </tr>
-                        <tr>
-                        <td>X</td>
-                        <td>X</td>
-                        <td>X</td>
-                        </tr>
-                        <tr>
-                        <td>X</td>
-                        <td colspan="2">X</td>
-                        </tr>
-                    </tbody>
-                </table> -->
-        </div>
-        </header>
-            
-        <main>
-        <!-- Stave -->
-            <section id="section-my-stave">
-                <div id="my-stave"></div>
-            </section>
-        <!-- options-bar-smp -->
-            <section class="p-4 options-bar-smp">
-                <div class="row d-flex justify-content-center">
-                    Edit, remove, play and options buttons.
-                </div>
-            </div>
-        </main>
+        <!-- page content -->
+        <div class="main">This is Repository.html</div>
+
         <!-- Scripts -->
-        <!-- <script src="https://unpkg.com/vexflow@4.0.3/releases/vexflow-min.js"></script> -->
-        <script src="vexflow-3_0_9.txt"></script>
-        <script src="compose/js/constants.js"></script>
-        <script src="compose/js/clickPosition.js"></script>
-        <script src="compose/js/logic.js"></script>
-        <script src="compose/js/draw.js"></script>
-        <script src="compose/js/theme.js"></script>
-        <script src="compose/js/index.js"></script>
+        <script src="./js/repository.js"></script>
     </body>
 </html>
