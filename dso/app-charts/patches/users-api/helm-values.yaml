@@ -20,5 +20,5 @@ spec:
     containers:
       image: europe-southwest1-docker.pkg.dev/sympho-db/sympho/sympho-api:latest 
     ports:
-      API_PORT: 9495
+      API_PORT: 9494
       
