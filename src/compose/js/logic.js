@@ -21,6 +21,7 @@ const divAddDoubleFlat = document.getElementById("add-double-flat");
 const divAddTie = document.getElementById("add-tie");
 const divAddDot = document.getElementById("add-dot");
 const divAddTriplet = document.getElementById("add-triplet");
+const divPlay = document.getElementById("btn-play");
 var notePosInArray;
 var noteDuration;
 var isRest;
