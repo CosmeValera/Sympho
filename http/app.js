@@ -7,14 +7,24 @@ const db = require('./db.js')
 db.conn()
 app.use(express.json())
 
-app.get("/", controller.getAllController);
+app.get("/login/:id", controller.loginController);
 
-app.get("/:id", controller.getController);
+app.post("/register", controller.registerController);
 
-app.post("/", controller.postController)
+app.get("/sheets", controller.getAllController);
 
-app.put("/:id", controller.putController)
+app.get("/sheets/:id", controller.getController);
 
-app.delete("/:id", controller.deleteController)
+app.post("/sheets", controller.postController);
 
-app.listen(PORT, () => console.log("En escucha"))
+app.get("/mysheets", controller.getAllController);
+
+app.get("/mysheets/:id", controller.getController);
+
+app.post("/mysheets", controller.postController);
+
+app.put("/mysheets/:id", controller.putController);
+
+app.delete("/mysheets/:id", controller.deleteController);
+
+app.listen(PORT, () => console.log("En escucha"));

@@ -2,9 +2,10 @@ const service = require('./service')
 
 async function getController(req, res) {
     try {
-        const user = await service.getOne(req.params.id)
-        if(user) {
-            res.send(user)
+        const isPriv = req.body.isPriv
+        const sheet = await service.getOne(req.params.id, isPriv)
+        if(sheet) {
+            res.send(sheet)
         }else {
             res.sendStatus(404)
         }
@@ -13,11 +14,12 @@ async function getController(req, res) {
     }
 }
 
-async function getAllController(_req,res) {
+async function getAllController(req,res) {
     try {
-        const users = await service.getAll()
-        if (users) {
-            res.json(users)
+        const isPriv = req.body.isPriv
+        const sheets = await service.getAll(isPriv)
+        if (sheets) {
+            res.json(sheets)
         }else {
             res.sendStatus(404)
         }
@@ -42,7 +44,7 @@ async function postController(req,res) {
 
 async function putController(req, res) {
     try{    
-        const serviceBody = {"id":req.params.id,"nombre":req.body.nombre}
+        const serviceBody = {"id":req.params.id,"nombre":req.body.nombre, "value": req.body.value}
         const response = await service.update(serviceBody)
         if (response){
             return res.sendStatus(200)
@@ -68,4 +70,33 @@ async function deleteController(req, res) {
     }
 }
 
-module.exports = {getController, getAllController, postController, putController, deleteController}
+async function loginController(req, res) {
+    try {
+        const response = await service.login(req.params.id, req.body)
+        if (response == true) {
+            res.send(200)
+        }else if (response == false){
+            res.sendStatus(401)
+        }else {
+            res.sendStatus(404)
+        }        
+    }catch(err) {
+        res.sendStatus(500)
+    }
+}
+
+async function registerController(req, res) {
+    try {
+        const body = req.body
+        const response = await service.resgister(body)
+        if (response) {
+            res.sendStatus(201)
+        }else {
+            res.sendStatus(400)
+        }
+    } catch (err) {
+        res.sendStatus(500)
+    }
+}
+
+module.exports = {getController, getAllController, postController, putController, deleteController, loginController, registerController}
