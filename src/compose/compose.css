@@ -1,0 +1,272 @@
+body {
+  
+  --add-whole-note-url: url('../../../../icons/1_note.png');
+  --add-half-note-url: url('../../icons/2_note.png');
+  --add-quarter-note-url: url('../../icons/4_note.png');
+  --add-eighth-note-url: url('../../icons/8_note.png');
+  --add-sixteenth-note-url: url('../../icons/16_note.png');
+  --add-thirty-second-note-url: url('../../icons/32_note.png');
+  
+  --add-whole-rest-url: url('../../icons/1_rest.png');
+  --add-half-rest-url: url('../../icons/2_rest.png');
+  --add-quarter-rest-url: url('../../icons/4_rest.png');
+  --add-eighth-rest-url: url('../../icons/8_rest.png');
+  --add-sixteenth-rest-url: url('../../icons/16_rest.png');
+  --add-thirty-second-rest-url: url('../../icons/32_rest.png');
+
+  --toggle-mouse-url: url('../../icons/mouse.png');
+  --add-flat: url('../../icons/flat.png');
+  --add-sharp: url('../../icons/sharp.png');
+  --add-double-flat: url('../../icons/double_flat.png');
+  --add-double-sharp: url('../../icons/double_sharp.png');
+  --add-tie-url: url('../../icons/tie.png');
+  --add-dot-url: url('../../icons/dot.png');
+  --add-triplet-url: url('../../icons/triplet.png');
+  
+}
+
+#section-my-stave {
+  display: flex;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  background-color: var(--bg-stave);
+  height: fill;
+  width: calc(100% - (var(--margin-left) * 1.65));
+}
+
+.toolbar-smp {
+  height: 19vh;
+  margin-left: var(--margin-left);
+  display: grid;
+  background-color: var(--bg-primary);
+  overflow: hidden;
+}
+
+.toolbar-smp div.row {
+  margin: 0;
+}
+
+.options-bar-smp {
+  position: fixed;
+  right: 0;
+  height: 100%;
+  width: var(--margin-right);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+.table-bordered-smp {
+  font-size: 8px;
+  color: var(--text-primary);
+  margin-bottom: 0px;
+}
+
+#section-my-stave::-webkit-scrollbar,
+.toolbar-smp::-webkit-scrollbar {
+  width: 0.25rem;
+  /* height: 0.25rem; */
+  height: 0rem;
+}
+#section-my-stave::-webkit-scrollbar-track,
+.toolbar-smp::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+#section-my-stave::-webkit-scrollbar-thumb,
+.toolbar-smp::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+}
+.table thead th, .table tbody tr th, .table tbody tr td{
+  border: 1.7px solid var(--bg-secondary);
+}
+
+.is-disabled {
+  color: currentColor!important;
+  cursor: not-allowed;
+  opacity: 0.5;
+  text-decoration: none!important;
+}
+
+tbody tr td {
+  display: table-cell;
+  vertical-align: middle!important;
+  text-align: center;
+  position: relative;
+}
+
+#add-whole-note {
+  content: var(--add-whole-note-url);
+}
+
+#add-half-note {
+  content: var(--add-half-note-url);
+}
+
+#add-quarter-note {
+  content: var(--add-quarter-note-url);
+}
+
+#add-eighth-note {
+  content: var(--add-eighth-note-url);
+}
+
+#add-sixteenth-note {
+  content: var(--add-sixteenth-note-url);
+}
+
+#add-whole-rest {
+  content: var(--add-whole-rest-url);
+}
+
+#add-half-rest {
+  content: var(--add-half-rest-url);
+}
+
+#add-quarter-rest {
+  content: var(--add-quarter-rest-url);
+}
+
+#add-eighth-rest {
+  content: var(--add-eighth-rest-url);
+}
+
+#add-sixteenth-rest {
+  content: var(--add-sixteenth-rest-url);
+}
+
+#mouse-toggle {
+  content: var(--toggle-mouse-url);
+}
+
+#add-flat {
+  content: var(--add-flat);
+}
+
+#add-sharp {
+  content: var(--add-sharp);
+}
+
+#add-double-flat {
+  content: var(--add-double-flat);
+}
+
+#add-double-sharp {
+  content: var(--add-double-sharp);
+}
+
+#add-tie {
+  content: var(--add-tie-url);
+}
+
+#add-dot {
+  content: var(--add-dot-url);
+}
+
+#add-triplet {
+  content: var(--add-triplet-url);
+}
+
+.dark {
+  
+  --add-whole-note-url: url('../../icons/1_note_white.png');
+  --add-half-note-url: url('../../icons/2_note_white.png');
+  --add-quarter-note-url: url('../../icons/4_note_white.png');
+  --add-eighth-note-url: url('../../icons/8_note_white.png');
+  --add-sixteenth-note-url: url('../../icons/16_note_white.png');
+  --add-thirty-second-note-url: url('../../icons/32_note_white.png');
+  
+  --add-whole-rest-url: url('../../icons/1_rest_white.png');
+  --add-half-rest-url: url('../../icons/2_rest_white.png');
+  --add-quarter-rest-url: url('../../icons/4_rest_white.png');
+  --add-eighth-rest-url: url('../../icons/8_rest_white.png');
+  --add-sixteenth-rest-url: url('../../icons/16_rest_white.png');
+  --add-thirty-second-rest-url: url('../../icons/32_rest_white.png');
+
+  --toggle-mouse-url: url('../../icons/mouse_white.png');
+  --add-flat: url('../../icons/flat_white.png');
+  --add-sharp: url('../../icons/sharp_white.png');
+  --add-double-flat: url('../../icons/double_flat_white.png');
+  --add-double-sharp: url('../../icons/double_sharp_white.png');
+  --add-tie-url: url('../../icons/tie_white.png');
+  --add-dot-url: url('../../icons/dot_white.png');
+  --add-triplet-url: url('../../icons/triplet_white.png');
+  
+}
+
+.light {
+  
+  --add-whole-note-url: url('../../icons/1_note.png');
+  --add-half-note-url: url('../../icons/2_note.png');
+  --add-quarter-note-url: url('../../icons/4_note.png');
+  --add-eighth-note-url: url('../../icons/8_note.png');
+  --add-sixteenth-note-url: url('../../icons/16_note.png');
+  --add-thirty-second-note-url: url('../../icons/32_note.png');
+  
+  --add-whole-rest-url: url('../../icons/1_rest.png');
+  --add-half-rest-url: url('../../icons/2_rest.png');
+  --add-quarter-rest-url: url('../../icons/4_rest.png');
+  --add-eighth-rest-url: url('../../icons/8_rest.png');
+  --add-sixteenth-rest-url: url('../../icons/16_rest.png');
+  --add-thirty-second-rest-url: url('../../icons/32_rest.png');
+
+  --toggle-mouse-url: url('../../icons/mouse.png');
+  --add-flat: url('../../icons/flat.png');
+  --add-sharp: url('../../icons/sharp.png');
+  --add-double-flat: url('../../icons/double_flat.png');
+  --add-double-sharp: url('../../icons/double_sharp.png');
+  --add-tie-url: url('../../icons/tie.png');
+  --add-dot-url: url('../../icons/dot.png');
+  --add-triplet-url: url('../../icons/triplet.png');
+  
+}
+
+.solar {
+  
+  --add-whole-note-url: url('../../icons/1_note.png');
+  --add-half-note-url: url('../../icons/2_note.png');
+  --add-quarter-note-url: url('../../icons/4_note.png');
+  --add-eighth-note-url: url('../../icons/8_note.png');
+  --add-sixteenth-note-url: url('../../icons/16_note.png');
+  --add-thirty-second-note-url: url('../../icons/32_note.png');
+  
+  --add-whole-rest-url: url('../../icons/1_rest.png');
+  --add-half-rest-url: url('../../icons/2_rest.png');
+  --add-quarter-rest-url: url('../../icons/4_rest.png');
+  --add-eighth-rest-url: url('../../icons/8_rest.png');
+  --add-sixteenth-rest-url: url('../../icons/16_rest.png');
+  --add-thirty-second-rest-url: url('../../icons/32_rest.png');
+
+  --toggle-mouse-url: url('../../icons/mouse.png');
+  --add-flat: url('../../icons/flat.png');
+  --add-sharp: url('../../icons/sharp.png');
+  --add-double-flat: url('../../icons/double_flat.png');
+  --add-double-sharp: url('../../icons/double_sharp.png');
+  --add-tie-url: url('../../icons/tie.png');
+  --add-dot-url: url('../../icons/dot.png');
+  --add-triplet-url: url('../../icons/triplet.png');
+  
+}
+
+
+/* Large screens */
+@media only screen and (min-width: 576px) {
+
+  .toolbar-smp {
+    margin-left: var(--margin-left);
+  }
+  .toolbar-smp-child {
+    display: flex;
+    justify-content: center;
+  }
+  
+}
+/* Small screens */
+@media only screen and (max-width: 576px) {
+  .toolbar-smp {
+    margin-left: 0;
+    overflow-y: auto;
+  }
+    
+  .col-1 {
+    display: none;
+  }
+}
