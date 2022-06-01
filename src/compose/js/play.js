@@ -30,7 +30,8 @@ function calculateNotes() {
         
         pitch = note.keys[0].charAt(0).toUpperCase();
         console.log(note.keys[0]);
-        accidental = note.modifiers[0]?note.modifiers[0].type:"";
+        // accidental = note.modifiers[0]?note.modifiers[0].type:"";
+        accidental = note.keys[0].split("/")[0].substring(1);
         octave = note.keys[0].split("/").pop();
         duration = note.duration;
         rest = note.customTypes[0] === "r";

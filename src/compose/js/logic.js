@@ -497,7 +497,7 @@ function mouseToggle() {
 
 function saveAlteredNoteInBars(modifier) {
     let octaveNumber = selectedNote.keys[0].split("/").pop();
-    let pitch = selectedNote.keys[0].split("/")[0];
+    let pitch = selectedNote.keys[0].split("/")[0].substring(0,1);
     selectedNote.keys[0] = `${pitch}${modifier}/${octaveNumber}`;
     selectedNote.modifiers = [];
     console.log(modifier)
