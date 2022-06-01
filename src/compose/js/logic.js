@@ -214,6 +214,7 @@ function calculateNote() {
     
     for (const [position, note] of notesMap.entries()) {
         if (yPosInAnyBar <= position) {
+            console.log(position, note)
             return note;
         }
     }
@@ -379,6 +380,7 @@ function addNewNote() {
 
     let newNoteDuration = noteDuration + (isRest ? "r" : "");
     console.log(notePosInArray)
+    console.log(note)
     bar.notes[notePosInArray] = new VF.StaveNote({
         clef: "treble",
         keys: note,
@@ -495,8 +497,10 @@ function mouseToggle() {
 
 function saveAlteredNoteInBars(modifier) {
     let octaveNumber = selectedNote.keys[0].split("/").pop();
-    selectedNote.keys[0] = `${modifier}/${octaveNumber}`;
+    let pitch = selectedNote.keys[0].split("/")[0];
+    selectedNote.keys[0] = `${pitch}${modifier}/${octaveNumber}`;
     selectedNote.modifiers = [];
+    console.log(modifier)
     selectedNote.addAccidental(0, new VF.Accidental(modifier));
 }
 
