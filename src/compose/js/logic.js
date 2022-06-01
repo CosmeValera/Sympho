@@ -22,6 +22,7 @@ const divAddTie = document.getElementById("add-tie");
 const divAddDot = document.getElementById("add-dot");
 const divAddTriplet = document.getElementById("add-triplet");
 const divPlay = document.getElementById("btn-play");
+const divBpm = document.querySelector(".bpm");
 var notePosInArray;
 var noteDuration;
 var isRest;
@@ -79,6 +80,8 @@ function setInitialData() {
     rightMargin = getComputedStyle(document.querySelector("body"))
         .getPropertyValue("--margin-right")
         .slice(0, -2);
+        console.log(divBpm)
+    divBpm.innerHTML += "= " + bpm;
 }
 
 function createNewBarFullOfSilences(barPos) {

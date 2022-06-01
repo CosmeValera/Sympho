@@ -25,6 +25,14 @@ body {
   
 }
 
+.bpm {
+  position: absolute;
+  /* TODO: put top and left like css variables, and get them in constants.js STAVE_MARGIN_LEFT, STAVE_MARGIN_TOP */
+  top: 25px;
+  left: 65px;
+  z-index:10;
+}
+
 #section-my-stave {
   display: flex;
   overflow-x: hidden;
@@ -53,6 +61,7 @@ body {
   width: var(--margin-right);
   color: var(--text-primary);
   background-color: var(--bg-primary);
+  z-index:99;
 }
 
 .table-bordered-smp {
