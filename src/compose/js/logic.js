@@ -33,6 +33,7 @@ var amountOfBarsPerRow;
 var leftMargin = 0;
 var rightMargin = 0;
 var bpm = 90;
+var instrument = "piano";
 
 class Bar {
     constructor(stave, notes, x, y) {
