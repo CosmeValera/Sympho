@@ -1,17 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: dso-gke-nodejs-svc-chart
+  name: sympho-svc-chart
   labels:
-    name: dso-gke-nodejs
-    app: api-nodejs
+    name: sympho-api
+    app: sympho-api
 spec:
   selector:
-    app: dso-gke-nodejs
+    app: sympho-api
   ports:
-  - name: dso-gke-nodejs
+  - name: sympho-api
     port: 80
     targetPort: {{.Values.ports.API_PORT}}
-  - name: prometheus
-    port: {{.Values.ports.PROMETHEUS_PORT}}
-    targetPort: {{.Values.ports.PROMETHEUS_PORT}}
+  
