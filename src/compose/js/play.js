@@ -1,12 +1,12 @@
 const synth = new Tone.Synth().toDestination();
 
-var notes = [
-    { pitch: "B", accidental: "bb", octave: "4", duration: 4, rest: false },
-    { pitch: "C", accidental: "bb", octave: "4", duration: 4, rest: true },
-    { pitch: "D", accidental: "###", octave: "4", duration: 8, rest: false },
-    { pitch: "E", accidental: "", octave: "4", duration: 8, rest: true },
-    { pitch: "F", accidental: "", octave: "4", duration: 2, rest: false },
-];
+// var notes = [
+//     { pitch: "B", accidental: "bb", octave: "4", duration: 4, rest: false },
+//     { pitch: "C", accidental: "bb", octave: "4", duration: 4, rest: true },
+//     { pitch: "D", accidental: "###", octave: "4", duration: 8, rest: false },
+//     { pitch: "E", accidental: "", octave: "4", duration: 8, rest: true },
+//     { pitch: "F", accidental: "", octave: "4", duration: 2, rest: false },
+// ];
 
 function calculateNotes() {
   let notes = [];

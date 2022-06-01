@@ -1,4 +1,4 @@
-// console.log("general.js is loaded");
+// Check if the link click is public or private
 document.querySelector(".public-sheets")
   .addEventListener("click", function(evt) {
     evt.preventDefault();
