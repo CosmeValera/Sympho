@@ -532,7 +532,7 @@ function addTriplet() {
     }
     console.log("always showing when click addTriplet");
 }
-function addTie() {
+    function addTie() {
     if (selectedNote) {
         console.log("TO IMPLEMENT: add tie");
     }
