@@ -1,4 +1,3 @@
-// var leftMargin = 0;
 function drawAll() {
     for (bar of bars) {
         drawABar(bar);

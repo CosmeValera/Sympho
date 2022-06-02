@@ -1,5 +1,6 @@
 // PLAY
 divPlay.addEventListener("click", play);
+divStop.addEventListener("click", stopMusic);
 
 // CLICK
 window.addEventListener("scroll", updatePosition);
@@ -81,3 +82,6 @@ divAddDoubleFlat.addEventListener("click", alterNote);
 divAddDot.addEventListener("click", addDot);
 divAddTriplet.addEventListener("click", addTriplet);
 divAddTie.addEventListener("click", addTie);
+
+divSettings.addEventListener("click", openSettings)
+divBtnSave.addEventListener("click", saveSettings);

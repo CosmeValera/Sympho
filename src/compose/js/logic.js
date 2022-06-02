@@ -22,8 +22,11 @@ const divAddTie = document.getElementById("add-tie");
 const divAddDot = document.getElementById("add-dot");
 const divAddTriplet = document.getElementById("add-triplet");
 const divPlay = document.getElementById("btn-play");
-const divSettings = document.getElementById("btn-settings");
+const divStop = document.getElementById("btn-stop");
 const divBpm = document.querySelector(".bpm");
+const divSettings = document.getElementById("btn-settings");
+const divBtnSave = document.getElementById("btn-save");
+const modal = new bootstrap.Modal(document.querySelector(".modal-settings"), {});
 var notePosInArray;
 var noteDuration;
 var isRest;
@@ -81,8 +84,7 @@ function setInitialData() {
     rightMargin = getComputedStyle(document.querySelector("body"))
         .getPropertyValue("--margin-right")
         .slice(0, -2);
-        console.log(divBpm)
-    divBpm.innerHTML += "= " + bpm;
+    setDivBpm();
 }
 
 function createNewBarFullOfSilences(barPos) {
@@ -531,6 +533,41 @@ function alterNote(evt) {
     }
 }
 
+function setDivBpm() {
+    divBpm.innerHTML =`
+    <img
+        src="../../icons/4_note.png"
+        alt="quarter"
+    /> = ${bpm}`;
+}
+
+function openSettings() {
+    modal.show();
+    modal._dialog.querySelector("#delete-last-bar").checked = false;
+}
+
+function saveSettings() {
+    bpm = modal._dialog.querySelector("#bpm").value;
+    instrument = modal._dialog.querySelector("#instrument").value.toLowerCase();
+    timeSignature = modal._dialog.querySelector("#time-signature").value;
+    scoreName = modal._dialog.querySelector("#score-name").value;
+    let doDeleteLastBar = modal._dialog.querySelector("#delete-last-bar").checked;
+    console.log(timeSignature, scoreName, doDeleteLastBar)
+    setDivBpm(); 
+    if (doDeleteLastBar) {
+        deleteLastBar();
+    }
+    modal.hide();
+}
+
+function deleteLastBar() {
+    if (bars.length > 1) {
+        bars.pop();
+        recalculateBars();
+        draw();
+    }
+}
+
 // TODO: add triplet, add tie and add dot
 function addTriplet() {
     if (selectedNote) {
@@ -549,12 +586,4 @@ function addDot() {
         console.log("TO IMPLEMENT: add dot");
     }
     console.log("always showing when click addDot");
-}
-
-// TODO: add a button somewhere that will call this function to delete last bar (maybe in right panel)
-function deleteLastBar() {
-    if (bars.length > 1) {
-        bars.pop();
-        draw();
-    }
 }

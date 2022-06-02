@@ -1,75 +1,18 @@
 var synth;
 function calculateInstrument() {
     switch (instrument) {
-        case "bass": {
-            var autoWah = new Tone.AutoWah(120, 10, -20).toMaster();
-            return new Tone.MonoSynth({
-                volume: -10,
-                envelope: {
-                    attack: 0.1,
-                    decay: 0.3,
-                    release: 2,
-                },
-                filterEnvelope: {
-                    attack: 0.001,
-                    decay: 0.01,
-                    sustain: 0.5,
-                    baseFrequency: 440,
-                    octaves: 2.6,
-                },
-            }).connect(autoWah);
-        }
-        case "xilophone": {
-            return new Tone.PolySynth({
-                volume: -10,
-                envelope: {
-                    attack: 0.1,
-                    decay: 0.3,
-                    release: 2,
-                },
-                filterEnvelope: {
-                    attack: 0.001,
-                    decay: 0.01,
-                    sustain: 0.5,
-                    baseFrequency: 440,
-                    octaves: 2.6,
-                },
-            }).toMaster();
-        }
         case "piano": {
-            return new Tone.PolySynth({
+            return new Tone.Synth({
                 volume: -10,
+                oscillator: {
+                    type: "sine",
+                },
                 envelope: {
                     attack: 0.01,
                     decay: 0.01,
                     sustain: 1,
                     release: 0.5,
                 },
-                voice: Tone.Synth,
-            }).toMaster();
-        }
-        case "trumpet": {
-            return new Tone.PolySynth({
-                volume: -10,
-                envelope: {
-                    attack: 0.01,
-                    decay: 0.01,
-                    sustain: 1,
-                    release: 0.5,
-                },
-                voice: Tone.AMSynth,
-            }).toMaster();
-        }
-        case "saxophone": {
-            return new Tone.PolySynth({
-                volume: -10,
-                envelope: {
-                    attack: 0.01,
-                    decay: 0.01,
-                    sustain: 1,
-                    release: 0.5,
-                },
-                voice: Tone.FMSynth,
             }).toMaster();
         }
         case "flute": {
@@ -98,21 +41,37 @@ function calculateInstrument() {
                 },
             }).toMaster();
         }
-        case "metal": {
-          return new Tone.MetalSynth({
-            frequency: 200,
-            envelope: {
-                attack: 0.001,
-                decay: 0.4,
-                release: 0.1,
-            },
-            harmonicity: 3.01,
-            modulationIndex: 20,
-            resonance: 4000,
-            octaves: 1.5,
-        }).toMaster();
-        
-
+        case "bass": {
+            var autoWah = new Tone.AutoWah(120, 10, -20).toMaster();
+            return new Tone.MonoSynth({
+                volume: -10,
+                envelope: {
+                    attack: 0.1,
+                    decay: 0.3,
+                    release: 2,
+                },
+                filterEnvelope: {
+                    attack: 0.001,
+                    decay: 0.01,
+                    sustain: 0.5,
+                    baseFrequency: 440,
+                    octaves: 2.6,
+                },
+            }).connect(autoWah);
+        }
+        case "guitar": {
+            return new Tone.Synth({
+                volume: -10,
+                oscillator: {
+                    type: "fatsawtooth",
+                },
+                envelope: {
+                    attack: 0.01,
+                    decay: 0.01,
+                    sustain: 1,
+                    release: 0.5,
+                },
+            }).toMaster();
         }
     }
 }
@@ -167,4 +126,12 @@ function play() {
             );
         }
     }
+}
+
+function stopMusic() {
+    // stop synth from sounding
+    synth.triggerRelease();
+    
+    Tone.Transport.stop();
+    Tone.Transport.cancel();
 }
