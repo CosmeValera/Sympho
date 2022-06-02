@@ -6,9 +6,6 @@ divStop.addEventListener("click", stopMusic);
 window.addEventListener("scroll", updatePosition);
 window.addEventListener("resize", updatePosition);
 
-// THEME
-document.getElementById('themeButton').addEventListener('click', toggleTheme);
-
 // LOGIC
 mySectionStave.addEventListener("click", divStaveClicked);
 mySectionStave.addEventListener("scroll", divStaveScrolled);

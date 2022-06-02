@@ -18,3 +18,6 @@ function toggleTheme() {
   bodyClass.replace(current, next);
   localStorage.setItem('theme', next);
 }
+
+// THEME
+document.getElementById('themeButton').addEventListener('click', toggleTheme);
