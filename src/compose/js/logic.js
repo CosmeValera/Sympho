@@ -313,7 +313,6 @@ function addNewNote() {
 
     let newNoteDuration = noteDuration + (isRest ? "r" : "");
     console.log(notePosInArray)
-    console.log(note)
     bar.notes[notePosInArray] = new VF.StaveNote({
         clef: "treble",
         keys: note,
@@ -336,6 +335,76 @@ function selectNote() {
     selectedNote.setStyle({fillStyle: "MediumBlue", strokeStyle: "MediumBlue"});
 }
     
+
+function alterBarNotesDot(bar) {
+    if (notePosInArray < bar.notes.length - 1) {
+        // selectedNote === bar.notes[notePosInArray]
+        let thisNoteDurationWithoutDot = noteDuration;
+        let nextNoteDuration = bar.notes[notePosInArray + 1].duration;
+        let thisNoteValueWithoutDot = 4 / thisNoteDurationWithoutDot;
+        let nextNoteValue = 4 / nextNoteDuration;
+
+        console.log("123")
+        if (nextNoteValue == thisNoteValueWithoutDot / 2) {
+            console.log("112323")
+            // remove note in position notePosInArray + 1
+            bar.notes.splice(notePosInArray + 1, 1);
+        } else if (nextNoteValue == thisNoteValueWithoutDot) {
+            console.log("9989823")
+            // remove note in position notePosInArray + 1
+            bar.notes.splice(notePosInArray + 1, 1);
+            // add note in position notePosInArray + 1
+            bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (noteDuration*4) + "r" }));
+        }
+
+        console.log("EXIT")
+
+        return;
+    }
+    return null;
+}
+
+function addDot() {
+    if (selectedNote) {
+        let bar = calculateBar();
+        let fakePos = calculatePosIf16Sixteenths();
+        calculateNotePosInArray(bar, fakePos);
+
+        if (alterBarNotesDot(bar) === null) {
+            return;
+        }
+        
+        let newNoteDuration = noteDuration + (isRest ? "r" : "") + "d";
+        console.log("newNoeDuation: " + newNoteDuration)
+        console.log("COsme")
+        console.log(BARS)
+        bar.notes[notePosInArray] = new VF.StaveNote({
+            clef: "treble",
+            keys: bar.notes[notePosInArray].keys,
+            duration: newNoteDuration,
+            auto_stem: true,
+        }).addDot(0);
+
+        recalculateBars();
+        draw();
+    }
+}
+
+// TODO: add triplet, add tie and add dot
+function addTriplet() {
+    if (selectedNote) {
+        console.log("TO IMPLEMENT: add triplet");
+    }
+    console.log("always showing when click addTriplet");
+}
+    function addTie() {
+    if (selectedNote) {
+        console.log("TO IMPLEMENT: add tie");
+    }
+    console.log("always showing when click addTie");
+}
+
+
 function lastBarHasOneNote(lastBar) {
     return BARS[lastBar].notes.some(n => {
         if (!(n.customTypes[0][0] === 'r')) {
@@ -515,24 +584,4 @@ function divStaveScrolled(evt) {
         // Hide divBpm
         divBpm.style.display = "none";
     }
-}
-
-// TODO: add triplet, add tie and add dot
-function addTriplet() {
-    if (selectedNote) {
-        console.log("TO IMPLEMENT: add triplet");
-    }
-    console.log("always showing when click addTriplet");
-}
-    function addTie() {
-    if (selectedNote) {
-        console.log("TO IMPLEMENT: add tie");
-    }
-    console.log("always showing when click addTie");
-}
-function addDot() {
-    if (selectedNote) {
-        console.log("TO IMPLEMENT: add dot");
-    }
-    console.log("always showing when click addDot");
 }

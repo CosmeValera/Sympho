@@ -5,7 +5,6 @@ function drawAll() {
 }
 
 function drawABar(bar) {
-    console.log(beats_per_bar, beat_value)
     const voice = new VF.Voice({ num_beats: beats_per_bar, beat_value: beat_value });
     voice.addTickables(bar.notes);
     new VF.Formatter().joinVoices([voice]).format([voice], BAR_SIZE);
