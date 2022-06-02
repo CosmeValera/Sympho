@@ -1,45 +1,3 @@
-const VF = Vex.Flow;
-const divStave = document.getElementById("my-stave");
-const renderer = new VF.Renderer(divStave, VF.Renderer.Backends.SVG);
-const context = renderer.getContext();
-const bars = [];
-const divWholeNote = document.getElementById("add-whole-note");
-const divWholeRest = document.getElementById("add-whole-rest");
-const divHalfNote = document.getElementById("add-half-note");
-const divHalfRest = document.getElementById("add-half-rest");
-const divQuarterNote = document.getElementById("add-quarter-note");
-const divQuarterRest = document.getElementById("add-quarter-rest");
-const divEighthNote = document.getElementById("add-eighth-note");
-const divEighthRest = document.getElementById("add-eighth-rest");
-const divSixteenthNote = document.getElementById("add-sixteenth-note");
-const divSixteenthRest = document.getElementById("add-sixteenth-rest");
-const divMouseToggle = document.getElementById("mouse-toggle");
-const divAddSharp = document.getElementById("add-sharp");
-const divAddFlat = document.getElementById("add-flat");
-const divAddDoubleSharp = document.getElementById("add-double-sharp");
-const divAddDoubleFlat = document.getElementById("add-double-flat");
-const divAddTie = document.getElementById("add-tie");
-const divAddDot = document.getElementById("add-dot");
-const divAddTriplet = document.getElementById("add-triplet");
-const divPlay = document.getElementById("btn-play");
-const divStop = document.getElementById("btn-stop");
-const divBpm = document.querySelector(".bpm");
-const divSettings = document.getElementById("btn-settings");
-const divBtnSave = document.getElementById("btn-save");
-const modal = new bootstrap.Modal(document.querySelector(".modal-settings"), {});
-var notePosInArray;
-var noteDuration;
-var isRest;
-var isMouseToggled;
-var selectedNote;
-var rendererWidth;
-var rendererHeight;
-var amountOfBarsPerRow;
-var leftMargin = 0;
-var rightMargin = 0;
-var bpm = 90;
-var instrument = "piano";
-
 class Bar {
     constructor(stave, notes, x, y) {
         this.stave = stave;
@@ -48,25 +6,6 @@ class Bar {
         this.y = y;
     }
 }
-
-let notesMap = new Map([
-    [1, ["c/6"]],
-    [2, ["b/5"]],
-    [3, ["a/5"]],
-    [4, ["g/5"]],
-    [5, ["f/5"]],
-    [6, ["e/5"]],
-    [7, ["d/5"]],
-    [8, ["c/5"]],
-    [9, ["b/4"]],
-    [10, ["a/4"]],
-    [11, ["g/4"]],
-    [12, ["f/4"]],
-    [13, ["e/4"]],
-    [14, ["d/4"]],
-    [15, ["c/4"]],
-    [16, ["b/3"]],
-]);
 
 function setInitialData() {
     isRest = false;
@@ -98,12 +37,12 @@ function createNewBarFullOfSilences(barPos) {
         new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }),
         new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }),
     ];
-    bars[barPos] = new Bar(stave, notes, widthAndX, heightAndY);
+    BARS[barPos] = new Bar(stave, notes, widthAndX, heightAndY);
     renderer.resize(rendererWidth, rendererHeight);
 }
 
 function calculateWidthAndX(barPos) {
-    if (bars.length == 0) { //empty bars
+    if (BARS.length == 0) { //empty BARS
         return STAVE_MARGIN_LEFT;
     }
     let previousBar = getLastBar(barPos);
@@ -117,7 +56,7 @@ function calculateWidthAndX(barPos) {
 }
 
 function calculateHeightAndY(barPos) {
-    if (bars.length == 0) { //empty bars
+    if (BARS.length == 0) { //empty BARS
         return STAVE_MARGIN_TOP;
     }
     let heightAndYMultiplier = Math.floor(barPos / amountOfBarsPerRow);
@@ -126,7 +65,7 @@ function calculateHeightAndY(barPos) {
 }
 
 function getLastBar(posBarToCreate) {
-    return bars[posBarToCreate - 1];
+    return BARS[posBarToCreate - 1];
 }
 
 function createStave(barPos, widthAndX, heightAndY) {
@@ -136,9 +75,9 @@ function createStave(barPos, widthAndX, heightAndY) {
         barPos == 0 ? STAVE_MARGIN_TOP : heightAndY,
         widthAndXPositioner == 0 ? BAR_SIZE_CLEF : BAR_SIZE
     ).setContext(context);
-    if (barPos == 0) stave.addTimeSignature("4/4");
+    if (barPos == 0) stave.addTimeSignature(beats_per_bar + "/" + beat_value);
     if (widthAndXPositioner == 0) stave.addClef("treble");
-    if (barPos == bars.length - 1 || bars.length == 0)
+    if (barPos == BARS.length - 1 || BARS.length == 0)
         stave.setEndBarType(Vex.Flow.Barline.type.END);
     return stave;
 }
@@ -210,7 +149,7 @@ function calculateBar() {
     let barNumber = barPosition + rowNumber * amountOfBarsPerRow;
     
     return barPosition < amountOfBarsPerRow && barPosition >= 0
-        ? bars[barNumber]
+        ? BARS[barNumber]
         : undefined;
 }
 
@@ -412,7 +351,7 @@ function selectNote() {
 }
     
 function lastBarHasOneNote(lastBar) {
-    return bars[lastBar].notes.some(n => {
+    return BARS[lastBar].notes.some(n => {
         if (!(n.customTypes[0][0] === 'r')) {
             return true;
         }
@@ -420,16 +359,16 @@ function lastBarHasOneNote(lastBar) {
 }
 
 function recalculateBars() {
-    for (let barPos = 0; barPos < bars.length; barPos++) {
+    for (let barPos = 0; barPos < BARS.length; barPos++) {
         let widthAndX = calculateWidthAndX(barPos);
         let heightAndY = calculateHeightAndY(barPos);
         let stave = createStave(barPos, widthAndX, heightAndY);
-        let notes = bars[barPos].notes;
+        let notes = BARS[barPos].notes;
         let x = widthAndX;
         let y = heightAndY;
 
         let barRecalculated = new Bar(stave, notes, x, y);
-        bars[barPos] = barRecalculated;
+        BARS[barPos] = barRecalculated;
     }
 }
 
@@ -529,7 +468,7 @@ function alterNote(evt) {
         }
         recalculateBars();
         draw();
-        console.log(bars)
+        console.log(BARS)
     }
 }
 
@@ -541,28 +480,43 @@ function setDivBpm() {
     /> = ${bpm}`;
 }
 
+function changeSignature() {
+    let timeSignature_beats_per_bar = timeSignature.split("/")[0];
+    let timeSignature_beat_value = timeSignature.split("/")[1];
+    if (timeSignature_beats_per_bar != beats_per_bar || timeSignature_beat_value != beat_value) {
+        beats_per_bar = timeSignature_beats_per_bar;
+        beat_value = timeSignature_beat_value;
+        recalculateBars();
+        draw();
+    }
+}
+
 function openSettings() {
     modal.show();
+    modal._dialog.querySelector("#score-name").value = scoreName;
+    modal._dialog.querySelector("#time-signature").value = timeSignature;
+    modal._dialog.querySelector("#instrument").value = instrument.charAt(0).toUpperCase() + instrument.slice(1);
+    modal._dialog.querySelector("#bpm").value = bpm;
     modal._dialog.querySelector("#delete-last-bar").checked = false;
 }
 
 function saveSettings() {
-    bpm = modal._dialog.querySelector("#bpm").value;
-    instrument = modal._dialog.querySelector("#instrument").value.toLowerCase();
-    timeSignature = modal._dialog.querySelector("#time-signature").value;
     scoreName = modal._dialog.querySelector("#score-name").value;
+    timeSignature = modal._dialog.querySelector("#time-signature").value;
+    instrument = modal._dialog.querySelector("#instrument").value.toLowerCase();
+    bpm = modal._dialog.querySelector("#bpm").value;
     let doDeleteLastBar = modal._dialog.querySelector("#delete-last-bar").checked;
-    console.log(timeSignature, scoreName, doDeleteLastBar)
+
+    changeSignature(timeSignature);
     setDivBpm(); 
-    if (doDeleteLastBar) {
-        deleteLastBar();
-    }
+    deleteLastBar(doDeleteLastBar);
+
     modal.hide();
 }
 
-function deleteLastBar() {
-    if (bars.length > 1) {
-        bars.pop();
+function deleteLastBar(bool) {
+    if (BARS.length > 1 && bool) {
+        BARS.pop();
         recalculateBars();
         draw();
     }

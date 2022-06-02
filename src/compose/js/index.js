@@ -22,8 +22,8 @@ function divStaveClicked(evt) {
         addNewNote();
     }
 
-    if (lastBarHasOneNote(bars.length - 1)) {
-        createNewBarFullOfSilences(bars.length);
+    if (lastBarHasOneNote(BARS.length - 1)) {
+        createNewBarFullOfSilences(BARS.length);
     }
     recalculateBars();
 

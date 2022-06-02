@@ -78,7 +78,7 @@ function calculateInstrument() {
 
 function calculateNotes() {
     let notes = [];
-    for (let bar of bars) {
+    for (let bar of BARS) {
         for (let note of bar.notes) {
             pitch = note.keys[0].charAt(0).toUpperCase();
             console.log(note.keys[0]);
@@ -105,7 +105,7 @@ function addDelayRegardingBpm(delay, noteValue, bpm) {
 }
 
 function play() {
-    console.log(bars);
+    console.log(BARS);
     notes = calculateNotes();
     synth = calculateInstrument();
     console.log(synth)
