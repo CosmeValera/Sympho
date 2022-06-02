@@ -28,6 +28,27 @@ function calculateRendererSize() {
     renderer.resize(width, height);
 }
 
+function createStave(barPos, widthAndX, heightAndY) {
+    let widthAndXPositioner = barPos % amountOfBarsPerRow;
+    let stave = new VF.Stave(
+        barPos == 0 ? STAVE_MARGIN_LEFT : widthAndX,
+        barPos == 0 ? STAVE_MARGIN_TOP : heightAndY,
+        widthAndXPositioner == 0 ? BAR_SIZE_CLEF : BAR_SIZE
+    ).setContext(context);
+    if (barPos == 0) {
+        let VFkeySig = new VF.KeySignature(keySignature);
+        VFkeySig.addToStave(stave);
+        stave.addTimeSignature(beats_per_bar + "/" + beat_value);
+    }
+    if (widthAndXPositioner == 0) {
+        stave.addClef("treble");
+    }
+    if (barPos == BARS.length - 1 || BARS.length == 0) {
+        stave.setEndBarType(Vex.Flow.Barline.type.END);
+    }
+    return stave;
+}
+
 function setInitialLayout() {
     // leftMargin = getComputedStyle(document.querySelector('body'))
     // .getPropertyValue('--margin-left');

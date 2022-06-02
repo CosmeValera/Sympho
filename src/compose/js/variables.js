@@ -46,6 +46,10 @@ const BARS = [];
 var beats_per_bar = 4;
 var beat_value = 4;
 var timeSignature = "4/4";
+var keySignature = "C";
+var bpm = 90;
+var instrument = "piano";
+var scoreName = "";
 var notePosInArray;
 var noteDuration;
 var isRest;
@@ -56,9 +60,6 @@ var rendererHeight;
 var amountOfBarsPerRow;
 var leftMargin = 0;
 var rightMargin = 0;
-var bpm = 90;
-var instrument = "piano";
-var scoreName = "";
 
 var notesMap = new Map([
   [1, ["c/6"]],

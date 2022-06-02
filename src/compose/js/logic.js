@@ -68,20 +68,6 @@ function getLastBar(posBarToCreate) {
     return BARS[posBarToCreate - 1];
 }
 
-function createStave(barPos, widthAndX, heightAndY) {
-    let widthAndXPositioner = barPos % amountOfBarsPerRow;
-    let stave = new VF.Stave(
-        barPos == 0 ? STAVE_MARGIN_LEFT : widthAndX,
-        barPos == 0 ? STAVE_MARGIN_TOP : heightAndY,
-        widthAndXPositioner == 0 ? BAR_SIZE_CLEF : BAR_SIZE
-    ).setContext(context);
-    if (barPos == 0) stave.addTimeSignature(beats_per_bar + "/" + beat_value);
-    if (widthAndXPositioner == 0) stave.addClef("treble");
-    if (barPos == BARS.length - 1 || BARS.length == 0)
-        stave.setEndBarType(Vex.Flow.Barline.type.END);
-    return stave;
-}
-
 function deleteFrom(notes, notePos) {
     notes.splice(notePos, 1);
     return notes;
@@ -486,8 +472,12 @@ function changeSignature() {
     if (timeSignature_beats_per_bar != beats_per_bar || timeSignature_beat_value != beat_value) {
         beats_per_bar = timeSignature_beats_per_bar;
         beat_value = timeSignature_beat_value;
-        recalculateBars();
-        draw();
+    }
+}
+
+function deleteLastBar(bool) {
+    if (BARS.length > 1 && bool) {
+        BARS.pop();
     }
 }
 
@@ -502,8 +492,9 @@ function openSettings() {
 
 function saveSettings() {
     scoreName = modal._dialog.querySelector("#score-name").value;
-    timeSignature = modal._dialog.querySelector("#time-signature").value;
     instrument = modal._dialog.querySelector("#instrument").value.toLowerCase();
+    keySignature = modal._dialog.querySelector("#key-signature").value;
+    timeSignature = modal._dialog.querySelector("#time-signature").value;
     bpm = modal._dialog.querySelector("#bpm").value;
     let doDeleteLastBar = modal._dialog.querySelector("#delete-last-bar").checked;
 
@@ -511,15 +502,9 @@ function saveSettings() {
     setDivBpm(); 
     deleteLastBar(doDeleteLastBar);
 
+    recalculateBars();
+    draw();
     modal.hide();
-}
-
-function deleteLastBar(bool) {
-    if (BARS.length > 1 && bool) {
-        BARS.pop();
-        recalculateBars();
-        draw();
-    }
 }
 
 // TODO: add triplet, add tie and add dot
