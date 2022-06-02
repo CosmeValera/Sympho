@@ -18,5 +18,3 @@ function toggleTheme() {
   bodyClass.replace(current, next);
   localStorage.setItem('theme', next);
 }
-
-document.getElementById('themeButton').addEventListener('click', toggleTheme);

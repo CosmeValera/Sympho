@@ -168,5 +168,3 @@ function play() {
         }
     }
 }
-
-divPlay.addEventListener("click", play);

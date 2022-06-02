@@ -22,6 +22,7 @@ const divAddTie = document.getElementById("add-tie");
 const divAddDot = document.getElementById("add-dot");
 const divAddTriplet = document.getElementById("add-triplet");
 const divPlay = document.getElementById("btn-play");
+const divSettings = document.getElementById("btn-settings");
 const divBpm = document.querySelector(".bpm");
 var notePosInArray;
 var noteDuration;
