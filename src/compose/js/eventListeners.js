@@ -11,6 +11,7 @@ document.getElementById('themeButton').addEventListener('click', toggleTheme);
 
 // LOGIC
 mySectionStave.addEventListener("click", divStaveClicked);
+mySectionStave.addEventListener("scroll", divStaveScrolled);
 window.addEventListener("resize", windowSizeChanged);
 divMouseToggle.addEventListener("click", mouseToggle);
 

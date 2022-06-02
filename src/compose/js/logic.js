@@ -507,6 +507,16 @@ function saveSettings() {
     modal.hide();
 }
 
+function divStaveScrolled(evt) {
+    if (evt.target.scrollTop === 0) {
+        // Show divBpm
+        divBpm.style.display = "block";
+    } else if (evt.target.scrollTop !== 0) {
+        // Hide divBpm
+        divBpm.style.display = "none";
+    }
+}
+
 // TODO: add triplet, add tie and add dot
 function addTriplet() {
     if (selectedNote) {
