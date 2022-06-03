@@ -635,6 +635,7 @@ function deleteLastBar(bool) {
 function openSettings() {
     modal.show();
     modal._dialog.querySelector("#score-name").value = scoreName;
+    modal._dialog.querySelector("#composer-name").value = composerName;
     modal._dialog.querySelector("#time-signature").value = timeSignature;
     modal._dialog.querySelector("#instrument").value = instrument.charAt(0).toUpperCase() + instrument.slice(1);
     modal._dialog.querySelector("#bpm").value = bpm;
@@ -643,6 +644,7 @@ function openSettings() {
 
 function saveSettings() {
     scoreName = modal._dialog.querySelector("#score-name").value;
+    composerName = modal._dialog.querySelector("#composer-name").value;
     instrument = modal._dialog.querySelector("#instrument").value.toLowerCase();
     keySignature = modal._dialog.querySelector("#key-signature").value;
     timeSignature = modal._dialog.querySelector("#time-signature").value;

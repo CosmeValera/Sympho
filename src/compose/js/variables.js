@@ -50,6 +50,7 @@ var keySignature = "C";
 var bpm = 90;
 var instrument = "piano";
 var scoreName = "";
+var composerName = "";
 var notePosInArray;
 var noteDuration;
 var isRest;
