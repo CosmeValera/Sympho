@@ -334,9 +334,12 @@ function selectNote() {
     selectedNote = bar.notes[notePosInArray];
     selectedNote.setStyle({fillStyle: "MediumBlue", strokeStyle: "MediumBlue"});
 }
-    
-// SEGUIR POR AQUI DOT MAÑANA
+
 function alterBarNotesDot(bar) {
+    if (notePosInArray == bar.notes.length - 1) {
+        return null;
+    }
+
     // selectedNote === bar.notes[notePosInArray]
     let thisNoteDurationWithoutDot = bar.notes[notePosInArray].duration;
     let nextNoteDuration = bar.notes[notePosInArray + 1].duration;
@@ -390,9 +393,6 @@ function addDot() {
         
         // DONT USE noteDuration, use selectedNote.duration
         let newNoteDuration = selectedNote.duration + (isRest ? "r" : "") + "d";
-        console.log("newNoeDuation: " + newNoteDuration)
-        console.log("COsme")
-        console.log(BARS)
         bar.notes[notePosInArray] = new VF.StaveNote({
             clef: "treble",
             keys: bar.notes[notePosInArray].keys,
@@ -400,10 +400,17 @@ function addDot() {
             dots: 1,
             auto_stem: true,
         }).addDotToAll();
-
-
+        let accidental = selectedNote.keys[0].split("/")[0].substring(1);
+        console.log(accidental)
+        if (accidental) {
+            saveAlteredNoteInBars(accidental);
+            bar.notes[notePosInArray].addAccidental(0, new VF.Accidental(accidental));
+        }
+        
+        selectNote();
         recalculateBars();
         draw();
+        console.log(BARS)
     }
 }
 
@@ -514,13 +521,31 @@ function mouseToggle() {
     }
 }
 
-function saveAlteredNoteInBars(modifier) {
+function checkIfHasDot() {
+    for (let modifier of selectedNote.modifiers) {
+        if (modifier && modifier.attrs.type && modifier.attrs.type === "Dot") {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function saveAlteredNoteInBars(accidental) {
+    let hasDot = false;
+    console.log(selectedNote.modifiers)
+    if (selectedNote.modifiers[0] && checkIfHasDot()) {
+        hasDot = true;
+    }
     let octaveNumber = selectedNote.keys[0].split("/").pop();
     let pitch = selectedNote.keys[0].split("/")[0].substring(0,1);
-    selectedNote.keys[0] = `${pitch}${modifier}/${octaveNumber}`;
+
+    selectedNote.keys[0] = `${pitch}${accidental}/${octaveNumber}`;
     selectedNote.modifiers = [];
-    console.log(modifier)
-    selectedNote.addAccidental(0, new VF.Accidental(modifier));
+    selectedNote.addAccidental(0, new VF.Accidental(accidental));
+    if (hasDot) {
+        selectedNote.addDotToAll();
+    }
 }
 
 function checkIsRest() {
