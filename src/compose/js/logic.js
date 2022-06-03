@@ -335,7 +335,7 @@ function selectNote() {
     selectedNote.setStyle({fillStyle: "MediumBlue", strokeStyle: "MediumBlue"});
 }
     
-
+// SEGUIR POR AQUI DOT MAÑANA
 function alterBarNotesDot(bar) {
     if (notePosInArray < bar.notes.length - 1) {
         // selectedNote === bar.notes[notePosInArray]
@@ -344,20 +344,12 @@ function alterBarNotesDot(bar) {
         let thisNoteValueWithoutDot = 4 / thisNoteDurationWithoutDot;
         let nextNoteValue = 4 / nextNoteDuration;
 
-        console.log("123")
         if (nextNoteValue == thisNoteValueWithoutDot / 2) {
-            console.log("112323")
-            // remove note in position notePosInArray + 1
             bar.notes.splice(notePosInArray + 1, 1);
         } else if (nextNoteValue == thisNoteValueWithoutDot) {
-            console.log("9989823")
-            // remove note in position notePosInArray + 1
             bar.notes.splice(notePosInArray + 1, 1);
-            // add note in position notePosInArray + 1
-            bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (noteDuration*4) + "r" }));
+            bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (noteDuration*2) + "r" }));
         }
-
-        console.log("EXIT")
 
         return;
     }
@@ -382,8 +374,9 @@ function addDot() {
             clef: "treble",
             keys: bar.notes[notePosInArray].keys,
             duration: newNoteDuration,
+            dots: 1,
             auto_stem: true,
-        }).addDot(0);
+        }).addDotToAll();
 
         recalculateBars();
         draw();
