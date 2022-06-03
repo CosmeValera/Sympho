@@ -337,22 +337,44 @@ function selectNote() {
     
 // SEGUIR POR AQUI DOT MAÑANA
 function alterBarNotesDot(bar) {
-    if (notePosInArray < bar.notes.length - 1) {
-        // selectedNote === bar.notes[notePosInArray]
-        let thisNoteDurationWithoutDot = noteDuration;
-        let nextNoteDuration = bar.notes[notePosInArray + 1].duration;
-        let thisNoteValueWithoutDot = 4 / thisNoteDurationWithoutDot;
-        let nextNoteValue = 4 / nextNoteDuration;
+    // selectedNote === bar.notes[notePosInArray]
+    let thisNoteDurationWithoutDot = bar.notes[notePosInArray].duration;
+    let nextNoteDuration = bar.notes[notePosInArray + 1].duration;
+    let thisNoteValueWithoutDot = 4 / thisNoteDurationWithoutDot;
+    let nextNoteValue = 4 / nextNoteDuration;
 
-        if (nextNoteValue == thisNoteValueWithoutDot / 2) {
-            bar.notes.splice(notePosInArray + 1, 1);
-        } else if (nextNoteValue == thisNoteValueWithoutDot) {
-            bar.notes.splice(notePosInArray + 1, 1);
-            bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (noteDuration*2) + "r" }));
+    if (notePosInArray < bar.notes.length - 1) {
+        if (bar.notes[notePosInArray].dots || bar.notes[notePosInArray + 1].dots) {
+            return null;
         }
 
-        return;
+        if (nextNoteValue == thisNoteValueWithoutDot / 2) {
+            console.log("11")
+            bar.notes.splice(notePosInArray + 1, 1);
+            return;
+        } else if (nextNoteValue == thisNoteValueWithoutDot) {
+            console.log("22")
+            debugger;
+            bar.notes.splice(notePosInArray + 1, 1);
+            bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (selectedNote.duration*2) + "r" }));
+            return;
+        }
     }
+    if (notePosInArray < bar.notes.length - 2) {
+        let nextNextNoteDuration = bar.notes[notePosInArray + 2].duration;
+        let nextNextNoteValue = 4 / nextNextNoteDuration;
+        if (bar.notes[notePosInArray + 2].dots) {
+            return null;
+        }
+
+        if (nextNoteValue + nextNextNoteValue == thisNoteValueWithoutDot / 2) {
+            bar.notes.splice(notePosInArray + 1, 1);
+            bar.notes.splice(notePosInArray + 1, 1);
+            console.log("33")
+            return;
+        }
+    }
+    console.log("55")
     return null;
 }
 
@@ -366,7 +388,8 @@ function addDot() {
             return;
         }
         
-        let newNoteDuration = noteDuration + (isRest ? "r" : "") + "d";
+        // DONT USE noteDuration, use selectedNote.duration
+        let newNoteDuration = selectedNote.duration + (isRest ? "r" : "") + "d";
         console.log("newNoeDuation: " + newNoteDuration)
         console.log("COsme")
         console.log(BARS)
@@ -377,6 +400,7 @@ function addDot() {
             dots: 1,
             auto_stem: true,
         }).addDotToAll();
+
 
         recalculateBars();
         draw();
