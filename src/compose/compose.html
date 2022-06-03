@@ -18,7 +18,6 @@
             href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap"
             rel="stylesheet"
         />
-
     </head>
     <body>
         <!-- navbar-smp -->
@@ -83,7 +82,10 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="../sheets/sheets.html" class="nav-link public-sheets">
+                    <a
+                        href="../sheets/sheets.html"
+                        class="nav-link public-sheets"
+                    >
                         <svg
                             aria-hidden="true"
                             focusable="false"
@@ -112,7 +114,10 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="../sheets/sheets.html" class="nav-link private-sheets">
+                    <a
+                        href="../sheets/sheets.html"
+                        class="nav-link private-sheets"
+                    >
                         <svg
                             aria-hidden="true"
                             focusable="false"
@@ -439,7 +444,7 @@
                 <section id="section-my-stave">
                     <div id="my-stave"></div>
                 </section>
-                
+
                 <!-- bpm -->
                 <div class="bpm">
                     <!-- Filled in logic.js -->
@@ -448,9 +453,24 @@
                 <!-- options-bar-smp -->
                 <section class="p-4 options-bar-smp">
                     <div class="row d-flex justify-content-center">
-                        <a href="#" class="btn btn-success mb-2 col-12" id="btn-play">▶</a>
-                        <a href="#" class="btn btn-danger mb-2 col-12" id="btn-stop">🔴</a>
-                        <a href="#" class="btn btn-secondary mb-2 col-12" id="btn-settings">⚙️</a>
+                        <a
+                            href="#"
+                            class="btn btn-success mb-2 col-12"
+                            id="btn-play"
+                            >▶</a
+                        >
+                        <a
+                            href="#"
+                            class="btn btn-danger mb-2 col-12"
+                            id="btn-stop"
+                            >🔴</a
+                        >
+                        <a
+                            href="#"
+                            class="btn btn-secondary mb-2 col-12"
+                            id="btn-settings"
+                            >⚙️</a
+                        >
                         <!-- <a href="#" class="btn btn-secondary mb-2 col-12">🔨</a>
                         <a href="#" class="btn btn-secondary mb-2 col-12">🗑️</a> -->
                     </div>
@@ -458,91 +478,152 @@
             </main>
         </div>
 
-  <!-- Modal -->
-  <div class="modal fade modal-settings" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Settings</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+        <!-- Modal -->
+        <div
+            class="modal fade modal-settings"
+            id="exampleModalCenter"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="exampleModalCenterTitle"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">
+                            Settings
+                        </h5>
+                        <button
+                            type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Score name -->
+                        <div class="form-group">
+                            <label for="score-name">Score name</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="score-name"
+                                placeholder="Enter score name"
+                            />
+                        </div>
+                        <!-- Composer name -->
+                        <div class="form-group">
+                            <label for="composer-name">Composer name</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="composer-name"
+                                placeholder="Enter composer name"
+                            />
+                        </div>
+                        <!-- Here we put a check for instrument -->
+                        <div class="form-group">
+                            <label for="instrument">Instrument</label>
+                            <select class="form-control" id="instrument">
+                                <option>Piano</option>
+                                <option>Flute</option>
+                                <option>Bass</option>
+                                <option>Guitar</option>
+                            </select>
+                        </div>
+                        <!-- Time Signature -->
+                        <div class="form-group">
+                            <label for="beat">Time Signature</label>
+                            <select class="form-control" id="time-signature">
+                                <option>4/4</option>
+                                <option>2/2</option>
+                                <option>8/8</option>
+                            </select>
+                        </div>
+                        <!-- Key Signature -->
+                        <div class="form-group">
+                            <label for="key-signature">Key Signature</label>
+                            <select class="form-control" id="key-signature">
+                                <option>C</option>
+                                <option>Am</option>
+                                <option>G</option>
+                                <option>Em</option>
+                                <option>F</option>
+                                <option>Dm</option>
+                                <option>D</option>
+                                <option>Bm</option>
+                                <option>Bb</option>
+                                <option>Gm</option>
+                                <option>A</option>
+                                <option>F#m</option>
+                                <option>Eb</option>
+                                <option>Cm</option>
+                            </select>
+                        </div>
+                        <!-- Here number check bpm -->
+                        <div class="form-group">
+                            <label for="bpm">BPM</label>
+                            <input
+                                type="number"
+                                class="form-control"
+                                id="bpm"
+                                value="90"
+                            />
+                        </div>
+                        <!-- delete last bar -->
+                        <label for="delete-last-bar">Delete last bar</label>
+                        <input
+                            type="checkbox"
+                            class="form-control"
+                            id="delete-last-bar"
+                            value="false"
+                        />
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-dismiss="modal"
+                        >
+                            Close
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="btn-save"
+                        >
+                            Save changes
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="modal-body">
-            <!-- Score name -->
-            <div class="form-group">
-                <label for="score-name">Score name</label>
-                <input type="text" class="form-control" id="score-name" placeholder="Enter score name">
-            </div>
-            <!-- Composer name -->
-            <div class="form-group">
-                <label for="composer-name">Composer name</label>
-                <input type="text" class="form-control" id="composer-name" placeholder="Enter composer name">
-            </div>
-            <!-- Here we put a check for instrument -->
-            <div class="form-group">
-                <label for="instrument">Instrument</label>
-                <select class="form-control" id="instrument">
-                    <option>Piano</option>
-                    <option>Flute</option>
-                    <option>Bass</option>
-                    <option>Guitar</option>
-                </select>
-            </div>
-            <!-- Time Signature -->
-            <div class="form-group">
-                <label for="beat">Time Signature</label>
-                <select class="form-control" id="time-signature">
-                    <option>4/4</option>
-                    <option>2/2</option>
-                    <option>8/8</option>
-                </select>
-            </div>
-            <!-- Key Signature -->
-            <div class="form-group">
-                <label for="key-signature">Key Signature</label>
-                <select class="form-control" id="key-signature">
-                    <option>C</option>
-                    <option>Am</option>
-                    <option>G</option>
-                    <option>Em</option>
-                    <option>F</option>
-                    <option>Dm</option>
-                    <option>D</option>
-                    <option>Bm</option>
-                    <option>Bb</option>
-                    <option>Gm</option>
-                    <option>A</option>
-                    <option>F#m</option>
-                    <option>Eb</option>
-                    <option>Cm</option>
-                </select>
-            </div>
-            <!-- Here number check bpm -->
-            <div class="form-group">
-                <label for="bpm">BPM</label>
-                <input type="number" class="form-control" id="bpm" value="90">
-            </div>
-            <!-- delete last bar -->
-            <label for="delete-last-bar">Delete last bar</label>
-            <input type="checkbox" class="form-control" id="delete-last-bar" value="false">
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="btn-save">Save changes</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
         <!-- Scripts -->
         <!-- <script src="https://unpkg.com/vexflow@4.0.3/releases/vexflow-min.js"></script> -->
         <script src="../vexflow-3_0_9.txt"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.40/Tone.js"></script>
-        <script src="https://kit.fontawesome.com/9f8963b749.js" crossorigin="anonymous"></script>
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script
+            src="https://kit.fontawesome.com/9f8963b749.js"
+            crossorigin="anonymous"
+        ></script>
+        <script
+            src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"
+        ></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js"
+            integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+            crossorigin="anonymous"
+        ></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"
+            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+            crossorigin="anonymous"
+        ></script>
 
         <script src="../theme.js"></script>
         <script src="../general.js"></script>
