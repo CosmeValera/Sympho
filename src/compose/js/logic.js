@@ -252,12 +252,55 @@ function newNoteValueIsSixteenTimesBigger(bar, olderNoteDuration) {
     return;
 }
 
+function alterBarNotesOverDotNotes(bar, newNoteValue, previousNoteValue) {
+    console.log("Has dot")
+    if (newNoteValue === previousNoteValue * 2) {
+        if (notePosInArray < bar.notes.length - 1
+            && 4 / (bar.notes[notePosInArray + 1].duration) === previousNoteValue / 2) {
+            bar.notes.splice(notePosInArray + 1, 1);
+            return true;
+        }
+    }
+    if (newNoteValue === previousNoteValue) {
+        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (noteDuration*2)+"r" }));    
+        return;
+    }
+    if (newNoteValue === previousNoteValue / 2) {
+        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (noteDuration)+"r" }));
+        return;
+    }    
+    if (newNoteValue === previousNoteValue / 4) {
+        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (noteDuration)+"r" }));
+        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (noteDuration)+"r" }));
+        return;
+    }
+    if (newNoteValue === previousNoteValue / 8) {
+        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (noteDuration)+"r" }));
+        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (noteDuration)+"r" }));
+        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (noteDuration)+"r" }));
+        bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (noteDuration)+"r" }));
+        return;
+    }
+    return null;
+}
+
 function alterBarNotes(bar) {
     let newNoteDuration = noteDuration;
     let olderNoteDuration = bar.notes[notePosInArray].duration;
     let newNoteValue = 4/newNoteDuration;
     let previousNoteValue = 4/olderNoteDuration;
     
+    // check if older note has a dot
+    if (checkIfHasDot(bar.notes[notePosInArray])) {
+        let result = alterBarNotesOverDotNotes(bar, newNoteValue, previousNoteValue);
+        if (result === null) {
+            return null;
+        }
+        if (result === true) {
+            return;
+        }
+    }
+
     if (newNoteValue == previousNoteValue / 16) {
         if (newNoteValueIsSixteenTimesLess(bar) === null) {
             return null;
@@ -313,6 +356,7 @@ function addNewNote() {
 
     let newNoteDuration = noteDuration + (isRest ? "r" : "");
     console.log(notePosInArray)
+    console.log(BARS)
     bar.notes[notePosInArray] = new VF.StaveNote({
         clef: "treble",
         keys: note,
@@ -352,12 +396,9 @@ function alterBarNotesDot(bar) {
         }
 
         if (nextNoteValue == thisNoteValueWithoutDot / 2) {
-            console.log("11")
             bar.notes.splice(notePosInArray + 1, 1);
             return;
         } else if (nextNoteValue == thisNoteValueWithoutDot) {
-            console.log("22")
-            debugger;
             bar.notes.splice(notePosInArray + 1, 1);
             bar.notes.splice(notePosInArray + 1, 0, new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: (selectedNote.duration*2) + "r" }));
             return;
@@ -373,11 +414,9 @@ function alterBarNotesDot(bar) {
         if (nextNoteValue + nextNextNoteValue == thisNoteValueWithoutDot / 2) {
             bar.notes.splice(notePosInArray + 1, 1);
             bar.notes.splice(notePosInArray + 1, 1);
-            console.log("33")
             return;
         }
     }
-    console.log("55")
     return null;
 }
 
@@ -521,8 +560,9 @@ function mouseToggle() {
     }
 }
 
-function checkIfHasDot() {
-    for (let modifier of selectedNote.modifiers) {
+function checkIfHasDot(note) {
+    if (!note) return false;
+    for (let modifier of note.modifiers) {
         if (modifier && modifier.attrs.type && modifier.attrs.type === "Dot") {
             return true;
         }
@@ -534,7 +574,7 @@ function checkIfHasDot() {
 function saveAlteredNoteInBars(accidental) {
     let hasDot = false;
     console.log(selectedNote.modifiers)
-    if (selectedNote.modifiers[0] && checkIfHasDot()) {
+    if (selectedNote.modifiers[0] && checkIfHasDot(selectedNote)) {
         hasDot = true;
     }
     let octaveNumber = selectedNote.keys[0].split("/").pop();
@@ -552,7 +592,7 @@ function checkIsRest() {
     return selectedNote.customTypes[0] === 'r' ? true : false;
 }
 
-function alterNote(evt) {
+function alterNoteWithAccidental(evt) {
     if (selectedNote && !checkIsRest()) {
         if (evt.target.id === "add-sharp") {
             saveAlteredNoteInBars("#");

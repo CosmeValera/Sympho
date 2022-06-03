@@ -73,10 +73,10 @@ divSixteenthRest.addEventListener("click", () => {
     }
 });
 
-divAddSharp.addEventListener("click", alterNote);
-divAddFlat.addEventListener("click", alterNote);
-divAddDoubleSharp.addEventListener("click", alterNote);
-divAddDoubleFlat.addEventListener("click", alterNote);
+divAddSharp.addEventListener("click", alterNoteWithAccidental);
+divAddFlat.addEventListener("click", alterNoteWithAccidental);
+divAddDoubleSharp.addEventListener("click", alterNoteWithAccidental);
+divAddDoubleFlat.addEventListener("click", alterNoteWithAccidental);
 divAddDot.addEventListener("click", addDot);
 divAddTriplet.addEventListener("click", addTriplet);
 divAddTie.addEventListener("click", addTie);
