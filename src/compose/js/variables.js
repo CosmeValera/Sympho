@@ -23,9 +23,10 @@ const divAddDot = document.getElementById("add-dot");
 const divAddTriplet = document.getElementById("add-triplet");
 const divPlay = document.getElementById("btn-play");
 const divStop = document.getElementById("btn-stop");
-const divBpm = document.querySelector(".bpm");
+const divTrash = document.getElementById("btn-trash");
 const divSettings = document.getElementById("btn-settings");
 const divBtnSave = document.getElementById("btn-save");
+const divBpm = document.querySelector(".bpm");
 const modal = new bootstrap.Modal(document.querySelector(".modal-settings"), {});
 // END: Get element
 

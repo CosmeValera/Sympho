@@ -626,10 +626,12 @@ function changeSignature() {
     }
 }
 
-function deleteLastBar(bool) {
-    if (BARS.length > 1 && bool) {
+function deleteLastBar() {
+    if (BARS.length > 1) {
         BARS.pop();
     }
+    recalculateBars();
+    draw();
 }
 
 function openSettings() {
@@ -639,7 +641,6 @@ function openSettings() {
     modal._dialog.querySelector("#time-signature").value = timeSignature;
     modal._dialog.querySelector("#instrument").value = instrument.charAt(0).toUpperCase() + instrument.slice(1);
     modal._dialog.querySelector("#bpm").value = bpm;
-    modal._dialog.querySelector("#delete-last-bar").checked = false;
 }
 
 function saveSettings() {
@@ -649,11 +650,9 @@ function saveSettings() {
     keySignature = modal._dialog.querySelector("#key-signature").value;
     timeSignature = modal._dialog.querySelector("#time-signature").value;
     bpm = modal._dialog.querySelector("#bpm").value;
-    let doDeleteLastBar = modal._dialog.querySelector("#delete-last-bar").checked;
 
     changeSignature(timeSignature);
     setDivBpm(); 
-    deleteLastBar(doDeleteLastBar);
 
     recalculateBars();
     draw();

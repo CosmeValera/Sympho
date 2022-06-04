@@ -104,6 +104,7 @@ function addDelayRegardingBpm(delay, noteValue, bpm) {
     return delay + noteValue * (60 / bpm);
 }
 
+// toggle play button to play/pause 
 function play() {
     console.log(BARS);
     notes = calculateNotes();
@@ -126,6 +127,15 @@ function play() {
             );
         }
     }
+    // Reestablish button from play to start
+    let timeOutId = setTimeout(
+        ()=>{
+
+        },
+        delay
+    );
+
+    clearTimeout(timeOutId);
 }
 
 function stopMusic() {
