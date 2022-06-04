@@ -22,7 +22,10 @@ function divStaveClicked(evt) {
         addNewNote();
     }
 
-    if (lastBarHasOneNote(BARS.length - 1)) {
+    let automaticAddBarBool = automaticAddBar
+        ? automaticAddBar === "true"
+        : false;
+    if (automaticAddBarBool && lastBarHasOneNote(BARS.length - 1)) {
         createNewBarFullOfSilences();
     }
     recalculateBars();

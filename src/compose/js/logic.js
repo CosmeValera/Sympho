@@ -17,6 +17,7 @@ function setInitialData() {
     rendererWidth = BAR_SIZE_CLEF + EXTRA_RENDERER_SPACE;
     rendererHeight = BAR_WIDTH + EXTRA_RENDERER_SPACE;
     renderer.resize(rendererWidth, rendererHeight);
+    automaticAddBar = localStorage.getItem('automaticAddBar');
     leftMargin = getComputedStyle(document.querySelector("body"))
         .getPropertyValue("--margin-left")
         .slice(0, -2);

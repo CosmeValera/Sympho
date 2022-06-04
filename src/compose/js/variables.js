@@ -44,6 +44,7 @@ const MAX_AMOUNT_NOTES_IN_A_BAR = 16;
 const EXTRA_RENDERER_SPACE = 30;
 const BARS = [];
 
+var automaticAddBar = true;
 var beats_per_bar = 4;
 var beat_value = 4;
 var timeSignature = "4/4";
