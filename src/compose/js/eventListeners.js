@@ -83,3 +83,4 @@ divAddTie.addEventListener("click", addTie);
 divSettings.addEventListener("click", openSettings)
 divBtnSave.addEventListener("click", saveSettings);
 divTrash.addEventListener("click", deleteLastBar);
+divAddBar.addEventListener("click", addLastBar);

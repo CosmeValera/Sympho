@@ -23,6 +23,7 @@ const divAddDot = document.getElementById("add-dot");
 const divAddTriplet = document.getElementById("add-triplet");
 const divPlay = document.getElementById("btn-play");
 const divTrash = document.getElementById("btn-trash");
+const divAddBar = document.getElementById("btn-add-bar");
 const divSettings = document.getElementById("btn-settings");
 const divBtnSave = document.getElementById("btn-save");
 const divBpm = document.querySelector(".bpm");

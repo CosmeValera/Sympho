@@ -26,7 +26,8 @@ function setInitialData() {
     setDivBpm();
 }
 
-function createNewBarFullOfSilences(barPos) {
+function createNewBarFullOfSilences() {
+    let barPos = BARS.length;
     let widthAndX = calculateWidthAndX(barPos);
     let heightAndY = calculateHeightAndY(barPos);
 
@@ -38,7 +39,6 @@ function createNewBarFullOfSilences(barPos) {
         new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }),
     ];
     BARS[barPos] = new Bar(stave, notes, widthAndX, heightAndY);
-    renderer.resize(rendererWidth, rendererHeight);
 }
 
 function calculateWidthAndX(barPos) {
@@ -630,6 +630,12 @@ function deleteLastBar() {
     if (BARS.length > 1) {
         BARS.pop();
     }
+    recalculateBars();
+    draw();
+}
+
+function addLastBar() {
+    createNewBarFullOfSilences();
     recalculateBars();
     draw();
 }
