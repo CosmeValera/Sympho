@@ -22,7 +22,6 @@ const divAddTie = document.getElementById("add-tie");
 const divAddDot = document.getElementById("add-dot");
 const divAddTriplet = document.getElementById("add-triplet");
 const divPlay = document.getElementById("btn-play");
-const divStop = document.getElementById("btn-stop");
 const divTrash = document.getElementById("btn-trash");
 const divSettings = document.getElementById("btn-settings");
 const divBtnSave = document.getElementById("btn-save");
@@ -48,7 +47,7 @@ var beats_per_bar = 4;
 var beat_value = 4;
 var timeSignature = "4/4";
 var keySignature = "C";
-var bpm = 60;
+var bpm = 100;
 var instrument = "piano";
 var scoreName = "";
 var composerName = "";
@@ -62,6 +61,9 @@ var rendererHeight;
 var amountOfBarsPerRow;
 var leftMargin = 0;
 var rightMargin = 0;
+var isPlayingNow = false;
+var delay = 0;
+var timeoutId;
 
 var notesMap = new Map([
   [1, ["c/6"]],

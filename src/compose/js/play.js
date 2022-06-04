@@ -104,14 +104,12 @@ function addDelayRegardingBpm(delay, noteValue, bpm) {
     return delay + noteValue * (60 / bpm);
 }
 
-// toggle play button to play/pause 
-function play() {
-    console.log(BARS);
+function playMusic() {
     notes = calculateNotes();
     synth = calculateInstrument();
-    console.log(synth)
+    console.log(synth);
     console.log(notes);
-    let delay = Tone.now();
+    delay = Tone.now();
     for (let i = 0; i < notes.length; i++) {
         let thisNoteLength = 4 / notes[i].duration;
         if (i > 0) {
@@ -119,7 +117,6 @@ function play() {
             delay = addDelayRegardingBpm(delay, noteValue, bpm);
         }
         if (!notes[i].rest) {
-            // console.log(Tone.now()- delay)
             synth.triggerAttackRelease(
                 notes[i].pitch + notes[i].accidental + notes[i].octave,
                 thisNoteLength,
@@ -127,21 +124,35 @@ function play() {
             );
         }
     }
-    // Reestablish button from play to start
-    let timeOutId = setTimeout(
-        ()=>{
-
-        },
-        delay
-    );
-
-    clearTimeout(timeOutId);
 }
 
 function stopMusic() {
-    // stop synth from sounding
     synth.triggerRelease();
-    
+
     Tone.Transport.stop();
     Tone.Transport.cancel();
+}
+
+// toggle play button to play/pause
+function togglePlay() {
+    if (isPlayingNow) {
+        stopMusic();
+        isPlayingNow = false;
+        document.getElementById("btn-play").innerHTML = "▶";
+        if (timeoutId) {
+            console.log(timeoutId);
+            clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+    } else {
+        playMusic();
+        isPlayingNow = true;
+        document.getElementById("btn-play").innerHTML = "🟥";
+
+        timeoutId = setTimeout(() => {
+            console.log("timeot applied to stop music");
+            togglePlay();
+        }, (delay * 1000) - (Tone.now() * 1000) + 1000);
+    }
+    console.log(BARS);
 }

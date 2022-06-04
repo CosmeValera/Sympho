@@ -1,6 +1,5 @@
 // PLAY
-divPlay.addEventListener("click", play);
-divStop.addEventListener("click", stopMusic);
+divPlay.addEventListener("click", togglePlay);
 
 // CLICK
 window.addEventListener("scroll", updatePosition);
