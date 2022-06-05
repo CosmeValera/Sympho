@@ -28,6 +28,7 @@ const divSettings = document.getElementById("btn-settings");
 const divBtnSave = document.getElementById("btn-save");
 const divBpm = document.querySelector(".bpm");
 const modal = new bootstrap.Modal(document.querySelector(".modal-settings"), {});
+const divSwitch = document.querySelector('.switch-automatic-add-bar');
 // END: Get element
 
 const BAR_SIZE_CLEF = 280;
@@ -44,7 +45,7 @@ const MAX_AMOUNT_NOTES_IN_A_BAR = 16;
 const EXTRA_RENDERER_SPACE = 30;
 const BARS = [];
 
-var automaticAddBar = true;
+// var automaticAddBar = true;
 var beats_per_bar = 4;
 var beat_value = 4;
 var timeSignature = "4/4";
@@ -66,6 +67,7 @@ var rightMargin = 0;
 var isPlayingNow = false;
 var delay = 0;
 var timeoutId;
+
 
 var notesMap = new Map([
   [1, ["c/6"]],

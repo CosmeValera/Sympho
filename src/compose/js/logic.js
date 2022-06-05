@@ -657,6 +657,7 @@ function saveSettings() {
     keySignature = modal._dialog.querySelector("#key-signature").value;
     timeSignature = modal._dialog.querySelector("#time-signature").value;
     bpm = modal._dialog.querySelector("#bpm").value;
+    automaticAddBar = localStorage.getItem('automaticAddBar');
 
     changeSignature(timeSignature);
     setDivBpm(); 
@@ -673,5 +674,15 @@ function divStaveScrolled(evt) {
     } else if (evt.target.scrollTop !== 0) {
         // Hide divBpm
         divBpm.style.display = "none";
+    }
+}
+
+function switchClicked(evt) {
+    if (evt.target.checked) {
+        console.log("checked");
+        localStorage.setItem("automaticAddBar", true);
+    } else {
+        console.log("unchecked");
+        localStorage.setItem("automaticAddBar", false);
     }
 }
