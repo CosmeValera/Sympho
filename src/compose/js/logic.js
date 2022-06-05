@@ -686,3 +686,7 @@ function switchClicked(evt) {
         localStorage.setItem("automaticAddBar", false);
     }
 }
+
+function saveScore(evt) {
+    console.log("save score");
+}

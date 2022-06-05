@@ -13,7 +13,7 @@ function calculateInstrument() {
                     sustain: 1,
                     release: 0.5,
                 },
-            }).toMaster();
+            }).toDestination();
         }
         case "flute": {
             return new Tone.FMSynth({
@@ -39,10 +39,10 @@ function calculateInstrument() {
                     sustain: 1,
                     release: 0.5,
                 },
-            }).toMaster();
+            }).toDestination();
         }
         case "bass": {
-            var autoWah = new Tone.AutoWah(120, 10, -20).toMaster();
+            var autoWah = new Tone.AutoWah(120, 10, -20).toDestination();
             return new Tone.MonoSynth({
                 volume: -10,
                 envelope: {
@@ -71,7 +71,7 @@ function calculateInstrument() {
                     sustain: 1,
                     release: 0.5,
                 },
-            }).toMaster();
+            }).toDestination();
         }
     }
 }

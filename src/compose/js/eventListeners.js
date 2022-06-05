@@ -82,8 +82,9 @@ divAddTie.addEventListener("click", addTie);
 
 divSettings.addEventListener("click", openSettings)
 divBtnSave.addEventListener("click", saveSettings);
-divTrash.addEventListener("click", deleteLastBar);
 divAddBar.addEventListener("click", addLastBar);
+divTrash.addEventListener("click", deleteLastBar);
+divSaveScore.addEventListener("click", saveScore);
 divSwitch.addEventListener('click', switchClicked);
 
 divSettings.addEventListener("mouseover", ()=>{divSettings.classList.add("btn-info")});
@@ -92,3 +93,5 @@ divAddBar.addEventListener("mouseover", ()=>{divAddBar.classList.add("btn-succes
 divAddBar.addEventListener("mouseout", ()=>{divAddBar.classList.remove("btn-success")});
 divTrash.addEventListener("mouseover", ()=>{divTrash.classList.add("btn-danger")});
 divTrash.addEventListener("mouseout", ()=>{divTrash.classList.remove("btn-danger")});
+divSaveScore.addEventListener("mouseover", ()=>{divSaveScore.classList.add("btn-warning")});
+divSaveScore.addEventListener("mouseout", ()=>{divSaveScore.classList.remove("btn-warning")});

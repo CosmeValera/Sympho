@@ -21,6 +21,7 @@ const divAddDoubleFlat = document.getElementById("add-double-flat");
 const divAddTie = document.getElementById("add-tie");
 const divAddDot = document.getElementById("add-dot");
 const divAddTriplet = document.getElementById("add-triplet");
+const divSaveScore = document.getElementById("btn-save-score");
 const divPlay = document.getElementById("btn-play");
 const divTrash = document.getElementById("btn-trash");
 const divAddBar = document.getElementById("btn-add-bar");
