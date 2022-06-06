@@ -95,3 +95,14 @@ divTrash.addEventListener("mouseover", ()=>{divTrash.classList.add("btn-danger")
 divTrash.addEventListener("mouseout", ()=>{divTrash.classList.remove("btn-danger")});
 divSaveScore.addEventListener("mouseover", ()=>{divSaveScore.classList.add("btn-warning")});
 divSaveScore.addEventListener("mouseout", ()=>{divSaveScore.classList.remove("btn-warning")});
+
+divHamburger.addEventListener("click", ()=>{
+    toggleDivOptions();
+});
+
+divStave.addEventListener("click", ()=>{
+    closeDivOptions();
+});
+divToolbarSmp.addEventListener("click", ()=>{
+    closeDivOptions();
+});

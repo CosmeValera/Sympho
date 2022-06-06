@@ -30,6 +30,9 @@ const divBtnSave = document.getElementById("btn-save");
 const divBpm = document.querySelector(".bpm");
 const modal = new bootstrap.Modal(document.querySelector(".modal-settings"), {});
 const divSwitch = document.querySelector('.switch-automatic-add-bar');
+const divOptions = document.querySelector('.options-bar-smp');
+const divHamburger = document.querySelector('.hamburger');
+const divToolbarSmp = document.querySelector('.toolbar-smp');
 // END: Get element
 
 const BAR_SIZE_CLEF = 280;
@@ -68,6 +71,7 @@ var rightMargin = 0;
 var isPlayingNow = false;
 var delay = 0;
 var timeoutId;
+var toggleHamburguer = true;
 
 
 var notesMap = new Map([

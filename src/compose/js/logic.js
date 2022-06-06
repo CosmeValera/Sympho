@@ -686,6 +686,26 @@ function switchClicked(evt) {
     }
 }
 
+function openDivOptions() {
+    divOptions.style.width = "33%";
+    divOptions.querySelectorAll("*").forEach(e => e.style.display = "block");
+    toggleHamburguer = false;
+}
+
+function closeDivOptions() {
+    divOptions.style.width = "0";
+    divOptions.querySelectorAll("*").forEach(e => e.style.display = "none");
+    toggleHamburguer = true;
+}
+
+function toggleDivOptions() {
+    if (toggleHamburguer) {
+        openDivOptions();
+    } else {
+        closeDivOptions();
+    }
+}
+
 function saveScore(evt) {
     // TODO: link to api
     console.log("save score");
@@ -695,3 +715,4 @@ function loadScore(evt) {
     // TODO: link to api
     console.log("load score");
 }
+

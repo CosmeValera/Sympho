@@ -256,6 +256,10 @@ tbody tr td {
 }
 
 
+.hamburguer {
+  display: none;
+}
+
 /* Large screens */
 @media only screen and (min-width: 576px) {
 
@@ -280,13 +284,34 @@ tbody tr td {
   }
 }
 
-/* Small screens */
+/* VERY SMAll screens */
 @media only screen and (max-width: 440px) {
   #section-my-stave {
     width: 100%;
   }
     
+  .hamburger {
+    background-color: var(--bg-primary);
+    display: inline-block;
+    position: fixed;
+    top: 18.8vh;
+    padding-left: 0.63rem;
+    padding-right: 0.7rem;
+    right: 0;
+    z-index: 20000;
+    font-size: 30px;
+  }
+
   .options-bar-smp {
+    /* display: none; */
+    width: 0%;
+    padding: 0;
+    margin: 0;
+    margin-top: 5vh;
+    /* height: fit-content; */
+  }
+
+  .options-bar-smp * {
     display: none;
   }
 }
