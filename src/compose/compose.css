@@ -282,6 +282,11 @@ tbody tr td {
 }
 /* Small screens */
 @media only screen and (max-width: 576px) {
+  
+  #section-my-stave {
+    height: 72vh;
+  }
+  
   .toolbar-smp {
     margin-left: 0;
     overflow-y: auto;
@@ -291,6 +296,8 @@ tbody tr td {
     display: none;
   }
 }
+
+
 
 /* VERY SMAll screens */
 @media only screen and (max-width: 440px) {
@@ -327,4 +334,11 @@ tbody tr td {
     display: none;
   }
 
+}
+
+/* mobile landscape */
+@media only screen and (max-height: 440px) {
+  .toolbar-smp {
+    height: fit-content;
+  }
 }
