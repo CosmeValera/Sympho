@@ -106,3 +106,6 @@ divStave.addEventListener("click", ()=>{
 divToolbarSmp.addEventListener("click", ()=>{
     closeDivOptions();
 });
+divBpm.addEventListener("click", ()=>{
+    closeDivOptions();
+});

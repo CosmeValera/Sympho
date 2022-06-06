@@ -23,6 +23,7 @@ body {
   --add-dot-url: url('../../icons/dot.png');
   --add-triplet-url: url('../../icons/triplet.png');
   
+  --color-hamburger: black;
 }
 
 .bpm {
@@ -174,6 +175,10 @@ tbody tr td {
   content: var(--add-triplet-url);
 }
 
+.hamburger svg {
+  fill: var(--color-hamburger);
+}
+
 .dark {
   
   --add-whole-note-url: url('../../icons/1_note_white.png');
@@ -199,6 +204,7 @@ tbody tr td {
   --add-dot-url: url('../../icons/dot_white.png');
   --add-triplet-url: url('../../icons/triplet_white.png');
   
+  --color-hamburger: white;
 }
 
 .light {
@@ -226,6 +232,7 @@ tbody tr td {
   --add-dot-url: url('../../icons/dot.png');
   --add-triplet-url: url('../../icons/triplet.png');
   
+  --color-hamburger: black;
 }
 
 .solar {
@@ -253,10 +260,11 @@ tbody tr td {
   --add-dot-url: url('../../icons/dot.png');
   --add-triplet-url: url('../../icons/triplet.png');
   
+  --color-hamburger: black;
 }
 
 
-.hamburguer {
+.hamburger {
   display: none;
 }
 
@@ -295,7 +303,7 @@ tbody tr td {
     display: inline-block;
     position: fixed;
     top: 18.8vh;
-    padding-left: 0.63rem;
+    padding-left: 0.55rem;
     padding-right: 0.7rem;
     right: 0;
     z-index: 20000;
@@ -303,15 +311,20 @@ tbody tr td {
   }
 
   .options-bar-smp {
-    /* display: none; */
     width: 0%;
+    height: 0;
     padding: 0;
     margin: 0;
-    margin-top: 5vh;
-    /* height: fit-content; */
+  }
+  
+  .div-options-mobile {
+    width: var(--margin-right);
+    height: 100%;
+    margin-top: 2.78rem;
   }
 
-  .options-bar-smp * {
+  .children-display-none {
     display: none;
   }
+
 }

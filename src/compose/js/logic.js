@@ -687,15 +687,19 @@ function switchClicked(evt) {
 }
 
 function openDivOptions() {
-    divOptions.style.width = "33%";
-    divOptions.querySelectorAll("*").forEach(e => e.style.display = "block");
-    toggleHamburguer = false;
+    if (window.innerWidth <= 440) {
+        divOptions.classList.add("div-options-mobile");
+        divOptions.querySelectorAll("*").forEach(e => e.classList.remove("children-display-none"));
+        toggleHamburguer = false;
+    }
 }
 
 function closeDivOptions() {
-    divOptions.style.width = "0";
-    divOptions.querySelectorAll("*").forEach(e => e.style.display = "none");
-    toggleHamburguer = true;
+    if (window.innerWidth <= 440) {
+        divOptions.classList.remove("div-options-mobile");
+        divOptions.querySelectorAll("*").forEach(e => e.classList.add("children-display-none"));
+        toggleHamburguer = true;
+    }
 }
 
 function toggleDivOptions() {
