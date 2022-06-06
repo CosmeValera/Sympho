@@ -279,3 +279,14 @@ tbody tr td {
     display: none;
   }
 }
+
+/* Small screens */
+@media only screen and (max-width: 440px) {
+  #section-my-stave {
+    width: 100%;
+  }
+    
+  .options-bar-smp {
+    display: none;
+  }
+}

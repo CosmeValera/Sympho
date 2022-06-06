@@ -36,7 +36,8 @@ main {
   position: fixed;
   background-color: var(--bg-primary);
   transition: width 200ms ease;
-  z-index: 99;
+  z-index: 100;
+  overflow: auto;
 }
 
 .navbar-nav-smp {
@@ -293,3 +294,16 @@ input:checked + .slider:before {
 }
 
 /* End: Switch */
+
+
+.navbar-smp::-webkit-scrollbar {
+  width: 0.25rem;
+  height: 0.25rem;
+  height: 0rem;
+}
+.navbar-smp::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+.navbar-smp::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+}
