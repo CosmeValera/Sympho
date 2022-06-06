@@ -2,7 +2,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: nodejs-chart
-  namespace: sympho-ns
+  namespace: sympho-api-ns
 spec:
   interval: 1m
   chart:

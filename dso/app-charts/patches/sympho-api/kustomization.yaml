@@ -1,6 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: sympho-ns
+namespace: sympho-api-ns
 resources:
   - namespace.yaml
   - ../../base/sympho-api/
