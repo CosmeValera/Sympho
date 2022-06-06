@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<svg xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:svg="http://www.w3.org/2000/svg" id="svg3033" viewBox="0 0 744.09 1052.4" version="1.1">
+  <title id="title3077">Treble Clef</title>
+  <defs id="defs3035">
+    <linearGradient id="linearGradient3793" y2="490.83" gradientUnits="userSpaceOnUse" y1="490.83" gradientTransform="translate(-368.01 35.356)" x2="881.5" x1="598.61">
+      <stop id="stop3015-9" stop-opacity=".82639" offset="0"/>
+      <stop id="stop3017-0" offset="1"/>
+    </linearGradient>
+  </defs>
+  <g id="layer1">
+    <path id="path11" d="m278.89 840.5c0 23.811 27.144 51.133 48.193 55.108 0 0 22.508 5.6134 41.03 1.1224 3.3461 0.75146 59.498-9.5416 60.62-84.755l-11.843-91.536c7.8919-1.3481 33.643-13.763 41.592-18.478 21.812-12.943 31.355-31.636 39.852-45.465 9.5416-20.768 15.155-34.946 15.155-57.556 0-57.185-46.341-103.54-103.5-103.54-8.2386 0-16.243 0.97722-23.934 2.7962l-10.216-73.464c38.684-43.006 77.897-95.869 91.065-144.31 12.91-63.989 6.7357-107.21-27.504-125.73-31.432-7.2969-69.589 35.643-92.052 97.666-14.594 33.116 3.9976 96.385 12.349 122.36-61.528 58.983-122.74 101.28-129.1 203.51 0 80.053 64.874 144.94 144.89 144.94 7.6452 0 20.275 0.179 34.643-1.6835l6.7583 91.412s2.593 66.862-48.293 75.922c-20.196 3.5928-39.674 7.7565-34.07-5.6118 15.739-8.1967 34.07-21.263 34.07-42.704 0-26.683-20.085-48.316-44.849-48.316-24.774 0-44.859 21.633-44.859 48.316zm90.975-409.14 9.5303 68.634c-42.22 13.057-72.901 52.426-72.901 98.946 0 52.649 62.945 77.202 61.239 64.706-24.54-10.587-33.633-22.486-33.633-50.911 0-32.129 21.958-59.115 51.673-66.806l22.665 163.41c-5.0974 1.3804-10.598 2.5479-16.558 3.4799-86.249-1.7287-126.79-47.632-126.79-127.68 0.002-44.846 52.809-96.576 104.77-153.77zm45.197 275.97-22.599-162.78c3.4574-0.5386 7.0163-0.83047 10.632-0.83047 38.1 0 68.994 30.905 68.994 69.017-0.76275 30.67-2.2237 76.336-57.027 94.59zm-48.06-342.71c-15.548-52.459-1.4932-78.603 7.6323-98.699 21.565-47.452 40.537-64.706 59.857-80.108 25.124 9.8561 13.784 80.108 10.012 80.108-11.831 41.446-54.276 74.395-77.502 98.699z" fill-rule="evenodd" stroke="#000" clip-rule="evenodd" fill="url(#linearGradient3793)"/>
+  </g>
+  <metadata>
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+        <cc:license rdf:resource="http://creativecommons.org/licenses/publicdomain/"/>
+        <dc:publisher>
+          <cc:Agent rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:title>Treble Clef</dc:title>
+        <dc:date>2011-04-13T23:55:14</dc:date>
+        <dc:description>A single black &amp; white treble clef.</dc:description>
+        <dc:source>http://openclipart.org/detail/132361/treble-clef-by-jaschon</dc:source>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>jaschon</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>black and white</rdf:li>
+            <rdf:li>clef</rdf:li>
+            <rdf:li>clip art</rdf:li>
+            <rdf:li>clipart</rdf:li>
+            <rdf:li>flag</rdf:li>
+            <rdf:li>g clef</rdf:li>
+            <rdf:li>g-clef</rdf:li>
+            <rdf:li>music</rdf:li>
+            <rdf:li>music note</rdf:li>
+            <rdf:li>musical notation</rdf:li>
+            <rdf:li>sound</rdf:li>
+            <rdf:li>staff</rdf:li>
+            <rdf:li>treble</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+      </cc:Work>
+      <cc:License rdf:about="http://creativecommons.org/licenses/publicdomain/">
+        <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+        <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+        <cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>

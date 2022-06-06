@@ -180,8 +180,6 @@ main {
   --bg-stave: #ececec;
   --scrollbar-thumb: #6649b8;
   --scrollbar-track: #1e1e24;
-
-
 }
 
 .light {
@@ -192,8 +190,6 @@ main {
   --bg-stave: #ffffff;
   --scrollbar-thumb: var(--fa-primary);
   --scrollbar-track: #f0f0f0;
-
-
 }
 
 .solar {

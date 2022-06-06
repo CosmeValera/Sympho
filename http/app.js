@@ -1,9 +1,21 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 const PORT = 9494
+const bodyParser = require("body-parser");
 const controller = require('./controller.js')
 const dbSheets = require('./dbSheets')
 const dbUsers = require('./dbUsers')
+
+app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.json());
+app.use(
+    bodyParser.urlencoded({
+        extended: true,
+    })
+);
+app.use(bodyParser.json());
+
 
 dbUsers.conn()
 dbSheets.conn()
@@ -30,4 +42,4 @@ app.put("/mysheets/:id", controller.putController);
 
 app.delete("/mysheets/:id", controller.deleteController);
 
-app.listen(PORT, () => console.log("En escucha"));
+app.listen(PORT, () => console.log("Listening in port " + PORT));
