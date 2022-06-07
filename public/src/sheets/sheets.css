@@ -1,0 +1,15 @@
+main {
+  height: 100vh;
+}
+.container-smp-sheets {
+  height: fit-content;
+  background-color: var(--bg-stave);
+}
+.container-smp-sheets .card,
+.container-smp-sheets .card .card-body {
+  background-color: var(--bg-primary);
+}
+
+.card-text, .card-title {
+  color: var(--text-primary);
+}

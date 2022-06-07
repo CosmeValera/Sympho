@@ -1,3 +1,7 @@
+main {
+  height: 100vh;
+}
+
 /* The switch - the box around the slider */
 .switch {
   position: relative;

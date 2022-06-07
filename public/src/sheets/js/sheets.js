@@ -1,15 +1,15 @@
-
-async function saveSheet(/*userName, sheetTitle, sheetData*/){
-// Local Storage only stores strings, so we need to convert the boolean to a string
-if (localStorage.privateRepository == 'false') {
-  result = await fetch("http://localhost:9494/mysheets")
-  if (result == 200) {
-    console.log('fino')
+async function loadSheets() {
+  let response;
+  if (localStorage.getItem('privateRepository') == "true") {
+    response = await fetch("/mysheets");
+  } else {
+    response = await fetch("/sheets");
+  }
+  if (response.ok) {
+    const sheets = await response.json();
+    document.querySelector(".container-smp-sheets").innerHTML =
+      insertSheets({ sheets });
+  } else {
+    alert("Server found an issue, " + response.statusText);
   }
 }
-if (localStorage.privateRepository == 'true') {
-  console.log("private repository");
-}
-}
-
-module.exports = {saveSheet}

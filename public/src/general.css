@@ -32,6 +32,7 @@ main {
   display: flex;
   overflow-y: hidden;
   position: relative;
+  background-color: var(--bg-stave);
 }
 
 /*                   */
@@ -132,7 +133,7 @@ main {
 /* Large screens */
 @media only screen and (min-width: 576px) {
   main {
-    margin-left: var(--margin-left);
+    margin-left: var(--margin-left)!important;
     margin-bottom: 0;
   }
   
