@@ -1,4 +1,18 @@
 
+
+function carga() {
+    if (localStorage.sheetData) {
+        BARS = localStorage.sheetData
+        modalSaveScore.dataset.id = "update"
+    }else {
+        BARS = []
+        modalSaveScore.dataset.id = "save"
+    }
+}
+
+modalSaveScore.addEventListener("click", saveScore)
+
+carga()
 class Bar {
     constructor(stave, notes, x, y) {
         this.stave = stave;
@@ -7,6 +21,10 @@ class Bar {
         this.y = y;
     }
 }
+
+
+
+
 
 function setInitialData() {
     isRest = false;
@@ -359,6 +377,7 @@ function addNewNote() {
     let newNoteDuration = noteDuration + (isRest ? "r" : "");
     console.log(notePosInArray)
     console.log(BARS)
+    
     bar.notes[notePosInArray] = new VF.StaveNote({
         clef: "treble",
         keys: note,
@@ -644,7 +663,6 @@ function addLastBar() {
 function openSettings() {
     modalForSettings.show();
     modalForSettings._dialog.querySelector("#score-name").value = scoreName;
-    modalForSettings._dialog.querySelector("#composer-name").value = composerName;
     modalForSettings._dialog.querySelector("#time-signature").value = timeSignature;
     modalForSettings._dialog.querySelector("#instrument").value = instrument.charAt(0).toUpperCase() + instrument.slice(1);
     modalForSettings._dialog.querySelector("#bpm").value = bpm;
@@ -652,7 +670,6 @@ function openSettings() {
 
 function saveSettings() {
     scoreName = modalForSettings._dialog.querySelector("#score-name").value;
-    composerName = modalForSettings._dialog.querySelector("#composer-name").value;
     instrument = modalForSettings._dialog.querySelector("#instrument").value.toLowerCase();
     keySignature = modalForSettings._dialog.querySelector("#key-signature").value;
     timeSignature = modalForSettings._dialog.querySelector("#time-signature").value;
@@ -668,13 +685,59 @@ function saveSettings() {
 }
 
 function openSaveScore() {
+    
     modalForSaveScore.show();
     // modal._dialog.querySelector("#score-name").value = scoreName;
 }
 
-function saveScore() {
+async function saveScore(evt) {
     // TODO: link to api
-    
+    var isPublic = modalForSaveScore._dialog.querySelector("#type-of-score").value
+    if (evt.target.dataset.id === "save") {
+        if (isPublic === "Public"){
+            var res = await fetch('/sheets')
+            if (res.ok) {
+            var score = {BARS}
+            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": score, "isPriv": false}
+            await fetch("http://34.175.197.150/sympho/sheets", {
+                method: "POST",
+                headers: {
+                    "Content-type" : "application/json",
+                },
+                body: JSON.stringify(sheet)
+                }
+            )
+        }
+        }else {
+            var res = await fetch('/sheets')
+            if (res.ok) {
+                
+            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": [], "isPriv": true}
+            await fetch("http://34.175.197.150/sympho/sheets", {
+                method: "POST",
+                headers: {
+                    "Content-type" : "application/json",
+                },
+                body: JSON.stringify(sheet)
+                }
+            )
+        }
+    }
+        
+    }else {
+        var res = await fetch("/mysheets")
+        if (res.ok) {
+            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": [], "isPriv": true}
+            await fetch(`http://34.175.197.150/sympho/sheets/${localStorage.sheetID}`, {
+                method: "PUT",
+                headers: {
+                    "Content-type" : "application/json",
+                },
+                body: JSON.stringify(sheet)
+                }
+            )
+        }
+    }
     modalForSaveScore.hide();
 }
 

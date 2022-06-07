@@ -14,6 +14,7 @@ async function loadSheets() {
   }
 }
 
+<<<<<<< HEAD
 function sheetClicked(evt) {
   console.log(evt.target);
   const id = findSiblingIdUsingDom(evt.target, ".card", ".this-is-id");
@@ -33,3 +34,6 @@ function findSiblingIdUsingDom(actualElement, parentClass, siblingClass) {
 
 
 document.querySelector(".container-smp-sheets").addEventListener("click", sheetClicked);
+=======
+
+>>>>>>> 3530a98dc1c7972981ac0863c752e8909edcd7ad
