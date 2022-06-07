@@ -50,7 +50,7 @@ const TEMPO_SIZE = 30;
 const SPACE_PER_NOTE = 55 / 4;
 const MAX_AMOUNT_NOTES_IN_A_BAR = 16;
 const EXTRA_RENDERER_SPACE = 30;
-var BARS = [];
+
 
 // var automaticAddBar = true;
 var beats_per_bar = 4;
@@ -75,6 +75,7 @@ var isPlayingNow = false;
 var delay = 0;
 var timeoutId;
 var toggleHamburguer = true;
+var BARS = [];
 
 
 var notesMap = new Map([

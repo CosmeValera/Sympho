@@ -5,6 +5,10 @@ main {
   height: fit-content;
   background-color: var(--bg-stave);
 }
+
+main.container-fluid {
+  width: calc(100vw - 80px);
+}
 .container-smp-sheets .card,
 .container-smp-sheets .card .card-body {
   background-color: var(--bg-primary);
@@ -12,4 +16,17 @@ main {
 
 .card-text, .card-title {
   color: var(--text-primary);
+}
+
+.edit-button-class {
+  right: 10px;
+  top: 10px;
+  position: absolute;
+}
+
+/* Small screens */
+@media only screen and (max-width: 576px) {
+  main.container-fluid {
+    width: 100vw;
+  }
 }
