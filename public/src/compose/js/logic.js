@@ -1,4 +1,18 @@
 
+
+function carga() {
+    if (localStorage.sheetData) {
+        BARS = localStorage.sheetData
+        modalSaveScore.dataset.id = "update"
+    }else {
+        //BARS = []
+        modalSaveScore.dataset.id = "save"
+    }
+}
+
+modalSaveScore.addEventListener("click", saveScore)
+
+carga()
 class Bar {
     constructor(stave, notes, x, y) {
         this.stave = stave;
@@ -668,13 +682,51 @@ function saveSettings() {
 }
 
 function openSaveScore() {
+    
     modalForSaveScore.show();
     // modal._dialog.querySelector("#score-name").value = scoreName;
 }
 
-function saveScore() {
+async function saveScore(evt) {
     // TODO: link to api
-    
+    var isPublic = modalForSaveScore._dialog.querySelector("#type-of-score").value
+    if (evt.target.dataset.id === "save") {
+        if (isPublic === "Public"){
+            var res = await fetch('/sheets')
+            if (res.ok) {
+            
+            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": BARS, "isPriv": false}
+            await fetch("http://34.175.197.150/sympho/sheets", {
+                method: "POST",
+                headers: {
+                    "Content-type" : "application/json",
+                },
+                body: JSON.stringify(sheet)
+                }
+            )
+        }
+        }else {
+            var res = await fetch('/sheets')
+            if (res.ok) {
+            
+            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": BARS, "isPriv": true}
+            await fetch("http://34.175.197.150/sympho/sheets", {
+                method: "POST",
+                headers: {
+                    "Content-type" : "application/json",
+                },
+                body: JSON.stringify(sheet)
+                }
+            )
+        }
+    }
+        
+    }else {
+        var res = await fetch("/mysheets")
+        if (res.ok) {
+            
+        }
+    }
     modalForSaveScore.hide();
 }
 
