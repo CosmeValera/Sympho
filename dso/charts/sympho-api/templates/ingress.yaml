@@ -16,6 +16,6 @@ spec:
                 name: sympho-svc-chart
                 port:
                   number: 80
-            path: /(/|$)(.*)      
+            path: /sympho(/|$)(.*)      
             pathType: Prefix
             

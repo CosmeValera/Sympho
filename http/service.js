@@ -1,4 +1,3 @@
-const users = require('./dbUsers.js')
 const mysheets = require('./dbMySheets.js')
 const sheets = require('./dbSheets.js')
 
@@ -66,27 +65,10 @@ async function deleteOne(id) {
 }
 
 async function login(id, obj) {
-    try {
-        const dbResponse = await users.findOne(id, obj)
-        if (dbResponse) {
-            return dbResponse
-        } else {
-            return null
-        }
-    } catch (error) {
-        return error
-    }
+    
 }
 
-async function register(obj) {
-    const user = users.findOne(obj.id)
-    if (user) {
-        return null
-    }else {
-        return users.insertOne(obj)
-    }
-}
 
 module.exports = {
-    getAll, getOne, create, update, deleteOne, login, register
+    getAll, getOne, create, update, deleteOne, login
 }

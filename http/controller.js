@@ -85,18 +85,6 @@ async function loginController(req, res) {
     }
 }
 
-async function registerController(req, res) {
-    try {
-        const body = req.body
-        const response = await service.register(body)
-        if (response) {
-            res.sendStatus(201)
-        }else {
-            res.sendStatus(400)
-        }
-    } catch (err) {
-        res.sendStatus(500)
-    }
-}
 
-module.exports = {getController, getAllController, postController, putController, deleteController, loginController, registerController}
+
+module.exports = {getController, getAllController, postController, putController, deleteController, loginController}
