@@ -3,31 +3,47 @@ const app = express();
 const PORT = 9494
 const controller = require('./controller.js')
 const dbSheets = require('./dbSheets')
-const dbUsers = require('./dbUsers')
+const dbMySheets = require('./dbMySheets')
+const passport = require('passport');
+const session = require('express-session')
+require('./auth')
 
-dbUsers.conn()
-dbSheets.conn()
-
+//dbSheets.conn()
+function isLoggedIn(req,res,next) {
+  req.user ? next() : res.sendStatus(401);
+}
+app.use(session({secret:"cats"}))
+app.use(passport.initialize())
+app.use(passport.session())
 app.use(express.json())
 
-app.get("/login/:id", controller.loginController);
+app.get("/login", (req, res) => {
+  res.sendFile("C:\\Users\\p-jgomariz\\Sympho\\src\\account\\account.html")
+})
+app.get('/google/auth', passport.authenticate('google', {scope: ['email', 'profile']}))
 
-app.post("/register", controller.registerController);
+app.get('/google/callback', passport.authenticate('google', {successRedirect: '/account',
+failureRedirect: '/login'}))
 
 app.get("/sheets", controller.getAllController);
 
 app.get("/sheets/:id", controller.getController);
 
-app.post("/sheets", controller.postController);
+app.post("/sheets", isLoggedIn, controller.postController);
 
-app.get("/mysheets", controller.getAllController);
+app.get("/mysheets", isLoggedIn, controller.getAllController);
 
-app.get("/mysheets/:id", controller.getController);
+app.get("/mysheets/:id", isLoggedIn, controller.getController);
 
-app.post("/mysheets", controller.postController);
+app.post("/mysheets", isLoggedIn, controller.postController);
 
-app.put("/mysheets/:id", controller.putController);
+app.put("/mysheets/:id", isLoggedIn, controller.putController);
 
-app.delete("/mysheets/:id", controller.deleteController);
+app.delete("/mysheets/:id", isLoggedIn, controller.deleteController);
 
-app.listen(PORT, () => console.log("En escucha"));
+app.get("/account", isLoggedIn, (req, res) => {
+  //dbMySheets.conn(req.user.sub)
+  res.send({"nombre": req.user.displayName, "imagen": req.user.picture, "id_cuenta":req.user.sub})
+})
+
+app.listen(PORT, () => console.log(PORT));
