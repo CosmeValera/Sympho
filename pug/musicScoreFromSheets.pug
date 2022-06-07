@@ -6,5 +6,5 @@ each sheet in sheets
       p(class="card-text")=`Score author: ${sheet.nombre}`
       p(class="card-text")=`Instrument: ${sheet.instrumento}`
   div(class="card-footer d-flex justify-content-between")
-    a(href="#" class="btn btn-danger btn-remove-sheet")=Remove
-    a(href="#" class="btn btn-primary btn-edit-sheet")=Edit
+    a(href="#" class="btn btn-danger btn-remove-sheet" data-type="remove")=Remove
+    a(href="#" class="btn btn-primary btn-edit-sheet" data-type="edit")=Edit

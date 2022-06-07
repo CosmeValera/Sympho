@@ -13,3 +13,23 @@ async function loadSheets() {
     alert("Server found an issue, " + response.statusText);
   }
 }
+
+function sheetClicked(evt) {
+  console.log(evt.target);
+  const id = findSiblingIdUsingDom(evt.target, ".card", ".this-is-id");
+  console.log(evt.target.dataset.type);
+  console.log(id);
+
+  // TODO Fetch sheet from server
+}
+
+function findSiblingIdUsingDom(actualElement, parentClass, siblingClass) {
+  const parentDiv = actualElement.closest(parentClass);
+  const divWithId = parentDiv.querySelector(siblingClass);
+  const id = divWithId.innerHTML.trim();
+  return id;
+}
+
+
+
+document.querySelector(".container-smp-sheets").addEventListener("click", sheetClicked);
