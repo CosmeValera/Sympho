@@ -1,0 +1,14 @@
+main {
+  height: 100vh;
+}
+.container-smp {
+  height: fit-content;
+  background-color: var(--bg-stave);
+}
+.container-smp * {
+  background-color: var(--bg-primary);
+}
+
+.container-smp * * {
+  background-color: var(--bg-primary);
+}
