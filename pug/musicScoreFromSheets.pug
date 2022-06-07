@@ -1,7 +1,7 @@
 each sheet in sheets
   div(class="card col-md-6 my-2 shadow-sm")
     div(class="card-body")
-      p(class="d-none this-is-id")= `${sheet.id}`
-      h4(class="card-title")=`Score name: ${sheet.scoreName}`
-      p(class="card-text")=`Score author: ${sheet.scoreAuthor}`
-      p(class="card-text")=`Instrument: ${sheet.Instrument}`
+      p(class="d-none this-is-id")= `${sheet._id}`
+      h4(class="card-title")=`Score name: ${sheet.compositor}`
+      p(class="card-text")=`Score author: ${sheet.nombre}`
+      p(class="card-text")=`Instrument: ${sheet.instrumento}`
