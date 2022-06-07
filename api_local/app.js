@@ -9,7 +9,7 @@ const path = require('path')
 require('./auth')
 
 function isLoggedIn(req,res,next) {
-  req.user ? next() : res.redirect("http://127.0.0.1:5501/public/src/account/account.html");
+  req.user ? next() : res.redirect("http://localhost:9494/src/account/account.html");
 }
 app.use(session({secret:"cats"}))
 app.use(passport.initialize())
@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, "../public")))
 
 app.get('/google/auth', passport.authenticate('google', {scope: ['email', 'profile']}))
 
-app.get('/google/callback', passport.authenticate('google', {successRedirect: 'http://127.0.0.1:5501/public/src/account/account.html',
+app.get('/google/callback', passport.authenticate('google', {successRedirect: 'http://localhost:9494/src/account/account.html',
 failureRedirect: '/login'}))
 
 app.get("/sheets", isLoggedIn, (req, res) =>{
@@ -32,7 +32,7 @@ app.get("/mysheets", isLoggedIn, (req, res) => {
 
 app.get("/logout", isLoggedIn, (req, res) => {
   res.clearCookie('connect.sid')
-  res.send(200)
+  res.redirect('http://localhost:9494/src/account/account.html')
 })
 
 

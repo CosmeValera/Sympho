@@ -5,7 +5,7 @@ function carga() {
         BARS = localStorage.sheetData
         modalSaveScore.dataset.id = "update"
     }else {
-        //BARS = []
+        BARS = []
         modalSaveScore.dataset.id = "save"
     }
 }
@@ -21,6 +21,10 @@ class Bar {
         this.y = y;
     }
 }
+
+
+
+
 
 function setInitialData() {
     isRest = false;
@@ -373,6 +377,7 @@ function addNewNote() {
     let newNoteDuration = noteDuration + (isRest ? "r" : "");
     console.log(notePosInArray)
     console.log(BARS)
+    
     bar.notes[notePosInArray] = new VF.StaveNote({
         clef: "treble",
         keys: note,
@@ -658,7 +663,6 @@ function addLastBar() {
 function openSettings() {
     modalForSettings.show();
     modalForSettings._dialog.querySelector("#score-name").value = scoreName;
-    modalForSettings._dialog.querySelector("#composer-name").value = composerName;
     modalForSettings._dialog.querySelector("#time-signature").value = timeSignature;
     modalForSettings._dialog.querySelector("#instrument").value = instrument.charAt(0).toUpperCase() + instrument.slice(1);
     modalForSettings._dialog.querySelector("#bpm").value = bpm;
@@ -666,7 +670,6 @@ function openSettings() {
 
 function saveSettings() {
     scoreName = modalForSettings._dialog.querySelector("#score-name").value;
-    composerName = modalForSettings._dialog.querySelector("#composer-name").value;
     instrument = modalForSettings._dialog.querySelector("#instrument").value.toLowerCase();
     keySignature = modalForSettings._dialog.querySelector("#key-signature").value;
     timeSignature = modalForSettings._dialog.querySelector("#time-signature").value;
@@ -694,8 +697,8 @@ async function saveScore(evt) {
         if (isPublic === "Public"){
             var res = await fetch('/sheets')
             if (res.ok) {
-            
-            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": BARS, "isPriv": false}
+            var score = {BARS}
+            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": score, "isPriv": false}
             await fetch("http://34.175.197.150/sympho/sheets", {
                 method: "POST",
                 headers: {
@@ -708,8 +711,8 @@ async function saveScore(evt) {
         }else {
             var res = await fetch('/sheets')
             if (res.ok) {
-            
-            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": BARS, "isPriv": true}
+                
+            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": [], "isPriv": true}
             await fetch("http://34.175.197.150/sympho/sheets", {
                 method: "POST",
                 headers: {
@@ -724,7 +727,15 @@ async function saveScore(evt) {
     }else {
         var res = await fetch("/mysheets")
         if (res.ok) {
-            
+            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": [], "isPriv": true}
+            await fetch(`http://34.175.197.150/sympho/sheets/${localStorage.sheetID}`, {
+                method: "PUT",
+                headers: {
+                    "Content-type" : "application/json",
+                },
+                body: JSON.stringify(sheet)
+                }
+            )
         }
     }
     modalForSaveScore.hide();
