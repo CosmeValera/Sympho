@@ -1,3 +1,4 @@
+
 class Bar {
     constructor(stave, notes, x, y) {
         this.stave = stave;
@@ -673,7 +674,7 @@ function openSaveScore() {
 
 function saveScore() {
     // TODO: link to api
-    console.log("save score");
+    
     modalForSaveScore.hide();
 }
 

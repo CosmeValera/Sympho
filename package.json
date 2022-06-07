@@ -11,7 +11,7 @@
     "package": "electron-forge package",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
-    "run-api": "nodemon http/app.js"
+    "run-api": "nodemon api_local/app.js"
   },
   "keywords": [],
   "author": {
