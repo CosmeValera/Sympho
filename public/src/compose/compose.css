@@ -1,6 +1,5 @@
 body {
-  
-  --add-whole-note-url: url('../../../../icons/1_note.png');
+  --add-whole-note-url: url('../../icons/1_note.png');
   --add-half-note-url: url('../../icons/2_note.png');
   --add-quarter-note-url: url('../../icons/4_note.png');
   --add-eighth-note-url: url('../../icons/8_note.png');
@@ -23,6 +22,7 @@ body {
   --add-dot-url: url('../../icons/dot.png');
   --add-triplet-url: url('../../icons/triplet.png');
   
+  --color-hamburger: black;
 }
 
 .bpm {
@@ -174,6 +174,10 @@ tbody tr td {
   content: var(--add-triplet-url);
 }
 
+.hamburger svg {
+  fill: var(--color-hamburger);
+}
+
 .dark {
   
   --add-whole-note-url: url('../../icons/1_note_white.png');
@@ -199,6 +203,7 @@ tbody tr td {
   --add-dot-url: url('../../icons/dot_white.png');
   --add-triplet-url: url('../../icons/triplet_white.png');
   
+  --color-hamburger: white;
 }
 
 .light {
@@ -226,6 +231,7 @@ tbody tr td {
   --add-dot-url: url('../../icons/dot.png');
   --add-triplet-url: url('../../icons/triplet.png');
   
+  --color-hamburger: black;
 }
 
 .solar {
@@ -253,8 +259,13 @@ tbody tr td {
   --add-dot-url: url('../../icons/dot.png');
   --add-triplet-url: url('../../icons/triplet.png');
   
+  --color-hamburger: black;
 }
 
+
+.hamburger {
+  display: none;
+}
 
 /* Large screens */
 @media only screen and (min-width: 576px) {
@@ -270,6 +281,11 @@ tbody tr td {
 }
 /* Small screens */
 @media only screen and (max-width: 576px) {
+  
+  #section-my-stave {
+    height: 72vh;
+  }
+  
   .toolbar-smp {
     margin-left: 0;
     overflow-y: auto;
@@ -277,5 +293,51 @@ tbody tr td {
     
   .col-1 {
     display: none;
+  }
+}
+
+
+
+/* VERY SMAll screens */
+@media only screen and (max-width: 440px) {
+  #section-my-stave {
+    width: 100%;
+  }
+    
+  .hamburger {
+    background-color: var(--bg-primary);
+    display: inline-block;
+    position: fixed;
+    top: 18.8vh;
+    padding-left: 0.55rem;
+    padding-right: 0.7rem;
+    right: 0;
+    z-index: 20000;
+    font-size: 30px;
+  }
+
+  .options-bar-smp {
+    width: 0%;
+    height: 0;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .div-options-mobile {
+    width: var(--margin-right);
+    height: 100%;
+    margin-top: 2.78rem;
+  }
+
+  .children-display-none {
+    display: none;
+  }
+
+}
+
+/* mobile landscape */
+@media only screen and (max-height: 440px) {
+  .toolbar-smp {
+    height: fit-content;
   }
 }

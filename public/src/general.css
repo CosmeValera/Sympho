@@ -1,4 +1,9 @@
 body {
+  --navbar-1-url: url('../icons/1_navbar.png');
+  --navbar-2-url: url('../icons/2_navbar.png');
+  --navbar-3-url: url('../icons/3_navbar.png');
+  --navbar-4-url: url('../icons/4_navbar.png');
+
   font-size: 16px;
   font-family: 'Open sans';
   --text-primary: #b6b6b6;
@@ -36,7 +41,8 @@ main {
   position: fixed;
   background-color: var(--bg-primary);
   transition: width 200ms ease;
-  z-index: 99;
+  z-index: 100;
+  overflow: auto;
 }
 
 .navbar-nav-smp {
@@ -79,7 +85,8 @@ main {
   margin-left: 1rem;
 }
 
-.nav-link svg {
+.nav-link svg,
+.nav-link img {
   width: 2rem;
   min-width: 2rem;
   margin: 0 1.5rem;
@@ -111,12 +118,14 @@ main {
   width: 100%;
 }
 
-.logo svg {
+.logo svg,
+.logo img {
   transform: rotate(0deg);
   transition: transform var(--transition-speed);
 }
 
-.navbar-smp:hover .logo svg {
+.navbar-smp:hover .logo svg,
+.navbar-smp:hover .logo img {
   transform: rotate(-180deg);
 }
 
@@ -170,8 +179,28 @@ main {
 }
 
 /* THEMIFY */
+#navbar_1 {
+  content: var(--navbar-1-url);
+}
+
+#navbar_2 {
+  content: var(--navbar-2-url);
+}
+
+#navbar_3 {
+  content: var(--navbar-3-url);
+}
+
+#navbar_4 {
+  content: var(--navbar-4-url);
+}
+
 
 .dark {
+  --navbar-1-url: url('../icons/1_navbar_white.png');
+  --navbar-2-url: url('../icons/2_navbar_white.png');
+  --navbar-3-url: url('../icons/3_navbar_white.png');
+  --navbar-4-url: url('../icons/4_navbar_white.png');
   --text-primary: #b6b6b6;
   --text-secondary: #ececec;
   --bg-primary: #23232e;
@@ -179,11 +208,13 @@ main {
   --bg-stave: #ececec;
   --scrollbar-thumb: #6649b8;
   --scrollbar-track: #1e1e24;
-
-
 }
 
 .light {
+  --navbar-1-url: url('../icons/1_navbar.png');
+  --navbar-2-url: url('../icons/2_navbar.png');
+  --navbar-3-url: url('../icons/3_navbar.png');
+  --navbar-4-url: url('../icons/4_navbar.png');
   --text-primary: #1f1f1f;
   --text-secondary: #000000;
   --bg-primary: #ffffff;
@@ -191,11 +222,13 @@ main {
   --bg-stave: #ffffff;
   --scrollbar-thumb: var(--fa-primary);
   --scrollbar-track: #f0f0f0;
-
-
 }
 
 .solar {
+  --navbar-1-url: url('../icons/1_navbar.png');
+  --navbar-2-url: url('../icons/2_navbar.png');
+  --navbar-3-url: url('../icons/3_navbar.png');
+  --navbar-4-url: url('../icons/4_navbar.png');
   --text-primary: #576e75;
   --text-secondary: #35535c;
   --bg-primary: #fdf6e3;
@@ -293,3 +326,16 @@ input:checked + .slider:before {
 }
 
 /* End: Switch */
+
+
+.navbar-smp::-webkit-scrollbar {
+  width: 0.25rem;
+  height: 0.25rem;
+  height: 0rem;
+}
+.navbar-smp::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+.navbar-smp::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+}

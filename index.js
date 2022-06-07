@@ -18,7 +18,7 @@ const createWindow = () => {
   });
 
   // and load the index.html of the app.
-  mainWindow.loadFile(path.join(__dirname, 'compose/compose.html'));
+  mainWindow.loadFile(path.join(__dirname, 'public/src/compose/compose.html'));
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();

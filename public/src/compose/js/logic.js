@@ -454,20 +454,19 @@ function addDot() {
     }
 }
 
-// TODO: add triplet, add tie and add dot
+// These 2 functinos are not done yet
 function addTriplet() {
     if (selectedNote) {
         console.log("TO IMPLEMENT: add triplet");
     }
     console.log("always showing when click addTriplet");
 }
-    function addTie() {
+function addTie() {
     if (selectedNote) {
         console.log("TO IMPLEMENT: add tie");
     }
     console.log("always showing when click addTie");
 }
-
 
 function lastBarHasOneNote(lastBar) {
     return BARS[lastBar].notes.some(n => {
@@ -679,14 +678,45 @@ function divStaveScrolled(evt) {
 
 function switchClicked(evt) {
     if (evt.target.checked) {
-        console.log("checked");
+        console.log("checked automaticAddBar");
         localStorage.setItem("automaticAddBar", true);
     } else {
-        console.log("unchecked");
+        console.log("unchecked automaticAddBar");
         localStorage.setItem("automaticAddBar", false);
     }
 }
 
+function openDivOptions() {
+    if (window.innerWidth <= 440) {
+        divOptions.classList.add("div-options-mobile");
+        divOptions.querySelectorAll("*").forEach(e => e.classList.remove("children-display-none"));
+        toggleHamburguer = false;
+    }
+}
+
+function closeDivOptions() {
+    if (window.innerWidth <= 440) {
+        divOptions.classList.remove("div-options-mobile");
+        divOptions.querySelectorAll("*").forEach(e => e.classList.add("children-display-none"));
+        toggleHamburguer = true;
+    }
+}
+
+function toggleDivOptions() {
+    if (toggleHamburguer) {
+        openDivOptions();
+    } else {
+        closeDivOptions();
+    }
+}
+
 function saveScore(evt) {
+    // TODO: link to api
     console.log("save score");
 }
+
+function loadScore(evt) {
+    // TODO: link to api
+    console.log("load score");
+}
+

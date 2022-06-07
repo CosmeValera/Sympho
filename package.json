@@ -3,11 +3,12 @@
   "productName": "sympho",
   "version": "1.0.0",
   "description": "My Electron application description",
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
+    "npmStart": "node http/app.js",
     "start": "electron-forge start",
-    "package": "electron-forge package",
     "make": "electron-forge make",
+    "package": "electron-forge package",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
     "run-api": "nodemon http/app.js"
