@@ -384,7 +384,7 @@
                         <a
                             href="#"
                             class="btn btn-secondary mb-2 col-12 children-display-none"
-                            id="btn-save-score"
+                            id="btn-open-save-score"
                             >💾</a
                         >
                         <a
@@ -406,7 +406,7 @@
             </main>
         </div>
 
-        <!-- Modal -->
+        <!-- Modal Settings-->
         <div
             class="modal fade modal-settings"
             id="exampleModalCenter"
@@ -515,7 +515,7 @@
                         <button
                             type="button"
                             class="btn btn-primary"
-                            id="btn-save"
+                            id="btn-save-settings"
                         >
                             Save changes
                         </button>
@@ -523,6 +523,61 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal Save score-->
+        <div
+            class="modal fade modal-save-score"
+            id="exampleModalCenter"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="exampleModalCenterTitle"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">
+                            Save Score
+                        </h5>
+                        <button
+                            type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Type of Score -->
+                        <div class="form-group">
+                            <label for="type-of-score">Public sheet?</label>
+                            <select class="form-control" id="type-of-score">
+                                <option>Public</option>
+                                <option>Private</option>
+                            </select>
+                        </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-dismiss="modal"
+                        >
+                            Close
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="btn-save-score"
+                        >
+                            Save score
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
 
         <!-- Scripts -->
         <!-- <script src="https://unpkg.com/vexflow@4.0.3/releases/vexflow-min.js"></script> -->

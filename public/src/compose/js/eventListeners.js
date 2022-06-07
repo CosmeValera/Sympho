@@ -80,15 +80,16 @@ divAddDot.addEventListener("click", addDot);
 divAddTriplet.addEventListener("click", addTriplet);
 divAddTie.addEventListener("click", addTie);
 
-divSettings.addEventListener("click", openSettings)
-divBtnSave.addEventListener("click", saveSettings);
+modalSettings.addEventListener("click", openSettings)
+divBtnSaveSettings.addEventListener("click", saveSettings);
+modalSaveScore.addEventListener("click", openSaveScore);
+divSaveScore.addEventListener("click", saveScore);
 divAddBar.addEventListener("click", addLastBar);
 divTrash.addEventListener("click", deleteLastBar);
-divSaveScore.addEventListener("click", saveScore);
 divSwitch.addEventListener('click', switchClicked);
 
-divSettings.addEventListener("mouseover", ()=>{divSettings.classList.add("btn-info")});
-divSettings.addEventListener("mouseout", ()=>{divSettings.classList.remove("btn-info")});
+modalSettings.addEventListener("mouseover", ()=>{modalSettings.classList.add("btn-info")});
+modalSettings.addEventListener("mouseout", ()=>{modalSettings.classList.remove("btn-info")});
 divAddBar.addEventListener("mouseover", ()=>{divAddBar.classList.add("btn-success")});
 divAddBar.addEventListener("mouseout", ()=>{divAddBar.classList.remove("btn-success")});
 divTrash.addEventListener("mouseover", ()=>{divTrash.classList.add("btn-danger")});

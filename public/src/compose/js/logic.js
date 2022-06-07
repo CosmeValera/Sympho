@@ -641,21 +641,21 @@ function addLastBar() {
 }
 
 function openSettings() {
-    modal.show();
-    modal._dialog.querySelector("#score-name").value = scoreName;
-    modal._dialog.querySelector("#composer-name").value = composerName;
-    modal._dialog.querySelector("#time-signature").value = timeSignature;
-    modal._dialog.querySelector("#instrument").value = instrument.charAt(0).toUpperCase() + instrument.slice(1);
-    modal._dialog.querySelector("#bpm").value = bpm;
+    modalForSettings.show();
+    modalForSettings._dialog.querySelector("#score-name").value = scoreName;
+    modalForSettings._dialog.querySelector("#composer-name").value = composerName;
+    modalForSettings._dialog.querySelector("#time-signature").value = timeSignature;
+    modalForSettings._dialog.querySelector("#instrument").value = instrument.charAt(0).toUpperCase() + instrument.slice(1);
+    modalForSettings._dialog.querySelector("#bpm").value = bpm;
 }
 
 function saveSettings() {
-    scoreName = modal._dialog.querySelector("#score-name").value;
-    composerName = modal._dialog.querySelector("#composer-name").value;
-    instrument = modal._dialog.querySelector("#instrument").value.toLowerCase();
-    keySignature = modal._dialog.querySelector("#key-signature").value;
-    timeSignature = modal._dialog.querySelector("#time-signature").value;
-    bpm = modal._dialog.querySelector("#bpm").value;
+    scoreName = modalForSettings._dialog.querySelector("#score-name").value;
+    composerName = modalForSettings._dialog.querySelector("#composer-name").value;
+    instrument = modalForSettings._dialog.querySelector("#instrument").value.toLowerCase();
+    keySignature = modalForSettings._dialog.querySelector("#key-signature").value;
+    timeSignature = modalForSettings._dialog.querySelector("#time-signature").value;
+    bpm = modalForSettings._dialog.querySelector("#bpm").value;
     automaticAddBar = localStorage.getItem('automaticAddBar');
 
     changeSignature(timeSignature);
@@ -663,8 +663,20 @@ function saveSettings() {
 
     recalculateBars();
     draw();
-    modal.hide();
+    modalForSettings.hide();
 }
+
+function openSaveScore() {
+    modalForSaveScore.show();
+    // modal._dialog.querySelector("#score-name").value = scoreName;
+}
+
+function saveScore() {
+    // TODO: link to api
+    console.log("save score");
+    modalForSaveScore.hide();
+}
+
 
 function divStaveScrolled(evt) {
     if (evt.target.scrollTop === 0) {
@@ -708,11 +720,6 @@ function toggleDivOptions() {
     } else {
         closeDivOptions();
     }
-}
-
-function saveScore(evt) {
-    // TODO: link to api
-    console.log("save score");
 }
 
 function loadScore(evt) {
