@@ -1,6 +1,5 @@
 body {
-  
-  --add-whole-note-url: url('../../../../icons/1_note.png');
+  --add-whole-note-url: url('../../icons/1_note.png');
   --add-half-note-url: url('../../icons/2_note.png');
   --add-quarter-note-url: url('../../icons/4_note.png');
   --add-eighth-note-url: url('../../icons/8_note.png');

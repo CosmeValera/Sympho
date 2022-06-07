@@ -1,4 +1,9 @@
 body {
+  --navbar-1-url: url('../icons/1_navbar.png');
+  --navbar-2-url: url('../icons/2_navbar.png');
+  --navbar-3-url: url('../icons/3_navbar.png');
+  --navbar-4-url: url('../icons/4_navbar.png');
+
   font-size: 16px;
   font-family: 'Open sans';
   --text-primary: #b6b6b6;
@@ -80,7 +85,8 @@ main {
   margin-left: 1rem;
 }
 
-.nav-link svg {
+.nav-link svg,
+.nav-link img {
   width: 2rem;
   min-width: 2rem;
   margin: 0 1.5rem;
@@ -112,12 +118,14 @@ main {
   width: 100%;
 }
 
-.logo svg {
+.logo svg,
+.logo img {
   transform: rotate(0deg);
   transition: transform var(--transition-speed);
 }
 
-.navbar-smp:hover .logo svg {
+.navbar-smp:hover .logo svg,
+.navbar-smp:hover .logo img {
   transform: rotate(-180deg);
 }
 
@@ -171,8 +179,28 @@ main {
 }
 
 /* THEMIFY */
+#navbar_1 {
+  content: var(--navbar-1-url);
+}
+
+#navbar_2 {
+  content: var(--navbar-2-url);
+}
+
+#navbar_3 {
+  content: var(--navbar-3-url);
+}
+
+#navbar_4 {
+  content: var(--navbar-4-url);
+}
+
 
 .dark {
+  --navbar-1-url: url('../icons/1_navbar_white.png');
+  --navbar-2-url: url('../icons/2_navbar_white.png');
+  --navbar-3-url: url('../icons/3_navbar_white.png');
+  --navbar-4-url: url('../icons/4_navbar_white.png');
   --text-primary: #b6b6b6;
   --text-secondary: #ececec;
   --bg-primary: #23232e;
@@ -183,6 +211,10 @@ main {
 }
 
 .light {
+  --navbar-1-url: url('../icons/1_navbar.png');
+  --navbar-2-url: url('../icons/2_navbar.png');
+  --navbar-3-url: url('../icons/3_navbar.png');
+  --navbar-4-url: url('../icons/4_navbar.png');
   --text-primary: #1f1f1f;
   --text-secondary: #000000;
   --bg-primary: #ffffff;
@@ -193,6 +225,10 @@ main {
 }
 
 .solar {
+  --navbar-1-url: url('../icons/1_navbar.png');
+  --navbar-2-url: url('../icons/2_navbar.png');
+  --navbar-3-url: url('../icons/3_navbar.png');
+  --navbar-4-url: url('../icons/4_navbar.png');
   --text-primary: #576e75;
   --text-secondary: #35535c;
   --bg-primary: #fdf6e3;
