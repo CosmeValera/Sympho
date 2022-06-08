@@ -2,6 +2,7 @@ loadSheets()
 async function loadSheets() {
   let response;
   if (localStorage.getItem('privateRepository') == "true") {
+    console.log("privado")
     response = await fetch("/mysheets");
     if (response.ok) {
       var res = await fetch("http://34.175.197.150/sympho/mysheets")
