@@ -1,22 +1,36 @@
+loadSheets()
 async function loadSheets() {
   let response;
   if (localStorage.getItem('privateRepository') == "true") {
     response = await fetch("/mysheets");
+    if (response.ok) {
+      var res = await fetch("http://34.175.197.150/sympho/mysheets")
+      const sheets = await res.json();
+      document.querySelector(".container-smp-sheets").innerHTML =
+        insertSheets({ sheets });
+    } else {
+      window.location = "http://localhost:9494/src/account/account.html"
+    }
   } else {
     response = await fetch("/sheets");
+    if (response.ok) {
+      var res = await fetch("http://34.175.197.150/sympho/sheets")
+      const sheets = await res.json();
+      document.querySelector(".container-smp-sheets").innerHTML =
+        insertSheets({ sheets });
+    } else {
+      window.location = "http://localhost:9494/src/account/account.html"
+    }
   }
-  if (response.ok) {
-    const sheets = await response.json();
-    document.querySelector(".container-smp-sheets").innerHTML =
-      insertSheets({ sheets });
-  } else {
-    alert("Server found an issue, " + response.statusText);
-  }
+  
 }
 
 function sheetClicked(evt) {
   console.log(evt.target);
   const id = findSiblingIdUsingDom(evt.target, ".card", ".this-is-id");
+  if (evt.target.dataset.type === "edit") {
+    
+  }
   console.log(evt.target.dataset.type);
   console.log(id);
 

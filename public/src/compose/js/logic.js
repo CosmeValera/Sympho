@@ -697,33 +697,35 @@ async function saveScore(evt) {
         if (isPublic === "Public"){
             var res = await fetch('http://localhost:9494/sheets')
             if (res.ok) {
-            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": [], "isPriv": false}
-            await fetch("http://34.175.197.150/sympho/sheets", {
-                method: "POST",
-                headers: {
-                    "Content-type" : "application/json",
-                },
-                body: JSON.stringify(sheet)
-                }
-            )
-        }else {
-            window.location = "http://localhost:9494/src/account/account.html"
-        }
+                var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": [], "isPriv": false}
+                await fetch("http://34.175.197.150/sympho/sheets", {
+                    method: "POST",
+                    headers: {
+                        "Content-type" : "application/json",
+                    },
+                    body: JSON.stringify(sheet)
+                    }
+                )
+            }else {
+                window.location = "http://localhost:9494/src/account/account.html"
+            }
         }else {
             var res = await fetch('/sheets')
             if (res.ok) {
                 
-            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": [], "isPriv": true}
-            await fetch("http://34.175.197.150/sympho/sheets", {
-                method: "POST",
-                headers: {
-                    "Content-type" : "application/json",
-                },
-                body: JSON.stringify(sheet)
-                }
-            )
+                var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": [], "isPriv": true}
+                await fetch("http://34.175.197.150/sympho/sheets", {
+                    method: "POST",
+                    headers: {
+                        "Content-type" : "application/json",
+                    },
+                    body: JSON.stringify(sheet)
+                    }
+                )
+            }else {
+                window.location = "http://localhost:9494/src/account/account.html"
+            }
         }
-    }
         
     }else {
         var res = await fetch("/mysheets")
@@ -737,6 +739,8 @@ async function saveScore(evt) {
                 body: JSON.stringify(sheet)
                 }
             )
+        }else {
+            window.location = "http://localhost:9494/src/account/account.html"
         }
     }
     modalForSaveScore.hide();
