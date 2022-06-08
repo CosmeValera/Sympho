@@ -9,7 +9,7 @@ async function loadSheets(word) {
         const regex = new RegExp(word, "i");
         sheets = sheets.filter(sheet => regex.test(sheet.compositor) || regex.test(sheet.nombre) || regex.test(sheet.instrumento));
       }
-      console.log("buenas")
+      sheets = sheets.filter(sheet => sheet.compositor == localStorage.getItem('userName'));
       document.querySelector(".container-smp-sheets").innerHTML =
         insertMySheets({ sheets });
     } else {
@@ -43,11 +43,13 @@ document.getElementById("filter").addEventListener("keyup", filterSheets);
 
 
 async function sheetClicked(evt) {
-  console.log(evt.target);
+  console.log(evt.target.dataset.type);
   const id = findSiblingIdUsingDom(evt.target, ".card", ".this-is-id");
+  console.log(id);
+  // debugger;
   if (evt.target.dataset.type === "remove") {
     console.log("hola")
-    var res = await fetch(`http://localhost:9495/mysheets/629fab60a669afa237788728`, {
+    var res = await fetch(`http://34.175.197.150/mysheets/${id}`, {
       method: "DELETE"
     })
     if (res.ok) {
@@ -57,10 +59,19 @@ async function sheetClicked(evt) {
       document.querySelector(".container-smp-sheets").innerHTML =
         insertMySheets({ sheets });
     } 
-    
+  } 
+  if (evt.target.dataset.type === "edit") {
+    var sheetData = await fetch(`http://34.175.197.150/mysheets/${id}`);
+    localStorage.setItem('sheetData', sheetData);
+    localStorage.setItem('typeOfCompose', "edit");
+    window.location = `http://localhost:9494/src/compose/compose.html`
   }
-  console.log(evt.target.dataset.type);
-  console.log(id);
+  if (evt.target.dataset.type === "details") {
+    var sheetData = await fetch(`http://34.175.197.150/mysheets/${id}`);
+    localStorage.setItem('sheetData', sheetData);
+    localStorage.setItem('typeOfCompose', "details");
+    window.location = `http://localhost:9494/src/compose/compose.html`
+  }
 }
 
 function findSiblingIdUsingDom(actualElement, parentClass, siblingClass) {

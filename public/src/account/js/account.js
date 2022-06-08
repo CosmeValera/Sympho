@@ -2,6 +2,7 @@ const pug_body = document.getElementById("pug-body")
 
 carga()
 async function carga() {
+    localStorage.typeOfCompose = "save";
     console.log(localStorage.user_id)
     var user    
     if (localStorage.user_id) {

@@ -58,6 +58,7 @@ var beat_value = 4;
 var timeSignature = "4/4";
 var keySignature = "C";
 var bpm = 100;
+var scoreId = "";
 var instrument = "piano";
 var scoreName = "";
 var composerName = "";
