@@ -172,56 +172,20 @@
 
         <!-- page content -->
         <div class="main">
-            <main class="container-fluid">
+            <main class="container-fluid row">
+
+                <div class="col-12 my-2">
+                    <label for="filter">Filter:</label>
+                    <input
+                        placeholder="Type to filter..."
+                        class="col-12 form-control ms-3 form-control-sm me-2"
+                        id="filter"
+                        type="search"/>
+                </div>
+
                 <div class="col-12 row container-smp-sheets">
                     <!-- HERE THE CARDS GO -->
 
-                    <div class="card col-md-6 my-2 shadow-sm">
-                        <div class="card-body">
-                            <p class="d-none this-is-id">1</p>
-                            <h4 class="card-title">
-                                Score name: Aleluya
-                            </h4>
-                            <p class="card-text">
-                                Score author: Pepe
-                            </p>
-                            <p class="card-text">
-                                Instrument: Violin
-                            </p>
-                        </div>
-                        <!-- Add edit button -->
-                        <div class="card-footer d-flex justify-content-between">
-                            <a href="#" class="btn btn-danger" data-type="remove">
-                                Remove
-                            </a>
-                            <a href="#" class="btn btn-primary" data-type="edit">
-                                Edit
-                            </a>
-                        </div>
-                    </div>
-                    <div class="card col-md-6 my-2 shadow-sm">
-                        <div class="card-body">
-                            <p class="d-none this-is-id">2</p>
-                            <h4 class="card-title">
-                                Score name: Night
-                            </h4>
-                            <p class="card-text">
-                                Score author: Paco
-                            </p>
-                            <p class="card-text">
-                                Instrument: Flute
-                            </p>
-                        </div>
-                        <!-- Add edit button -->
-                        <div class="card-footer d-flex justify-content-between">
-                            <a href="#" class="btn btn-danger" data-type="remove">
-                                Remove
-                            </a>
-                            <a href="#" class="btn btn-primary" data-type="edit">
-                                Edit
-                            </a>
-                        </div>
-                    </div>
                 </div>
             
             </main>

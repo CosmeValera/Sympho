@@ -1,11 +1,14 @@
-loadSheets()
-async function loadSheets() {
+async function loadSheets(word) {
   let response;
   if (localStorage.getItem('privateRepository') == "true") {
     response = await fetch("/mysheets");
     if (response.ok) {
       var res = await fetch("http://34.175.197.150/sympho/mysheets")
-      const sheets = await res.json();
+      var sheets = await res.json();
+      if (word) {
+        const regex = new RegExp(word, "i");
+        sheets = sheets.filter(sheet => regex.test(sheet.name));
+      }
       document.querySelector(".container-smp-sheets").innerHTML =
         insertSheets({ sheets });
     } else {
@@ -24,6 +27,15 @@ async function loadSheets() {
   }
   
 }
+
+function filterSheets(evt) {
+  console.log(evt.target.value);
+  loadSheets(evt.target.value);
+}
+
+
+document.getElementById("filter").addEventListener("keyup", filterSheets);
+
 
 function sheetClicked(evt) {
   console.log(evt.target);
@@ -47,3 +59,5 @@ function findSiblingIdUsingDom(actualElement, parentClass, siblingClass) {
 
 
 document.querySelector(".container-smp-sheets").addEventListener("click", sheetClicked);
+
+loadSheets();
