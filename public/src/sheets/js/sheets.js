@@ -7,8 +7,9 @@ async function loadSheets(word) {
       var sheets = await res.json();
       if (word) {
         const regex = new RegExp(word, "i");
-        sheets = sheets.filter(sheet => regex.test(sheet.name));
+        sheets = sheets.filter(sheet => regex.test(sheet.compositor) || regex.test(sheet.nombre) || regex.test(sheet.instrumento));
       }
+      console.log("buenas")
       document.querySelector(".container-smp-sheets").innerHTML =
         insertMySheets({ sheets });
     } else {
@@ -18,7 +19,11 @@ async function loadSheets(word) {
     response = await fetch("/sheets");
     if (response.ok) {
       var res = await fetch("http://34.175.197.150/sympho/sheets")
-      const sheets = await res.json();
+      var sheets = await res.json();
+      if (word) {
+        const regex = new RegExp(word, "i");
+        sheets = sheets.filter(sheet => regex.test(sheet.compositor) || regex.test(sheet.nombre) || regex.test(sheet.instrumento));
+      }
       document.querySelector(".container-smp-sheets").innerHTML =
         insertSheets({ sheets });
     } else {
@@ -56,8 +61,6 @@ async function sheetClicked(evt) {
   }
   console.log(evt.target.dataset.type);
   console.log(id);
-
-  // TODO Fetch sheet from server
 }
 
 function findSiblingIdUsingDom(actualElement, parentClass, siblingClass) {
