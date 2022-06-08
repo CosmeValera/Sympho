@@ -173,8 +173,14 @@
         <!-- page content -->
         <div class="main">
             <main>
-                <div id="pug-body">
-                <a class="btn btn-primary d-flex justify-content-center" href="http://localhost:9494/google/auth" role="button">Login with Google</a>
+                <!-- <p class="card-text">`${user.nombre}</p>
+                <img src="user.imagen" alt="userImage">
+                <a href="http://localhost:9494/logout" id="logout-btn" class="btn btn-primary d-flex justify-content-center" role="button">Logout</a> -->
+                <!-- p(class="card-text")= `${user.nombre}`
+img(src= `${user.imagen}`)
+a(id="logout-btn" class="btn btn-primary d-flex justify-content-center" href="http://localhost:9494/logout" role="button") Logout -->
+                <div id="pug-body" class="account-pug-class"> 
+                    <a class="btn btn-primary d-flex justify-content-center align-center" href="http://localhost:9494/google/auth" role="button">Login with Google</a>
                 <!-- Automatic add bar: 
                 <label class="switch switch-automatic-add-bar">
                     <input type="checkbox">

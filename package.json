@@ -12,7 +12,8 @@
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
     "run-api": "nodemon api_local/app.js",
-    "sheets-card-pug": "pug -c -D -n insertSheets -o public/src/sheets/js pug/musicScoreFromSheets.pug"
+    "sheets-card-pug": "pug -c -D -n insertSheets -o public/src/sheets/js pug/musicScoreFromSheets.pug",
+    "load-account-pug": "pug -c -D -n loadAccount -o public/src/account/js pug/loadAccount.pug"
   },
   "keywords": [],
   "author": {
