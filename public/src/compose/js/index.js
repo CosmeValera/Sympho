@@ -1,13 +1,16 @@
 function initialLoad() {
     //LOGIC
+    // createNewBarFullOfSilences(0);
     setInitialData();
-    createNewBarFullOfSilences(0);
+    carga();
 
     windowSizeChanged();
     mouseToggle();
 
     //DRAW
     setInitialLayout();
+
+    recalculateBars();
     draw();
 }
 

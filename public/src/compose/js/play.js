@@ -77,7 +77,7 @@ function calculateInstrument() {
 }
 
 function calculateNotes() {
-    let notes = [];
+    notesSimplified = [];
     for (let bar of BARS) {
         for (let note of bar.notes) {
             pitch = note.keys[0].charAt(0).toUpperCase();
@@ -87,17 +87,18 @@ function calculateNotes() {
             octave = note.keys[0].split("/").pop();
             duration = note.duration;
             rest = note.customTypes[0] === "r";
-            notes.push({
+            notesSimplified.push({
                 pitch,
                 accidental,
                 octave,
                 duration,
                 rest,
             });
+            console.log(notesSimplified);
         }
     }
 
-    return notes;
+    return notesSimplified;
 }
 
 function addDelayRegardingBpm(delay, noteValue, bpm) {
@@ -106,9 +107,9 @@ function addDelayRegardingBpm(delay, noteValue, bpm) {
 
 function playMusic() {
     notes = calculateNotes();
+    console.log(notes)
     synth = calculateInstrument();
     console.log(synth);
-    console.log(notes);
     delay = Tone.now();
     for (let i = 0; i < notes.length; i++) {
         let thisNoteLength = 4 / notes[i].duration;

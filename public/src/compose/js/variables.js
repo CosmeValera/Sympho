@@ -77,6 +77,7 @@ var delay = 0;
 var timeoutId;
 var toggleHamburguer = true;
 var BARS = [];
+var notesSimplified;
 
 
 var notesMap = new Map([

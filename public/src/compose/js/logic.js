@@ -4,6 +4,7 @@ function carga() {
         sheet = JSON.parse(localStorage.sheetData);
     }
     console.log(sheet);
+    console.log(sheet.value)
     let typeOfCompose = localStorage.typeOfCompose;
     if (typeOfCompose == "edit") {
         scoreId = sheet._id;
@@ -23,12 +24,54 @@ function carga() {
     } else {
         // modalSaveScore.dataset.id = "save"
     }
-    BARS = [];
+
+    notesSimplified = sheet.value;
+
+    console.log("notesSimplified", notesSimplified);
+    if (notesSimplified) {
+        createBarsWithSimplifiedNotes();
+    }
+    if (!notesSimplified) {
+        console.log("no notesSmiple")
+        createNewBarFullOfSilences(0);
+    }
+    
+}
+
+
+function createBarsWithSimplifiedNotes() {
+    let notesOfABar = [];
+    let barBeats = 0;
+    for (let noteSimpl of notesSimplified) {
+        // We insert notes until having 4 beats
+        let noteValue = 4/noteSimpl.duration;
+        barBeats += noteValue;
+        notesOfABar.push(noteSimpl);
+        if (barBeats == 4) {
+            createNewBarWithSimplifiedNotes(notesOfABar);
+            barBeats = 0;
+            notesOfABar = [];
+        }
+    }
+}
+
+function createNewBarWithSimplifiedNotes(notesOfABar) {
+    let barPos = BARS.length;
+    let widthAndX = calculateWidthAndX(barPos);
+    let heightAndY = calculateHeightAndY(barPos);
+
+    let stave = createStave(barPos, widthAndX, heightAndY);
+    let notes = []; 
+    for (let noteSimp of notesOfABar) {
+        // new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }),
+        notes.push(new VF.StaveNote({ clef: "treble", keys: [noteSimp.pitch + "/" + noteSimp.octave], duration: (noteSimp.duration) + ((noteSimp.rest)? "r" : "") }));
+    }
+
+    BARS[barPos] = new Bar(stave, notes, widthAndX, heightAndY);
 }
 
 divSaveScore.addEventListener("click", saveScore);
 
-carga();
 
 class Bar {
     constructor(stave, notes, x, y) {
@@ -854,6 +897,7 @@ async function saveScore(evt) {
     var isPublic =
         modalForSaveScore._dialog.querySelector("#type-of-score").value;
     let typeOfCompose = localStorage.typeOfCompose;
+    calculateNotes();
     if (typeOfCompose == "details") {
         return;
     } else if (typeOfCompose == "edit") {
@@ -864,7 +908,7 @@ async function saveScore(evt) {
                 nombre: scoreName,
                 compositor: localStorage.userName,
                 instrumento: instrument,
-                value: [],
+                value: notesSimplified,
                 isPriv: true,
             };
             await fetch(
@@ -891,7 +935,7 @@ async function saveScore(evt) {
                 nombre: scoreName,
                 compositor: localStorage.userName,
                 instrumento: instrument,
-                value: [],
+                value: notesSimplified,
                 isPriv: false,
             };
             await fetch("http://34.175.197.150/sympho/sheets", {
@@ -912,7 +956,7 @@ async function saveScore(evt) {
                 nombre: scoreName,
                 compositor: localStorage.userName,
                 instrumento: instrument,
-                value: [],
+                value: notesSimplified,
                 isPriv: true,
             };
             await fetch("http://34.175.197.150/sympho/sheets", {
