@@ -19,7 +19,7 @@ async function findAll() {
 async function findOne(id) {
     try {
        
-        const sheet = await sheets.findOne({"id":id.toString()})
+        const sheet = await sheets.findOne({"_id":mongo.ObjectId(id)})
         if (sheet) {
             return sheet
         }else {
@@ -35,7 +35,7 @@ async function findOne(id) {
 async function insertOne(obj) {
     try {
         
-        const respuesta = await sheets.insertOne({"id":obj.id.toString(),"nombre":obj.nombre.toString(), "value":obj.value.json()})
+        const respuesta = await sheets.insertOne({"nombre":obj.nombre.toString(), "value":obj.value, "compositor":obj.compositor.toString(), "instrumento": obj.instrumento.toString()})
         if (respuesta) {
             return respuesta
         }else {

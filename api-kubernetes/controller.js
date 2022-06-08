@@ -2,8 +2,20 @@ const service = require('./service')
 
 async function getController(req, res) {
     try {
-        const isPriv = req.body.isPriv
-        const sheet = await service.getOne(req.params.id, isPriv)
+        const sheet = await service.getOne(req.params.id, false)
+        if(sheet) {
+            res.send(sheet)
+        }else {
+            res.sendStatus(404)
+        }
+    } catch (error) {
+        res.sendStatus(500)
+    }
+}
+
+async function getPrivController(req, res) {
+    try {
+        const sheet = await service.getOne(req.params.id, true)
         if(sheet) {
             res.send(sheet)
         }else {
@@ -16,8 +28,20 @@ async function getController(req, res) {
 
 async function getAllController(req,res) {
     try {
-        const isPriv = req.body.isPriv
-        const sheets = await service.getAll(isPriv)
+        const sheets = await service.getAll(false)
+        if (sheets) {
+            res.json(sheets)
+        }else {
+            res.sendStatus(404)
+        }
+    } catch (error) {
+        res.sendStatus(500)
+    }
+}
+
+async function getAllPrivController(req,res) {
+    try {
+        const sheets = await service.getAll(true)
         if (sheets) {
             res.json(sheets)
         }else {
@@ -44,7 +68,7 @@ async function postController(req,res) {
 
 async function putController(req, res) {
     try{    
-        const serviceBody = {"id":req.params.id,"nombre":req.body.nombre, "value": req.body.value}
+        const serviceBody = {"id":req.params.id,"nombre":req.body.nombre, "value": req.body.value, "compositor": req.body.compositor, "instrumento": req.body.instrumento}
         const response = await service.update(serviceBody)
         if (response){
             return res.sendStatus(200)
@@ -70,21 +94,8 @@ async function deleteController(req, res) {
     }
 }
 
-async function loginController(req, res) {
-    try {
-        const response = await service.login(req.params.id, req.body)
-        if (response == 0) {
-            res.send(200)
-        }else if (response == 1){
-            res.sendStatus(401)
-        }else if (response == 2){
-            res.sendStatus(404)
-        }        
-    }catch(err) {
-        res.sendStatus(500)
-    }
-}
 
 
 
-module.exports = {getController, getAllController, postController, putController, deleteController, loginController}
+
+module.exports = {getController, getAllController, postController, putController, deleteController, getAllPrivController, getPrivController}
