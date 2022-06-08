@@ -10,7 +10,7 @@ async function loadSheets(word) {
         sheets = sheets.filter(sheet => regex.test(sheet.name));
       }
       document.querySelector(".container-smp-sheets").innerHTML =
-        insertSheets({ sheets });
+        insertMySheets({ sheets });
     } else {
       window.location = "http://localhost:9494/src/account/account.html"
     }
@@ -37,10 +37,21 @@ function filterSheets(evt) {
 document.getElementById("filter").addEventListener("keyup", filterSheets);
 
 
-function sheetClicked(evt) {
+async function sheetClicked(evt) {
   console.log(evt.target);
   const id = findSiblingIdUsingDom(evt.target, ".card", ".this-is-id");
-  if (evt.target.dataset.type === "edit") {
+  if (evt.target.dataset.type === "remove") {
+    console.log("hola")
+    var res = await fetch(`http://localhost:9495/mysheets/629fab60a669afa237788728`, {
+      method: "DELETE"
+    })
+    if (res.ok) {
+      console.log("buenas")
+      var res = await fetch("http://34.175.197.150/sympho/mysheets")
+      const sheets = await res.json();
+      document.querySelector(".container-smp-sheets").innerHTML =
+        insertMySheets({ sheets });
+    } 
     
   }
   console.log(evt.target.dataset.type);
@@ -55,8 +66,6 @@ function findSiblingIdUsingDom(actualElement, parentClass, siblingClass) {
   const id = divWithId.innerHTML.trim();
   return id;
 }
-
-
 
 document.querySelector(".container-smp-sheets").addEventListener("click", sheetClicked);
 
