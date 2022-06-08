@@ -19,7 +19,7 @@ async function findAll() {
 
 async function findOne(id) {
     try {
-        const sheet = await sheets.findOne({"id":id.toString()})
+        const sheet = await sheets.findOne({"_id":mongo.ObjectId(id)})
         if (sheet) {
             return sheet
         }else {
@@ -34,7 +34,7 @@ async function findOne(id) {
 async function insertOne(obj) {
     try {
         
-        const respuesta = await sheets.insertOne({"id":obj.id.toString(),"nombre":obj.nombre.toString(), "value":obj.value.json()})
+        const respuesta = await sheets.insertOne({"nombre":obj.nombre.toString(), "value":obj.value, "compositor":obj.compositor.toString(), "instrumento": obj.instrumento.toString()})
         if (respuesta) {
             if (obj.makePub) {
                 dbSheets.insertOne(obj)
@@ -50,7 +50,7 @@ async function insertOne(obj) {
 
 async function updateOne(obj) {
     try { 
-        const respuesta = await sheets.updateOne({"id":obj.id.toString()},{$set: {"nombre":obj.nombre.toString(),"value": obj.value.json()}})
+        const respuesta = await sheets.updateOne({"_id":mongo.ObjectId(obj.id)},{$set: {"nombre":obj.nombre.toString(), "value":obj.value, "compositor":obj.compositor.toString(), "instrumento": obj.instrumento.toString()}})
         if (respuesta) {
             return respuesta
         }else {
@@ -64,7 +64,11 @@ async function updateOne(obj) {
 
 async function deleteOne(id) {
     try{
-        const respuesta = await users.deleteOne({"id":id.toString()})
+        console.log(id)
+        const _id = mongo.ObjectId(id)
+        console.log(_id)
+        const respuesta = await sheets.deleteOne({"_id":_id})
+        console.log(respuesta)
         return respuesta 
     }catch(err) {
         throw new Error("Couldn't connect to DB")
@@ -78,3 +82,4 @@ function conn(userName) {
         sheets = db.db("api").collection(userName);
     })
 }
+

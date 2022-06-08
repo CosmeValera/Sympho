@@ -27,20 +27,21 @@ async function getOne(id, isPriv) {
 }
 
 async function create(obj) {
-    var sheet
-    if (obj.isPriv) {
-        sheet = await mysheets.findOne(obj.id)
-    }else {
+    
+    var sheetPriv
+    if (!obj.isPriv) {
+        var sheet
         sheet = await sheets.findOne(obj.id)
     }
-    if (sheet) {
+    sheetPriv = await mysheets.findOne(obj.id)
+    if (sheetPriv) {
         return null
     } else {
-        if (obj.isPriv) {
-            return await mysheets.insertOne(obj)
-        }else {
-            return await sheets.insertOne(obj)
+        if (!obj.isPriv) {
+            await sheets.insertOne(obj)
         }
+        return await mysheets.insertOne(obj)
+        
     }
 
 }
@@ -58,17 +59,16 @@ async function update(obj) {
 async function deleteOne(id) {
     try {
         const dbResponse = await mysheets.deleteOne(id)
+	    console.log(dbResponse.deletedCount)
         return dbResponse.deletedCount == 1
     } catch (error) {
         return error
     }
 }
 
-async function login(id, obj) {
-    
-}
+
 
 
 module.exports = {
-    getAll, getOne, create, update, deleteOne, login
+    getAll, getOne, create, update, deleteOne
 }
