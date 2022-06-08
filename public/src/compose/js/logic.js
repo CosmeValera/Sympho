@@ -64,7 +64,11 @@ function createNewBarWithSimplifiedNotes(notesOfABar) {
     let notes = []; 
     for (let noteSimp of notesOfABar) {
         // new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }),
-        notes.push(new VF.StaveNote({ clef: "treble", keys: [noteSimp.pitch + "/" + noteSimp.octave], duration: (noteSimp.duration) + ((noteSimp.rest)? "r" : "") }));
+        let noteStave = new VF.StaveNote({ clef: "treble", keys: [noteSimp.pitch + (noteSimp.accidental) + "/" + noteSimp.octave], duration: (noteSimp.duration) + ((noteSimp.rest)? "r" : "") }); 
+        if (noteSimp.accidental) {
+            noteStave.addAccidental(0, new VF.Accidental(noteSimp.accidental));
+        }
+        notes.push(noteStave);
     }
 
     BARS[barPos] = new Bar(stave, notes, widthAndX, heightAndY);
