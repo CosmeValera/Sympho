@@ -31,3 +31,15 @@ main.container-fluid {
     width: 100vw;
   }
 }
+
+main::-webkit-scrollbar {
+  width: 0.25rem;
+  /* height: 0.25rem; */
+  height: 0rem;
+}
+main::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+main::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+}
