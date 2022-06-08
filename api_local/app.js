@@ -9,7 +9,7 @@ const path = require('path')
 require('./auth')
 
 function isLoggedIn(req,res,next) {
-  req.user ? next() : res.redirect("http://localhost:9494/src/account/account.html");
+  req.user ? next() : res.sendStatus(401);
 }
 app.use(session({secret:"cats"}))
 app.use(passport.initialize())
@@ -31,13 +31,14 @@ app.get("/mysheets", isLoggedIn, (req, res) => {
 });
 
 app.get("/logout", isLoggedIn, (req, res) => {
-  res.clearCookie('connect.sid')
+  res.clearCookie("connect_sid")
+  res.clearCookie("g_state")
   res.redirect('http://localhost:9494/src/account/account.html')
 })
 
 
 app.get("/account", isLoggedIn, (req, res) => {
-  var user = {"nombre": req.user.displayName, "id_cuenta":req.user.sub}
+  var user = {"nombre": req.user.displayName,"imagen": req.user.picture, "id_cuenta":req.user.sub}
   res.send(user)
 })
 
