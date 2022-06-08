@@ -87,12 +87,19 @@ function calculateNotes() {
             octave = note.keys[0].split("/").pop();
             duration = note.duration;
             rest = note.customTypes[0] === "r";
+            
+            let hasDot = false;
+            if (note.modifiers[0] && checkIfHasDot(note)) {
+                hasDot = true;
+            }
+            
             notesSimplified.push({
                 pitch,
                 accidental,
                 octave,
                 duration,
                 rest,
+                hasDot
             });
             console.log(notesSimplified);
         }

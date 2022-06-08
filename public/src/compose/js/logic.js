@@ -4,7 +4,7 @@ function carga() {
         sheet = JSON.parse(localStorage.sheetData);
     }
     console.log(sheet);
-    console.log(sheet.value)
+    console.log(sheet.value);
     let typeOfCompose = localStorage.typeOfCompose;
     if (typeOfCompose == "edit") {
         scoreId = sheet._id;
@@ -32,20 +32,21 @@ function carga() {
         createBarsWithSimplifiedNotes();
     }
     if (!notesSimplified) {
-        console.log("no notesSmiple")
+        console.log("no notesSmiple");
         createNewBarFullOfSilences(0);
     }
-    
 }
-
 
 function createBarsWithSimplifiedNotes() {
     let notesOfABar = [];
     let barBeats = 0;
     for (let noteSimpl of notesSimplified) {
         // We insert notes until having 4 beats
-        let noteValue = 4/noteSimpl.duration;
+        let noteValue = 4 / noteSimpl.duration;
         barBeats += noteValue;
+        if (noteSimpl.hasDot) {
+            barBeats += noteValue/2;
+        }
         notesOfABar.push(noteSimpl);
         if (barBeats == 4) {
             createNewBarWithSimplifiedNotes(notesOfABar);
@@ -61,10 +62,36 @@ function createNewBarWithSimplifiedNotes(notesOfABar) {
     let heightAndY = calculateHeightAndY(barPos);
 
     let stave = createStave(barPos, widthAndX, heightAndY);
-    let notes = []; 
+    let notes = [];
     for (let noteSimp of notesOfABar) {
         // new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: "4r" }),
-        let noteStave = new VF.StaveNote({ clef: "treble", keys: [noteSimp.pitch + (noteSimp.accidental) + "/" + noteSimp.octave], duration: (noteSimp.duration) + ((noteSimp.rest)? "r" : "") }); 
+        let noteStave;
+        if (!noteSimp.hasDot || noteSimp.hasDot == false) {
+            noteStave = new VF.StaveNote({
+                clef: "treble",
+                keys: [
+                    noteSimp.pitch +
+                        noteSimp.accidental +
+                        "/" +
+                        noteSimp.octave,
+                ],
+                duration: noteSimp.duration + (noteSimp.rest ? "r" : ""),
+                auto_stem: true,
+            });
+        } else {
+            noteStave = new VF.StaveNote({
+                clef: "treble",
+                keys: [
+                    noteSimp.pitch +
+                        noteSimp.accidental +
+                        "/" +
+                        noteSimp.octave,
+                ],
+                duration: noteSimp.duration + (noteSimp.rest ? "r" : ""),
+                auto_stem: true,
+                dots: 1,
+            }).addDotToAll();
+        }
         if (noteSimp.accidental) {
             noteStave.addAccidental(0, new VF.Accidental(noteSimp.accidental));
         }
@@ -75,7 +102,6 @@ function createNewBarWithSimplifiedNotes(notesOfABar) {
 }
 
 divSaveScore.addEventListener("click", saveScore);
-
 
 class Bar {
     constructor(stave, notes, x, y) {
@@ -867,7 +893,8 @@ function openSettings() {
     modalForSettings._dialog.querySelector("#score-name").value = scoreName;
     modalForSettings._dialog.querySelector("#time-signature").value =
         timeSignature;
-    modalForSettings._dialog.querySelector("#instrument").value = instrument.charAt(0).toUpperCase() + instrument.slice(1);
+    modalForSettings._dialog.querySelector("#instrument").value =
+        instrument.charAt(0).toUpperCase() + instrument.slice(1);
     modalForSettings._dialog.querySelector("#bpm").value = bpm;
 }
 
@@ -915,21 +942,18 @@ async function saveScore(evt) {
                 value: notesSimplified,
                 isPriv: true,
             };
-            await fetch(
-                `http://34.175.197.150/sympho/mysheets/${scoreId}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-type": "application/json",
-                    },
-                    body: JSON.stringify(sheet),
-                }
-            );
+            await fetch(`http://34.175.197.150/sympho/mysheets/${scoreId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-type": "application/json",
+                },
+                body: JSON.stringify(sheet),
+            });
         } else {
             localStorage.typeOfCompose = "save";
             window.location = "http://localhost:9494/src/account/account.html";
         }
-    } 
+    }
     // This is normal case jsut upload the score
     localStorage.typeOfCompose = "save";
     if (isPublic === "Public") {
@@ -950,8 +974,7 @@ async function saveScore(evt) {
                 body: JSON.stringify(sheet),
             });
         } else {
-            window.location =
-                "http://localhost:9494/src/account/account.html";
+            window.location = "http://localhost:9494/src/account/account.html";
         }
     } else {
         var res = await fetch("/sheets");
@@ -972,8 +995,7 @@ async function saveScore(evt) {
             });
         } else {
             localStorage.typeOfCompose = "save";
-            window.location =
-                "http://localhost:9494/src/account/account.html";
+            window.location = "http://localhost:9494/src/account/account.html";
         }
     }
     localStorage.typeOfCompose = "save";
