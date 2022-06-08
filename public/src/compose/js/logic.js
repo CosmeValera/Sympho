@@ -1,18 +1,26 @@
 function carga() {
-    let sheet = localStorage.sheetData;
+    let sheet = "";
+    if (localStorage.sheetData) {
+        sheet = JSON.parse(localStorage.sheetData);
+    }
+    console.log(sheet);
     let typeOfCompose = localStorage.typeOfCompose;
     if (typeOfCompose == "edit") {
         scoreId = sheet._id;
         scoreName = sheet.nombre;
         instrument = sheet.instrumento ? sheet.instrumento : "Piano";
+        document.querySelector(".form-group-save").classList.add("d-none");
+        // document.querySelector("#type-of-score").classList.add("d-none");
         // modalSaveScore.dataset.id = "update"
     } else if (typeOfCompose == "details") {
         scoreId = sheet._id;
         scoreName = sheet.nombre;
         instrument = sheet.instrumento;
-        // modalSaveScore.dataset.id = "details"
+        modalSaveScore.classList.add("d-none");
+        divTrash.classList.add("d-none");
+        divAddBar.classList.add("d-none");
+        // modalSaveScore.removeAttribute("id") ;
     } else {
-        modalSaveScore.classList.add(".is-disabled");
         // modalSaveScore.dataset.id = "save"
     }
     BARS = [];
@@ -812,9 +820,7 @@ function openSettings() {
     modalForSettings._dialog.querySelector("#score-name").value = scoreName;
     modalForSettings._dialog.querySelector("#time-signature").value =
         timeSignature;
-    modalForSettings._dialog.querySelector("#instrument").value = instrument
-        ? instrument.charAt(0).toUpperCase() + instrument.slice(1)
-        : "";
+    modalForSettings._dialog.querySelector("#instrument").value = instrument.charAt(0).toUpperCase() + instrument.slice(1);
     modalForSettings._dialog.querySelector("#bpm").value = bpm;
 }
 
@@ -862,7 +868,7 @@ async function saveScore(evt) {
                 isPriv: true,
             };
             await fetch(
-                `http://34.175.197.150/sympho/sheets/${localStorage.sheetData._id}`,
+                `http://34.175.197.150/sympho/mysheets/${scoreId}`,
                 {
                     method: "PUT",
                     headers: {

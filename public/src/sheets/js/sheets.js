@@ -1,4 +1,6 @@
 async function loadSheets(word) {
+  localStorage.removeItem("typeOfCompose");
+  localStorage.removeItem("sheetData");
   let response;
   if (localStorage.getItem('privateRepository') == "true") {
     response = await fetch("/mysheets");
@@ -61,16 +63,23 @@ async function sheetClicked(evt) {
     } 
   } 
   if (evt.target.dataset.type === "edit") {
-    var sheetData = await fetch(`http://34.175.197.150/mysheets/${id}`);
-    localStorage.setItem('sheetData', sheetData);
-    localStorage.setItem('typeOfCompose', "edit");
-    window.location = `http://localhost:9494/src/compose/compose.html`
+    var sheetData = await fetch(`http://34.175.197.150/sympho/mysheets/${id}`);
+    if (sheetData.ok) {
+      let sheetDataJson = await sheetData.json();
+      localStorage.setItem('sheetData', JSON.stringify(sheetDataJson));
+      localStorage.setItem('typeOfCompose', "edit");
+      window.location = `http://localhost:9494/src/compose/compose.html`
+    }
   }
   if (evt.target.dataset.type === "details") {
-    var sheetData = await fetch(`http://34.175.197.150/mysheets/${id}`);
-    localStorage.setItem('sheetData', sheetData);
-    localStorage.setItem('typeOfCompose', "details");
-    window.location = `http://localhost:9494/src/compose/compose.html`
+    var sheetData = await fetch(`http://34.175.197.150/sympho/sheets/${id}`);
+    if (sheetData.ok) {
+      let sheetDataJson = await sheetData.json();
+      console.log(sheetDataJson);
+      localStorage.setItem('sheetData', JSON.stringify(sheetDataJson));
+      localStorage.setItem('typeOfCompose', "details");
+      window.location = `http://localhost:9494/src/compose/compose.html`
+    }
   }
 }
 
