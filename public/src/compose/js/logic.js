@@ -10,7 +10,7 @@ function carga() {
     }
 }
 
-modalSaveScore.addEventListener("click", saveScore)
+divSaveScore.addEventListener("click", saveScore)
 
 carga()
 class Bar {
@@ -693,12 +693,11 @@ function openSaveScore() {
 async function saveScore(evt) {
     // TODO: link to api
     var isPublic = modalForSaveScore._dialog.querySelector("#type-of-score").value
-    if (evt.target.dataset.id === "save") {
+    if (modalSaveScore.dataset.id === "save") {
         if (isPublic === "Public"){
-            var res = await fetch('/sheets')
+            var res = await fetch('http://localhost:9494/sheets')
             if (res.ok) {
-            var score = {BARS}
-            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": score, "isPriv": false}
+            var sheet = {"nombre":scoreName, "compositor":localStorage.userName, "instrumento": instrument, "value": [], "isPriv": false}
             await fetch("http://34.175.197.150/sympho/sheets", {
                 method: "POST",
                 headers: {
@@ -707,6 +706,8 @@ async function saveScore(evt) {
                 body: JSON.stringify(sheet)
                 }
             )
+        }else {
+            window.location = "http://localhost:9494/src/account/account.html"
         }
         }else {
             var res = await fetch('/sheets')

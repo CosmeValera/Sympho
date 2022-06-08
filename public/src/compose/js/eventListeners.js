@@ -83,7 +83,7 @@ divAddTie.addEventListener("click", addTie);
 modalSettings.addEventListener("click", openSettings)
 divBtnSaveSettings.addEventListener("click", saveSettings);
 modalSaveScore.addEventListener("click", openSaveScore);
-divSaveScore.addEventListener("click", saveScore);
+//divSaveScore.addEventListener("click", saveScore);
 divAddBar.addEventListener("click", addLastBar);
 divTrash.addEventListener("click", deleteLastBar);
 divSwitch.addEventListener('click', switchClicked);
