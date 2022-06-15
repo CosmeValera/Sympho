@@ -18,8 +18,11 @@ A desktop app to create, save, edit and play music scores. In addition, you can 
   ![](public/icons/readme_4.PNG)
   ![](public/icons/readme_5.PNG)
 
-- This is how the **private repository** looks like, the only difference with the **public repository** is that each card has an edit button and in the public repository it is instead a details button (you cannot edit another person's score). 
-![](public/icons/readme_8.PNG)
+- This is how the **private repository** looks like, each card has an edit button. 
+![](public/icons/readme_8-private.PNG)
+
+- This is how the **public repository** looks like, the only difference with the private repository is that each card has details button and in the private repository it is instead a edit button (you can edit your scores, but you cannot edit another person's score). 
+![](public/icons/readme_8-public.PNG)
 
 - This is how the **account** window looks like (before and after login in):
 ![](public/icons/readme_9.PNG)
