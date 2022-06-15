@@ -1,5 +1,5 @@
 # Sympho
-A desktop app to create, save, edit and play music scores. In addition, you can log in using google and then store your music sheets in your private and/or public repository.
+An app to compose, save, edit and play music scores. In addition, you can log in using Google and then store your music sheets in your private and/or public repository.
 - The **composer** window has 3 themes: dark, light and solar:
 ![](public/icons/readme_1.PNG)
 ![](public/icons/readme_2.PNG)
@@ -18,12 +18,12 @@ A desktop app to create, save, edit and play music scores. In addition, you can 
   ![](public/icons/readme_4.PNG)
   ![](public/icons/readme_5.PNG)
 
-- This is how the **private repository** looks like, each card has an edit button. 
+- This is how the **private repository** looks like (each card has an edit button):
 ![](public/icons/readme_8-private.PNG)
 
-- This is how the **public repository** looks like, the only difference with the private repository is that each card has details button and in the private repository it is instead a edit button (you can edit your scores, but you cannot edit another person's score). 
+- This is how the **public repository** looks like, the only difference with the private repository is that each card has a details button and in the private repository it is instead an edit button (you can edit your scores, but you cannot edit another person's score):
 ![](public/icons/readme_8-public.PNG)
 
-- This is how the **account** window looks like (before and after login in):
+- This is how the **account** window looks like (before and after the login):
 ![](public/icons/readme_9.PNG)
 ![](public/icons/readme_10.PNG)
