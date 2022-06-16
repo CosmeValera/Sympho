@@ -2,7 +2,7 @@ function initialLoad() {
     //LOGIC
     // createNewBarFullOfSilences(0);
     setInitialData();
-    carga();
+    loadDataIfEditOrDetailsSheet();
 
     windowSizeChanged();
     mouseToggle();

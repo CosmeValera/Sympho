@@ -1,6 +1,6 @@
 const pug_body = document.getElementById("pug-body")
 
-async function carga() {
+async function loadAccount() {
     localStorage.removeItem("typeOfCompose");
     localStorage.removeItem("sheetData");
     console.log(localStorage.user_id)
@@ -35,4 +35,4 @@ async function carga() {
     }
 }
     
-carga()
+loadAccount()

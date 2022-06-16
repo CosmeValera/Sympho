@@ -1,4 +1,33 @@
-function carga() {
+class Bar {
+    constructor(stave, notes, x, y) {
+        this.stave = stave;
+        this.notes = notes;
+        this.x = x;
+        this.y = y;
+    }
+}
+
+function setInitialData() {
+    isRest = false;
+    noteDuration = 4;
+    isMouseToggled = true;
+    isAddSharp = false;
+    isAddFlat = false;
+    selectedNote = null;
+    rendererWidth = BAR_SIZE_CLEF + EXTRA_RENDERER_SPACE;
+    rendererHeight = BAR_WIDTH + EXTRA_RENDERER_SPACE;
+    renderer.resize(rendererWidth, rendererHeight);
+    automaticAddBar = localStorage.getItem("automaticAddBar");
+    leftMargin = getComputedStyle(document.querySelector("body"))
+        .getPropertyValue("--margin-left")
+        .slice(0, -2);
+    rightMargin = getComputedStyle(document.querySelector("body"))
+        .getPropertyValue("--margin-right")
+        .slice(0, -2);
+    setDivBpm();
+}
+
+function loadDataIfEditOrDetailsSheet() {
     let sheet = "";
     if (localStorage.sheetData) {
         sheet = JSON.parse(localStorage.sheetData);
@@ -102,35 +131,6 @@ function createNewBarWithSimplifiedNotes(notesOfABar) {
 }
 
 divSaveScore.addEventListener("click", saveScore);
-
-class Bar {
-    constructor(stave, notes, x, y) {
-        this.stave = stave;
-        this.notes = notes;
-        this.x = x;
-        this.y = y;
-    }
-}
-
-function setInitialData() {
-    isRest = false;
-    noteDuration = 4;
-    isMouseToggled = true;
-    isAddSharp = false;
-    isAddFlat = false;
-    selectedNote = null;
-    rendererWidth = BAR_SIZE_CLEF + EXTRA_RENDERER_SPACE;
-    rendererHeight = BAR_WIDTH + EXTRA_RENDERER_SPACE;
-    renderer.resize(rendererWidth, rendererHeight);
-    automaticAddBar = localStorage.getItem("automaticAddBar");
-    leftMargin = getComputedStyle(document.querySelector("body"))
-        .getPropertyValue("--margin-left")
-        .slice(0, -2);
-    rightMargin = getComputedStyle(document.querySelector("body"))
-        .getPropertyValue("--margin-right")
-        .slice(0, -2);
-    setDivBpm();
-}
 
 function createNewBarFullOfSilences() {
     let barPos = BARS.length;
