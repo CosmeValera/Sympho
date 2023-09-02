@@ -1,5 +1,55 @@
 # Sympho
-An app to compose, save, edit and play music scores. In addition, you can log in using Google and then store your music sheets in your private and/or public repository.
+🎵 An app to compose, save, edit and play music scores. In addition, you can log in using Google and then store your music sheets in your private and/or public repository.
+![](public/icons/readme_3.PNG)
+
+## Tech
+### 📦 Prerequisites
+
+- Node 16.13.2 (or higher)
+- npm 8.1.2 (or higher)
+
+### 🚀 Getting Started
+This project can be executed either with Electron as a desktop app or as a web page using Live Server. Follow these steps to set up and run this project:
+1. Clone the code:
+```
+git clone git@github.com:CosmeValera/Sympho.git
+```
+
+2. Open your terminal and navigate to the root directory
+```
+cd Sympho
+```
+
+3. Install the dependencies
+```
+npm install
+```
+
+#### Desktop App (Electron)
+4. To run the project with Electron, use the following command*:
+```
+npm start
+```
+
+#### Webpage (Live Server)
+4. Alternatively, you can use Live Server to view the project as a web page. If you haven't already installed Live Server globally, you can do so with the following command::
+```
+npm install -g live-server
+```
+5. Start Live Server by running:
+```
+live-server
+```
+
+6. Open your web browser and enter the following URL to access the project:
+  
+[http://127.0.0.1:8080/public/src/compose/compose.html](http://127.0.0.1:8080/public/src/compose/compose.html)
+
+*Note: Please note that GoogleAuth and Kubernetes functionalities are not available in either option.
+
+---
+
+### Functionalities
 - The **composer** window has 3 themes: dark, light and solar:
 ![](public/icons/readme_1.PNG)
 ![](public/icons/readme_2.PNG)
@@ -27,3 +77,8 @@ An app to compose, save, edit and play music scores. In addition, you can log in
 - This is how the **account** window looks like (before and after the login):
 ![](public/icons/readme_9.PNG)
 ![](public/icons/readme_10.PNG)
+
+---
+
+### 👥 Contributing
+I welcome pull requests! If you're interested in collaborating or improving this project, feel free to fork the repository and submit your changes.
