@@ -32,7 +32,7 @@ npm start
 ```
 
 #### Webpage (Live Server)
-4. Alternatively, you can use Live Server to view the project as a web page. If you haven't already installed Live Server globally, you can do so with the following command::
+4. Alternatively, you can use Live Server to view the project as a web page. If you haven't already installed Live Server globally, you can do so with the following command:
 ```
 npm install -g live-server
 ```
@@ -41,7 +41,7 @@ npm install -g live-server
 live-server
 ```
 
-6. Open your web browser and enter the following URL to access the project:
+6. Open your web browser and enter the following URL to access the project*:
   
 [http://127.0.0.1:8080/public/src/compose/compose.html](http://127.0.0.1:8080/public/src/compose/compose.html)
 
