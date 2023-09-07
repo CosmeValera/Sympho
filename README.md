@@ -15,12 +15,12 @@ This project can be executed either with Electron as a desktop app or as a web p
 git clone git@github.com:CosmeValera/Sympho.git
 ```
 
-2. Open your terminal and navigate to the root directory
+2. Open your terminal and navigate to the root directory:
 ```
 cd Sympho
 ```
 
-3. Install the dependencies
+3. Install the dependencies:
 ```
 npm install
 ```
@@ -81,4 +81,4 @@ live-server
 ---
 
 ### 👥 Contributing
-I welcome pull requests! If you're interested in collaborating or improving this project, feel free to fork the repository and submit your changes.
+I welcome pull requests! If you're interested in collaborating or improving this project, feel free to fork the repository and create a pull request with your changes.
