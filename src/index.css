@@ -1,0 +1,255 @@
+/* Design tokens and base elements. Component styles live in App.css. */
+
+:root {
+  color-scheme: light;
+  --bg: #f4f1ea;
+  --surface: #fffdf8;
+  --paper: #fffefb;
+  --ink: #1d1b16;
+  --muted: #6d675c;
+  --line: #e3ddd0;
+  --line-strong: #cfc7b6;
+  --accent: #2f6fde;
+  --accent-ink: #fff;
+  --accent-soft: rgb(47 111 222 / 0.1);
+  --play: #e8590c;
+  --danger: #c92a2a;
+  --shadow: 0 1px 2px rgb(40 30 10 / 0.06), 0 8px 28px rgb(40 30 10 / 0.07);
+
+  --font-ui: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --header-height: 57px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #121316;
+  --surface: #1b1d22;
+  --paper: #202329;
+  --ink: #e9e6df;
+  --muted: #9a968c;
+  --line: #2e3138;
+  --line-strong: #3d414a;
+  --accent: #7aa2ff;
+  --accent-ink: #10131a;
+  --accent-soft: rgb(122 162 255 / 0.13);
+  --play: #ff9f43;
+  --danger: #ff6b6b;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 28px rgb(0 0 0 / 0.25);
+}
+
+:root[data-theme='solar'] {
+  color-scheme: light;
+  --bg: #f5eedb;
+  --surface: #eee8d5;
+  --paper: #fdf6e3;
+  --ink: #073642;
+  --muted: #657b83;
+  --line: #ddd6c1;
+  --line-strong: #c9c1a9;
+  --accent: #268bd2;
+  --accent-ink: #fdf6e3;
+  --accent-soft: rgb(38 139 210 / 0.12);
+  --play: #cb4b16;
+  --danger: #dc322f;
+}
+
+/* Before the app has set a theme, at least don't flash white at dark-mode users. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #121316;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+a {
+  color: var(--accent);
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.7em;
+  padding: 1px 6px;
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 0.78em;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* SMuFL glyphs (notes, rests, accidentals) drawn from the engraving font. */
+.glyph {
+  font-family: Bravura;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.button-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.button-primary:hover {
+  color: var(--accent-ink);
+  filter: brightness(1.08);
+}
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.icon-button:hover {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.icon-button.is-danger:hover {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+}
+
+select {
+  height: 36px;
+  padding: 0 30px 0 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) 52%,
+    calc(100% - 11px) 52%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  appearance: none;
+}
+
+select:hover {
+  border-color: var(--accent);
+}
+
+/* Hover tooltips for icon-only controls. */
+@media (hover: hover) {
+  [data-tip] {
+    position: relative;
+  }
+
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: calc(100% + 7px);
+    left: 50%;
+    z-index: 40;
+    padding: 4px 9px;
+    border-radius: 7px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateX(-50%);
+    animation: tip-in 0.12s ease 0.4s both;
+  }
+}
+
+@keyframes tip-in {
+  from {
+    opacity: 0;
+    translate: 0 -3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,84 +1,44 @@
 # Sympho
-🎵 An app to compose, save, edit and play music scores. In addition, you can log in using Google and then store your music sheets in your private and/or public repository.
-![](public/icons/readme_3.PNG)
 
-## Tech
-### 📦 Prerequisites
+Write sheet music in the browser, hear it played back, and share it with a link. Nothing to install and no account needed.
 
-- Node 16.13.2 (or higher)
-- npm 8.1.2 (or higher)
+**Live:** [sympho.cosmevalera.dev](https://sympho.cosmevalera.dev)
 
-### 🚀 Getting Started
-This project can be executed either with Electron as a desktop app or as a web page using Live Server. Follow these steps to set up and run this project:
-1. Clone the code:
-```
-git clone git@github.com:CosmeValera/Sympho.git
-```
+![The Sympho editor showing "Row, Row, Row Your Boat" in 6/8](docs/screenshot.png)
 
-2. Open your terminal and navigate to the root directory:
-```
-cd Sympho
-```
+## Features
 
-3. Install the dependencies:
-```
+- **Click to compose.** A ghost note follows the cursor and shows the pitch it will write. Click an existing note to select it.
+- **Keyboard entry.** Type `A`–`G` to add notes, `1`–`5` for values, arrows to move and select, `Space` to play. Press `?` in the app for the full list.
+- **Correct notation.** Notes that cross a barline are split and tied, gaps fill with rests, and 6/8 groups in dotted quarters. Engraving is done by [VexFlow](https://www.vexflow.com/).
+- **Playback** with sampled piano, flute, guitar and synth bass ([Tone.js](https://tonejs.github.io/)). The playing note is highlighted as it sounds.
+- **Library.** Scores save automatically in your browser, with thumbnails, duplicate and delete. Five examples to start from.
+- **Share links.** The whole score is compressed into the URL, so there is no server.
+- **Export** to MIDI, or SVG with the music fonts embedded.
+- **Undo/redo**, light, dark and solarized themes, and a layout that works on phones.
+
+## Development
+
+Requires Node.js 20 or newer.
+
+```sh
 npm install
+npm run dev       # http://localhost:5173
+npm test          # music engine tests (Vitest)
+npm run lint      # oxlint
+npm run build     # type-check and build into dist/
 ```
 
-#### Desktop App (Electron)
-4. To run the project with Electron, use the following command*:
-```
-npm start
-```
+## How it works
 
-#### Webpage (Live Server)
-4. Alternatively, you can use Live Server to view the project as a web page. If you haven't already installed Live Server globally, you can do so with the following command:
-```
-npm install -g live-server
-```
-5. Start Live Server by running:
-```
-live-server
-```
+- `src/music/` is a framework-free engine. A score is a list of measures of events, timed in 32nd-note ticks. Every edit flattens the music into a timeline, writes into it, and re-bars it, which is how ties, rests and meter changes stay consistent. It is covered by the tests in `score.test.ts`.
+- `src/render/` draws a score with VexFlow into SVG and returns a layout map, which the editor uses for hit-testing clicks and placing the ghost note.
+- `src/audio/` schedules playback on the Tone.js transport. Tone.js loads lazily on the first sound, and MIDI export also loads on demand.
+- `src/state/` holds the editor reducer (with undo history) and `localStorage` persistence.
+- Routing uses the URL hash (`#/library`, `#/example/<slug>`, `#/s/<data>`), so any static host works.
 
-6. Open your web browser and enter the following URL to access the project*:
-  
-[http://127.0.0.1:8080/public/src/compose/compose.html](http://127.0.0.1:8080/public/src/compose/compose.html)
+Stack: React 19, TypeScript, Vite, VexFlow 5, Tone.js, Vitest. Deployed on Vercel.
 
-*Note: Please note that GoogleAuth and Kubernetes functionalities are not available in either option.
+## History
 
----
-
-### Functionalities
-- The **composer** window has 3 themes: dark, light and solar:
-![](public/icons/readme_1.PNG)
-![](public/icons/readme_2.PNG)
-![](public/icons/readme_3.PNG)
-
-  - The left bar is the navigation menu where you can move to another window, there are 4: composer, public repository, private repository, account. And you can also change the theme.
-  - The top bar is a toolbar that has 2 clearly differentiated parts. In the left part you can choose the note duration and whether it's a rest. In the right part, you can also add accidentals, dots... to the notes you had already put.
-  - The right bar has some buttons, I'll proceed to explain them:
-    - The play button is used to reproduce the sheet music.
-    - The settings button is used to alter the settings of the score: you can change the settings to add a name to the score, change instrument, bpm... 
-    ![](public/icons/readme_6.PNG)
-    - The right bar also has a save button, with this button you can choose to save the sheet music publicly or privately, if you save it privately it'll be stored just in your private repository. However, if you save it publicly it'll be stored in the public repository AND in the private repository. 
-    ![](public/icons/readme_7.PNG)
-
-  - Sheet music example (computer & phone):
-  ![](public/icons/readme_4.PNG)
-  ![](public/icons/readme_5.PNG)
-
-- This is how the **private repository** looks like (each card has an edit button):
-![](public/icons/readme_8-private.PNG)
-
-- This is how the **public repository** looks like, the only difference with the private repository is that each card has a details button and in the private repository it is instead an edit button (you can edit your scores, but you cannot edit another person's score):
-![](public/icons/readme_8-public.PNG)
-
-- This is how the **account** window looks like (before and after the login):
-![](public/icons/readme_9.PNG)
-![](public/icons/readme_10.PNG)
-
----
-
-### 👥 Contributing
-I welcome pull requests! If you're interested in collaborating or improving this project, feel free to fork the repository and create a pull request with your changes.
+Sympho started as a team project by [Cosme Valera](https://github.com/CosmeValera) and [p-jgomariz](https://github.com/p-jgomariz): a vanilla JS app with Google sign-in, a MongoDB API and Kubernetes deployment manifests. Version 2 is a rewrite of the editor as a static React app. Accounts and the public repository were dropped in favour of local storage and share links. Triplets from the original aren't ported yet. The original code is in the git history.
