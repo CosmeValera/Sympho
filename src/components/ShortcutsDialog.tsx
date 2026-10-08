@@ -15,7 +15,7 @@ const COLUMNS: Group[][] = [
         [['A', '–', 'G'], 'Write a note in the blue box, in the nearest octave'],
         [['R'], 'Write a rest in the blue box'],
         [['Shift', 'A', '–', 'G'], 'Add a note above to the selected note, making a chord'],
-        [['Click'], 'Write a note there. On a note it selects it; above or below one it adds to the chord'],
+        [['Click'], 'Write a note there. On a notehead it selects that note; above or below one it adds to the chord'],
         [['1', '–', '5'], 'Value of the next note: whole to sixteenth (changes a note you clicked)'],
         [['.'], 'Dotted value'],
         [['W'], 'Write tool: clicks write notes'],
@@ -110,7 +110,7 @@ export function ShortcutsDialog({ open, onClose }: { open: boolean; onClose: () 
         <p className="muted shortcut-note">
           Value keys set the value of the next note you write; after clicking a note they change that note instead.
           While you type, a blue box shows where the next note goes: after the note you just wrote, or into a selected
-          rest. The orange line is where playback starts. Drag it, or click a note to move it there.
+          rest. The orange line is where playback starts. Drag it, or pick a note with the Select tool to move it there.
         </p>
       </div>
     </dialog>

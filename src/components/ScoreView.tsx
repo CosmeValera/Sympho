@@ -1,4 +1,13 @@
-import { type MouseEvent, type PointerEvent, type RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  type MouseEvent,
+  type PointerEvent,
+  type RefObject,
+  useEffect,
+  useEffectEvent,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import {
   TREBLE_TOP_LINE,
   clampDiatonic,
@@ -60,9 +69,6 @@ const NOTEHEAD: Record<Duration, string> = {
   '8': '\uE0A4',
   '16': '\uE0A4',
 }
-
-/** While writing, a click this many steps from a notehead picks the note rather than adding one to it. */
-const NOTE_REACH = 1
 
 /** Holding a finger this long on the staff while writing aims a note instead of scrolling. */
 const AIM_DELAY = 220
@@ -178,6 +184,8 @@ export function ScoreView(props: Props) {
   const [aiming, setAiming] = useState(false)
   // The click being handled is a finger's tap, rougher than a mouse click.
   const touched = useRef(false)
+  // Where the mouse is over the staff, to update the ghost note when the music changes under it.
+  const mouse = useRef<{ clientX: number; clientY: number } | null>(null)
 
   useEffect(() => {
     let live = true
@@ -231,6 +239,14 @@ export function ScoreView(props: Props) {
     onLayout?.(next)
   }, [score, width, scale, fontsReady, editable, onLayout])
 
+  // A click that adds a chord note leaves the mouse on it: the ghost now stands on a real note.
+  const refreshHover = useEffectEvent(() => {
+    if (hover && mouse.current) setHover(toHit(mouse.current))
+  })
+  useEffect(() => {
+    if (layout) refreshHover()
+  }, [layout])
+
   const hoverNoteId = hover?.noteId ?? null
   useEffect(() => {
     const svg = hostRef.current?.querySelector('svg')
@@ -268,7 +284,12 @@ export function ScoreView(props: Props) {
     return { x: (e.clientX - rect.left) / layout.scale, y: (e.clientY - rect.top) / layout.scale }
   }
 
-  /** What a click or tap at a point does. `tap` is a finger's quick tap, too rough to aim beside a note: on a note's column it picks the note. */
+  /**
+   * What a click or tap at a point does. While writing, a click on a notehead
+   * picks that note and anywhere else above or below it adds a note to make a
+   * chord. `tap` is a finger's quick tap, too rough to aim beside a note: on a
+   * note's column it picks the nearest note.
+   */
   const toHit = (e: { clientX: number; clientY: number }, tap = false): StaffHit | null => {
     const point = toLayout(e)
     if (!point || !layout) return null
@@ -279,8 +300,7 @@ export function ScoreView(props: Props) {
     const distance = (line: number) => Math.abs(line - hit.diatonic)
     const nearest = lines.length ? lines.reduce((a, b) => (distance(b) < distance(a) ? b : a)) : null
     if (tool === 'select') return { ...hit, noteId: target?.id ?? null, head: nearest, addTo: null }
-    // Near a notehead the click picks that note; elsewhere above or below a note it adds one to make a chord.
-    const near = nearest !== null && (tap || distance(nearest) <= NOTE_REACH)
+    const near = nearest !== null && (tap || distance(nearest) === 0)
     return {
       ...hit,
       noteId: near ? target!.id : null,
@@ -319,7 +339,9 @@ export function ScoreView(props: Props) {
       else if (Math.hypot(e.clientX - held.x, e.clientY - held.y) > AIM_SLOP) endAim()
       return
     }
-    if (e.pointerType === 'mouse') setHover(toHit(e))
+    if (e.pointerType !== 'mouse') return
+    mouse.current = { clientX: e.clientX, clientY: e.clientY }
+    setHover(toHit(e))
   }
 
   const onPointerUp = (e: PointerEvent<HTMLDivElement>) => {
@@ -368,7 +390,10 @@ export function ScoreView(props: Props) {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
-        onPointerLeave={() => setHover(null)}
+        onPointerLeave={() => {
+          mouse.current = null
+          setHover(null)
+        }}
         onContextMenu={(e) => touched.current && e.preventDefault()}
         onClick={onClick}
       >

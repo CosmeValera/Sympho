@@ -36,8 +36,8 @@ export interface EditorState {
   dots: 0 | 1
   tool: Tool
   /**
-   * Tick playback starts from, always the start of an event. It follows a picked
-   * selection, and pausing or dragging the marker moves it.
+   * Tick playback starts from, always the start of an event. It follows an event
+   * picked with the Select tool, and pausing or dragging the marker moves it.
    */
   playhead: number
   /**
@@ -89,10 +89,12 @@ export function initEditor(score: Score, persisted: boolean, saveAs: string | nu
 
 /**
  * Keeps the selection only if that event still exists, and syncs the caret to
- * it. A picked note also sets the input value, and a picked event moves the
- * playhead; a note just written does neither. Otherwise the playhead stays put,
- * snapped to whatever event now covers it, and so does the caret unless `cursor`
- * moves it. A chord keeps its selected note if it still has it, else selects its top one.
+ * it. A picked note also sets the input value, and an event picked with the
+ * Select tool moves the playhead; a note just written does neither, and while
+ * writing, picking a note to fix it leaves the playhead alone. Otherwise the
+ * playhead stays put, snapped to whatever event now covers it, and so does the
+ * caret unless `cursor` moves it. A chord keeps its selected note if it still
+ * has it, else selects its top one.
  */
 function withSelection(
   state: EditorState,
@@ -113,7 +115,7 @@ function withSelection(
     written: !!found && written,
     duration: note ? note.duration : state.duration,
     dots: note ? note.dots : state.dots,
-    playhead: picked ? picked.start : eventStart(score, state.playhead),
+    playhead: picked && state.tool === 'select' ? picked.start : eventStart(score, state.playhead),
     cursor: Math.min(cursor ?? (found ? entryTick(score, id) : state.cursor), scoreTicks(score)),
   }
 }

@@ -79,15 +79,20 @@ describe('caret', () => {
 describe('playhead', () => {
   // C D E F | G A B C, a quarter note is 8 ticks.
   const score = { ...newScore(), measures: parseMusic('C4:4 D4:4 E4:4 F4:4 | G4:4 A4:4 B4:4 C5:4', FOUR) }
-  const start = initEditor(score, true)
+  const writing = initEditor(score, true)
+  const start = editorReducer(writing, { type: 'tool', tool: 'select' })
   const ids = locateAll(score).map((l) => l.event.id)
 
   it('starts at the beginning', () => {
     expect(start.playhead).toBe(0)
   })
 
-  it('follows the selection', () => {
+  it('follows what the Select tool picks', () => {
     expect(editorReducer(start, { type: 'select', id: ids[5] }).playhead).toBe(40)
+  })
+
+  it('stays put when a note is picked while writing', () => {
+    expect(editorReducer(writing, { type: 'select', id: ids[5] }).playhead).toBe(0)
   })
 
   it('stays put when the selection is cleared', () => {

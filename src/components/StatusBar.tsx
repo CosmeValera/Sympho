@@ -68,7 +68,10 @@ function ToolHelp({ tool, value, touch }: { tool: Tool; value: DurationValue; to
     return tool === 'select' ? (
       <>Tap a note or rest to edit it.</>
     ) : (
-      <>Tap the staff to write {aValue(value)} note. Hold and slide to aim its pitch, then let go.</>
+      <>
+        Tap the staff to write {aValue(value)} note, or hold and slide to aim it. Aim above or below a note to make a
+        chord.
+      </>
     )
   }
   if (tool === 'select') {
@@ -81,7 +84,7 @@ function ToolHelp({ tool, value, touch }: { tool: Tool; value: DurationValue; to
   return (
     <>
       Type <kbd>A</kbd>–<kbd>G</kbd> or click the staff to write {aValue(value)} note,{' '}
-      <kbd>R</kbd> for a rest. Click a note to change it.
+      <kbd>R</kbd> for a rest. Click above or below a note to make a chord.
     </>
   )
 }

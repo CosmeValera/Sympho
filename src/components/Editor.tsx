@@ -187,8 +187,11 @@ export function Editor({ state, dispatch }: Props) {
     dispatch({ type: 'select', id, head })
     const found = locate(score, id)
     if (!found) return
-    // The marker follows the selection, so mid-playback this jumps there.
-    if (playing) return playFrom(found.start)
+    if (playing) {
+      // The marker follows what the Select tool picks, so mid-playback this jumps there.
+      if (tool === 'select') playFrom(found.start)
+      return
+    }
     if (found.event.pitches) void player.audition(found.event.pitches, score.instrument)
   }
 
