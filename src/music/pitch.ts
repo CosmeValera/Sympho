@@ -108,6 +108,30 @@ export function nearestPitch(step: Step, reference: Pitch, keySignature: string)
   return fromDiatonic(best, keySignature)
 }
 
-export function samePitch(a: Pitch | undefined, b: Pitch | undefined): boolean {
-  return !!a && !!b && toMidi(a) === toMidi(b)
+/** A chord's pitches lowest first, keeping one per staff position (the last given wins). */
+export function chordOf(pitches: Pitch[]): Pitch[] {
+  const byLine = new Map(pitches.map((p) => [diatonicIndex(p), p]))
+  return [...byLine.entries()].sort(([a], [b]) => a - b).map(([, p]) => p)
+}
+
+/** Whether `chord` sounds `pitch` (enharmonics count). */
+export function includesPitch(chord: Pitch[] | undefined, pitch: Pitch): boolean {
+  return !!chord?.some((p) => toMidi(p) === toMidi(pitch))
+}
+
+/** Whether two notes or chords have a pitch in common, which a tie can carry over. */
+export function sharesPitch(a: Pitch[] | undefined, b: Pitch[] | undefined): boolean {
+  return !!a?.some((p) => includesPitch(b, p))
+}
+
+/**
+ * `step` in the nearest octave above staff position `from` that `chord`
+ * hasn't got yet, as when stacking a chord upwards. Null above the range.
+ */
+export function pitchAbove(step: Step, from: number, chord: Pitch[], keySignature: string): Pitch | null {
+  const taken = new Set(chord.map(diatonicIndex))
+  let index = from
+  do index += (STEPS.indexOf(step) - (index % 7) + 7) % 7 || 7
+  while (taken.has(index))
+  return index <= HIGHEST ? fromDiatonic(index, keySignature) : null
 }

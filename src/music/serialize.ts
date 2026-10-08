@@ -1,7 +1,7 @@
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string'
 import { DURATIONS, canDot, measureTicks, valueTicks } from './duration'
 import { INSTRUMENTS } from './instruments'
-import { KEY_SIGNATURES, STEPS } from './pitch'
+import { KEY_SIGNATURES, STEPS, chordOf } from './pitch'
 import { type Segment, buildMeasures, newId } from './score'
 import type { Duration, NoteEvent, Pitch, Score, Step, TimeSignature } from './types'
 
@@ -36,9 +36,11 @@ function readEvent(v: unknown): Omit<NoteEvent, 'id'> | undefined {
   if (!DURATIONS.includes(duration)) return undefined
   const dots = v.dots === 1 && canDot(duration) ? 1 : 0
   if (v.kind === 'rest') return { kind: 'rest', duration, dots }
-  const pitch = readPitch(v.pitch)
-  if (v.kind !== 'note' || !pitch) return undefined
-  return { kind: 'note', duration, dots, pitch, tie: v.tie === true || undefined }
+  // Scores saved before chords have a single `pitch`.
+  const raw = Array.isArray(v.pitches) ? v.pitches.slice(0, 32) : [v.pitch]
+  const pitches = chordOf(raw.map(readPitch).filter((p): p is Pitch => !!p))
+  if (v.kind !== 'note' || pitches.length === 0) return undefined
+  return { kind: 'note', duration, dots, pitches, tie: v.tie === true || undefined }
 }
 
 /**
@@ -61,7 +63,7 @@ export function readScore(raw: unknown): Score | null {
       const event = readEvent(e)
       if (!event) continue
       const ticks = valueTicks(event)
-      segments.push({ start: pos, ticks, kind: event.kind, pitch: event.pitch, tie: event.tie })
+      segments.push({ start: pos, ticks, kind: event.kind, pitches: event.pitches, tie: event.tie })
       pos += ticks
     }
   })

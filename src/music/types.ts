@@ -14,8 +14,9 @@ export interface NoteEvent {
   kind: 'note' | 'rest'
   duration: Duration
   dots: 0 | 1
-  pitch?: Pitch
-  /** Tied to the following note (which must have the same pitch). */
+  /** A note's pitches, lowest first and at most one per staff position: one for a single note, more for a chord. */
+  pitches?: Pitch[]
+  /** Tied to the following note: the pitches the two share carry on. */
   tie?: boolean
 }
 

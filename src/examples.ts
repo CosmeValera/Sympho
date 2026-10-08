@@ -79,6 +79,19 @@ export const EXAMPLES: Example[] = [
       G4:4 G4:4 F4:4 F4:4 | E4:4 E4:4 D4:2 | G4:4 G4:4 F4:4 F4:4 | E4:4 E4:4 D4:2 |
       C4:4 C4:4 G4:4 G4:4 | A4:4 A4:4 G4:2 | F4:4 F4:4 E4:4 E4:4 | D4:4 D4:4 C4:2`,
   },
+  {
+    // The chord progression, with the first violin's descending line on top.
+    slug: 'canon-in-d',
+    title: 'Canon in D',
+    composer: 'Johann Pachelbel',
+    instrument: 'piano',
+    keySignature: 'D',
+    timeSignature: COMMON,
+    bpm: 72,
+    music: `
+      A4+D5+F#5:2 A4+C#5+E5:2 | F#4+B4+D5:2 F#4+A4+C#5:2 | D4+G4+B4:2 D4+F#4+A4:2 | D4+G4+B4:2 E4+A4+C#5:2 |
+      F#4+A4+D5:1`,
+  },
 ]
 
 /** A fresh, unsaved copy of an example. */

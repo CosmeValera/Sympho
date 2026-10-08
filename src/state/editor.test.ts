@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { parseMusic } from '../music/parse'
 import { parsePitch } from '../music/pitch'
-import { addMeasure, locateAll, moveSteps, placeAt, removeLastMeasure } from '../music/score'
+import { addMeasure, locateAll, moveSteps, placeAt, removeLastMeasure, removeNote } from '../music/score'
 import { newScore } from '../music/serialize'
 import { editorReducer, initEditor } from './editor'
 
@@ -157,6 +157,40 @@ describe('value', () => {
     expect(dotted.dots).toBe(1)
     expect(editorReducer(dotted, { type: 'duration', duration: '2' }).dots).toBe(0)
     expect(editorReducer(start, { type: 'duration', duration: '16', dots: 1 }).dots).toBe(0)
+  })
+})
+
+describe('chord', () => {
+  // A C major triad, then a single note.
+  const score = { ...newScore(), measures: parseMusic('C4+E4+G4:2 D4:2', FOUR) }
+  const start = initEditor(score, true)
+  const ids = locateAll(score).map((l) => l.event.id)
+  const picked = editorReducer(start, { type: 'select', id: ids[0] })
+  const E4 = 30
+  const G4 = 32
+
+  it('picks its top note unless told which', () => {
+    expect(picked.head).toBe(G4)
+    expect(editorReducer(start, { type: 'select', id: ids[0], head: E4 }).head).toBe(E4)
+    expect(editorReducer(start, { type: 'select', id: ids[1] }).head).toBe(29)
+  })
+
+  it('moves to another of its notes, but not one it lacks', () => {
+    expect(editorReducer(picked, { type: 'head', head: E4 }).head).toBe(E4)
+    expect(editorReducer(picked, { type: 'head', head: 31 })).toBe(picked)
+  })
+
+  it('edits the picked note and follows it', () => {
+    const middle = editorReducer(picked, { type: 'head', head: E4 })
+    const moved = editorReducer(middle, { type: 'edit', label: 'move E4 up', edit: (s, id, head) => moveSteps(s, id!, 1, head) })
+    expect(moved.head).toBe(31)
+    expect(moved.score.measures[0].events[0].pitches!.map((p) => p.step)).toEqual(['C', 'F', 'G'])
+  })
+
+  it('falls back to the top note once the picked one is removed', () => {
+    const middle = editorReducer(picked, { type: 'head', head: E4 })
+    const removed = editorReducer(middle, { type: 'edit', label: 'remove E4', edit: (s, id, head) => removeNote(s, id!, head) })
+    expect(removed.head).toBe(G4)
   })
 })
 

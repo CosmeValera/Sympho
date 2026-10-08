@@ -13,6 +13,7 @@ import {
   type EventBox,
   type MeasureBox,
   type ScoreLayout,
+  headId,
   loadMusicFonts,
   renderScore,
 } from '../render/renderScore'
@@ -24,11 +25,17 @@ export interface StaffHit {
   diatonic: number
   /** The click selects this existing note (or rest) instead of writing a new one. */
   noteId: string | null
+  /** Staff position of the note it selects in a chord. */
+  head: number | null
+  /** While writing, the click adds a note at `diatonic` to this note or chord. */
+  addTo: string | null
 }
 
 interface Props {
   score: Score
   selectedId: string | null
+  /** Staff position of the selected note in a chord. */
+  head: number | null
   playingId: string | null
   /** Tick the playback marker is drawn at. */
   playhead: number
@@ -54,19 +61,29 @@ const NOTEHEAD: Record<Duration, string> = {
   '16': '\uE0A4',
 }
 
-/** While writing, a click this many steps from a notehead picks the note rather than writing over it. */
+/** While writing, a click this many steps from a notehead picks the note rather than adding one to it. */
 const NOTE_REACH = 1
+
+/** Holding a finger this long on the staff while writing aims a note instead of scrolling. */
+const AIM_DELAY = 220
+
+/** A finger that moves this many pixels before then is scrolling. */
+const AIM_SLOP = 8
 
 /**
  * Scrolls the window just enough to show `el` when it's hidden behind the
- * sticky toolbar or below the bottom edge. Unlike scrollIntoView it leaves the
- * page alone while `el` is visible, so keyboard work doesn't nudge it.
+ * sticky toolbar (or, on a phone, the header and the toolbar docked at the
+ * bottom) or past the edge. Unlike scrollIntoView it leaves the page alone
+ * while `el` is visible, so keyboard work doesn't nudge it.
  */
 function reveal(el: Element) {
   const margin = 16
   const rect = el.getBoundingClientRect()
-  const top = (document.querySelector('.toolbar')?.getBoundingClientRect().bottom ?? 0) + margin
-  const bottom = window.innerHeight - margin
+  const bar = document.querySelector('.toolbar')?.getBoundingClientRect()
+  const docked = !!bar && bar.top > window.innerHeight / 2
+  const header = Math.max(0, document.querySelector('.app-header')?.getBoundingClientRect().bottom ?? 0)
+  const top = (docked ? header : (bar?.bottom ?? 0)) + margin
+  const bottom = (docked ? bar.top : window.innerHeight) - margin
   const by = rect.top < top ? rect.top - top : rect.bottom > bottom ? Math.min(rect.bottom - bottom, rect.top - top) : 0
   if (by === 0) return
   const instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -76,10 +93,12 @@ function reveal(el: Element) {
 function scaleFor(width: number): number {
   if (width >= 1000) return 1.2
   if (width >= 640) return 1.08
-  return 0.9
+  if (width >= 480) return 0.9
+  // A phone: small enough for two simple bars a row. Dense bars draw smaller still (`fitScale`).
+  return 0.8
 }
 
-function hitTest(layout: ScoreLayout, x: number, y: number): Omit<StaffHit, 'noteId'> | null {
+function hitTest(layout: ScoreLayout, x: number, y: number): Omit<StaffHit, 'noteId' | 'head' | 'addTo'> | null {
   for (const measure of layout.measures) {
     const { topLineY, spacing } = measure
     if (x < measure.x || x > measure.x + measure.width) continue
@@ -142,7 +161,7 @@ function snapTick(layout: ScoreLayout, x: number, y: number): number | null {
 }
 
 export function ScoreView(props: Props) {
-  const { score, selectedId, playingId, playhead, cursor, playing, editable, tool, value, onStaffClick, onSeek, onLayout } = props
+  const { score, selectedId, head, playingId, playhead, cursor, playing, editable, tool, value, onStaffClick, onSeek, onLayout } = props
   const paperRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const hostRef = useRef<HTMLDivElement>(null)
@@ -154,6 +173,11 @@ export function ScoreView(props: Props) {
   const swallowClick = useRef(false)
   // The last change came from a click on the staff, where the user is already looking: don't scroll for it.
   const byPointer = useRef(false)
+  // A finger held on the staff while writing. Once `active` it aims a note, shown as the ghost, and lifting it writes there.
+  const aim = useRef<{ pointerId: number; x: number; y: number; timer: number; active: boolean } | null>(null)
+  const [aiming, setAiming] = useState(false)
+  // The click being handled is a finger's tap, rougher than a mouse click.
+  const touched = useRef(false)
 
   useEffect(() => {
     let live = true
@@ -178,6 +202,19 @@ export function ScoreView(props: Props) {
     }
   }, [])
 
+  // The page mustn't scroll under a finger that is aiming a note. That takes a non-passive listener, which React doesn't attach.
+  useEffect(() => {
+    const el = canvasRef.current
+    if (!el) return
+    const onTouchMove = (e: TouchEvent) => {
+      if (aim.current?.active) e.preventDefault()
+    }
+    el.addEventListener('touchmove', onTouchMove, { passive: false })
+    return () => el.removeEventListener('touchmove', onTouchMove)
+  }, [])
+
+  useEffect(() => () => clearTimeout(aim.current?.timer), [])
+
   useLayoutEffect(() => {
     const el = paperRef.current
     if (!el) return
@@ -198,7 +235,7 @@ export function ScoreView(props: Props) {
   useEffect(() => {
     const svg = hostRef.current?.querySelector('svg')
     if (!svg || !layout) return
-    for (const cls of ['is-selected', 'is-playing', 'is-hover']) {
+    for (const cls of ['is-selected', 'is-playing', 'is-hover', 'is-chord', 'is-head']) {
       svg.querySelectorAll(`.${cls}`).forEach((el) => el.classList.remove(cls))
     }
     const mark = (id: string | null, cls: string) => {
@@ -207,7 +244,12 @@ export function ScoreView(props: Props) {
     mark(selectedId, 'is-selected')
     mark(playingId, 'is-playing')
     mark(hoverNoteId, 'is-hover')
-  }, [layout, selectedId, playingId, hoverNoteId])
+    // In a chord, the note that arrows and accidentals change stands out from the rest.
+    if (selectedId && head !== null && (locate(score, selectedId)?.event.pitches?.length ?? 0) > 1) {
+      mark(selectedId, 'is-chord')
+      mark(headId(selectedId, head), 'is-head')
+    }
+  }, [layout, score, selectedId, head, playingId, hoverNoteId])
 
   // Playback is always followed; a selection only when it moved off screen by keyboard.
   useEffect(() => {
@@ -220,25 +262,81 @@ export function ScoreView(props: Props) {
   /** Converts a pointer position to layout units. */
   const toLayout = (e: { clientX: number; clientY: number }): { x: number; y: number } | null => {
     const svg = hostRef.current?.querySelector('svg')
-    if (!svg) return null
+    if (!svg || !layout) return null
+    // The layout's own scale: a score too wide for the screen is drawn smaller than `scale`.
     const rect = svg.getBoundingClientRect()
-    return { x: (e.clientX - rect.left) / scale, y: (e.clientY - rect.top) / scale }
+    return { x: (e.clientX - rect.left) / layout.scale, y: (e.clientY - rect.top) / layout.scale }
   }
 
-  const toHit = (e: { clientX: number; clientY: number }): StaffHit | null => {
+  /** What a click or tap at a point does. `tap` is a finger's quick tap, too rough to aim beside a note: on a note's column it picks the note. */
+  const toHit = (e: { clientX: number; clientY: number }, tap = false): StaffHit | null => {
     const point = toLayout(e)
     if (!point || !layout) return null
     const hit = hitTest(layout, point.x, point.y)
     if (!hit) return null
     const target = locate(score, hit.box.id)?.event
-    if (tool === 'select') return { ...hit, noteId: target?.id ?? null }
-    const nearNote = target?.pitch && Math.abs(diatonicIndex(target.pitch) - hit.diatonic) <= NOTE_REACH
-    return { ...hit, noteId: target && nearNote ? target.id : null }
+    const lines = target?.pitches?.map(diatonicIndex) ?? []
+    const distance = (line: number) => Math.abs(line - hit.diatonic)
+    const nearest = lines.length ? lines.reduce((a, b) => (distance(b) < distance(a) ? b : a)) : null
+    if (tool === 'select') return { ...hit, noteId: target?.id ?? null, head: nearest, addTo: null }
+    // Near a notehead the click picks that note; elsewhere above or below a note it adds one to make a chord.
+    const near = nearest !== null && (tap || distance(nearest) <= NOTE_REACH)
+    return {
+      ...hit,
+      noteId: near ? target!.id : null,
+      head: near ? nearest : null,
+      addTo: !near && nearest !== null ? target!.id : null,
+    }
+  }
+
+  const endAim = () => {
+    clearTimeout(aim.current?.timer)
+    aim.current = null
+    setAiming(false)
+  }
+
+  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    swallowClick.current = false
+    touched.current = e.pointerType === 'touch'
+    endAim()
+    if (!editable || tool !== 'write' || e.pointerType !== 'touch' || !e.isPrimary) return
+    // A finger can't hover, so holding it still aims instead: the ghost note follows it until it lifts.
+    const at = { clientX: e.clientX, clientY: e.clientY }
+    const timer = window.setTimeout(() => {
+      if (!aim.current) return
+      aim.current.active = true
+      setAiming(true)
+      setHover(toHit(at))
+    }, AIM_DELAY)
+    aim.current = { pointerId: e.pointerId, x: e.clientX, y: e.clientY, timer, active: false }
   }
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (!editable || e.pointerType !== 'mouse') return
-    setHover(toHit(e))
+    if (!editable) return
+    const held = aim.current
+    if (held?.pointerId === e.pointerId) {
+      if (held.active) setHover(toHit(e))
+      else if (Math.hypot(e.clientX - held.x, e.clientY - held.y) > AIM_SLOP) endAim()
+      return
+    }
+    if (e.pointerType === 'mouse') setHover(toHit(e))
+  }
+
+  const onPointerUp = (e: PointerEvent<HTMLDivElement>) => {
+    const held = aim.current
+    if (held?.pointerId !== e.pointerId) return
+    endAim()
+    if (!held.active) return
+    // The note is written on lifting the finger; a click that follows mustn't write another.
+    swallowClick.current = true
+    setHover(null)
+    const hit = toHit(e)
+    if (hit) onStaffClick(hit)
+  }
+
+  const onPointerCancel = () => {
+    endAim()
+    if (touched.current) setHover(null)
   }
 
   const onClick = (e: MouseEvent<HTMLDivElement>) => {
@@ -247,7 +345,7 @@ export function ScoreView(props: Props) {
       swallowClick.current = false
       return
     }
-    const hit = toHit(e)
+    const hit = toHit(e, touched.current)
     if (hit) onStaffClick(hit)
   }
 
@@ -256,6 +354,7 @@ export function ScoreView(props: Props) {
     'score-canvas',
     editable && (writing ? 'is-writing' : 'is-selecting'),
     hover?.noteId && 'is-over-note',
+    aiming && 'is-aiming',
   ]
     .filter(Boolean)
     .join(' ')
@@ -265,14 +364,19 @@ export function ScoreView(props: Props) {
       <div
         ref={canvasRef}
         className={canvasClass}
-        onPointerDown={() => (swallowClick.current = false)}
+        onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
         onPointerLeave={() => setHover(null)}
+        onContextMenu={(e) => touched.current && e.preventDefault()}
         onClick={onClick}
       >
         <div ref={hostRef} className="score-svg" />
         {!fontsReady && <div className="score-loading">Loading engraver…</div>}
-        {layout && hover && !hover.noteId && writing && <Ghost layout={layout} hover={hover} duration={value.duration} score={score} />}
+        {layout && hover && !hover.noteId && writing && (
+          <Ghost layout={layout} hover={hover} duration={value.duration} score={score} lifted={aiming} />
+        )}
         {layout && editable && cursor !== null && (
           <Caret
             layout={layout}
@@ -408,8 +512,19 @@ function Caret({ layout, tick, ticks, cap, byPointer }: CaretProps) {
   )
 }
 
-function Ghost({ layout, hover, duration, score }: { layout: ScoreLayout; hover: StaffHit; duration: Duration; score: Score }) {
-  const { measure, box, diatonic } = hover
+interface GhostProps {
+  layout: ScoreLayout
+  hover: StaffHit
+  duration: Duration
+  score: Score
+  /** Aimed by a finger: the label goes higher, clear of the fingertip. */
+  lifted: boolean
+}
+
+function Ghost({ layout, hover, duration, score, lifted }: GhostProps) {
+  const { measure, box, diatonic, addTo } = hover
+  // Added to a chord, the note takes the chord's value.
+  const head = NOTEHEAD[locate(score, addTo)?.event.duration ?? duration]
   const { topLineY, spacing } = measure
   const x = measure.fullRest ? measure.noteStartX + 10 : box.cx
   const halfSpaces = TREBLE_TOP_LINE - diatonic
@@ -434,10 +549,14 @@ function Ghost({ layout, hover, duration, score }: { layout: ScoreLayout; hover:
           <line key={n} x1={x - 11} x2={x + 11} y1={topLineY + (n * spacing) / 2} y2={topLineY + (n * spacing) / 2} />
         ))}
         <text x={x} y={y} fontSize={fontSize} textAnchor="middle">
-          {NOTEHEAD[duration]}
+          {head}
         </text>
       </svg>
-      <span className="ghost-label" style={{ left: (x + 12) * s, top: (y - 30) * s }}>
+      <span
+        className={`ghost-label${lifted ? ' is-lifted' : ''}`}
+        style={lifted ? { left: x * s, top: y * s - 64 } : { left: (x + 12) * s, top: (y - 30) * s }}
+      >
+        {addTo ? '+ ' : ''}
         {pitchLabel(fromDiatonic(diatonic, score.keySignature))}
       </span>
     </>

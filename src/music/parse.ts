@@ -1,11 +1,12 @@
 import { DURATIONS, valueTicks } from './duration'
-import { parsePitch } from './pitch'
+import { chordOf, parsePitch } from './pitch'
 import { type Segment, buildMeasures } from './score'
-import type { Duration, Measure, TimeSignature } from './types'
+import type { Duration, Measure, Pitch, TimeSignature } from './types'
 
 /**
  * Compact text notation used for the bundled examples and tests:
- * `C5:4` quarter C5, `F#4:8.` dotted eighth, `r:2` half rest, `G4:2~` tied.
+ * `C5:4` quarter C5, `F#4:8.` dotted eighth, `r:2` half rest, `G4:2~` tied,
+ * `C4+E4+G4:2` a half-note chord.
  * Bar lines (`|`) are ignored; barring comes from the time signature.
  */
 export function parseMusic(text: string, ts: TimeSignature): Measure[] {
@@ -20,9 +21,9 @@ export function parseMusic(text: string, ts: TimeSignature): Measure[] {
     if (m[1] === 'r') {
       segments.push({ start: pos, ticks, kind: 'rest' })
     } else {
-      const pitch = parsePitch(m[1])
-      if (!pitch) throw new Error(`Bad pitch "${m[1]}"`)
-      segments.push({ start: pos, ticks, kind: 'note', pitch, tie: m[4] === '~' })
+      const pitches = m[1].split('+').map(parsePitch)
+      if (pitches.some((p) => !p)) throw new Error(`Bad pitch "${m[1]}"`)
+      segments.push({ start: pos, ticks, kind: 'note', pitches: chordOf(pitches as Pitch[]), tie: m[4] === '~' })
     }
     pos += ticks
   }

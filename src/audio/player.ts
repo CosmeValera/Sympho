@@ -1,7 +1,7 @@
 import { eventTicks, secondsPerTick } from '../music/duration'
 import { instrumentInfo } from '../music/instruments'
 import { toMidi } from '../music/pitch'
-import { locateAll } from '../music/score'
+import { locateAll, soundingNotes } from '../music/score'
 import type { Instrument, Pitch, Score } from '../music/types'
 
 type ToneModule = typeof import('tone')
@@ -9,6 +9,15 @@ type ToneModule = typeof import('tone')
 interface Voice {
   triggerAttackRelease(note: number, duration: number, time?: number, velocity?: number): unknown
   dispose(): unknown
+}
+
+/** Spreads notes over several one-note-at-a-time voices so they can play chords. */
+function pool(voices: Voice[]): Voice {
+  let next = 0
+  return {
+    triggerAttackRelease: (...args) => voices[next++ % voices.length].triggerAttackRelease(...args),
+    dispose: () => voices.forEach((v) => v.dispose()),
+  }
 }
 
 const PIANO_SAMPLES = ['A2', 'C3', 'D#3', 'F#3', 'A3', 'C4', 'D#4', 'F#4', 'A4', 'C5', 'D#5', 'F#5', 'A5', 'C6', 'D#6', 'F#6', 'A6', 'C7']
@@ -31,7 +40,12 @@ class Player {
   private run = 0
 
   private async load(): Promise<ToneModule> {
-    this.tone ??= await import('tone')
+    if (!this.tone) {
+      const Tone = await import('tone')
+      // Chords add up; keep their peaks from clipping.
+      Tone.getDestination().chain(new Tone.Limiter(-1))
+      this.tone = Tone
+    }
     await this.tone.start()
     return this.tone
   }
@@ -66,19 +80,26 @@ class Player {
         return Promise.resolve(synth)
       }
       case 'guitar': {
-        const pluck = new Tone.PluckSynth({ attackNoise: 1, dampening: 3800, resonance: 0.96 }).toDestination()
-        pluck.volume.value = -2
-        return Promise.resolve(pluck)
+        // One per string.
+        const strings = Array.from({ length: 6 }, () => {
+          const pluck = new Tone.PluckSynth({ attackNoise: 1, dampening: 3800, resonance: 0.96 }).toDestination()
+          pluck.volume.value = -2
+          return pluck
+        })
+        return Promise.resolve(pool(strings))
       }
       case 'bass': {
         const wah = new Tone.AutoWah(120, 10, -20).toDestination()
-        const bass = new Tone.MonoSynth({
-          oscillator: { type: 'sawtooth' },
-          envelope: { attack: 0.01, decay: 0.2, sustain: 0.7, release: 0.3 },
-          filterEnvelope: { attack: 0.01, decay: 0.2, sustain: 0.4, baseFrequency: 200, octaves: 3 },
-        }).connect(wah)
-        bass.volume.value = -10
-        return Promise.resolve(bass)
+        const voices = Array.from({ length: 4 }, () => {
+          const bass = new Tone.MonoSynth({
+            oscillator: { type: 'sawtooth' },
+            envelope: { attack: 0.01, decay: 0.2, sustain: 0.7, release: 0.3 },
+            filterEnvelope: { attack: 0.01, decay: 0.2, sustain: 0.4, baseFrequency: 200, octaves: 3 },
+          }).connect(wah)
+          bass.volume.value = -10
+          return bass
+        })
+        return Promise.resolve(pool(voices))
       }
     }
   }
@@ -102,10 +123,12 @@ class Player {
     void this.voice(instrument).catch(() => {})
   }
 
-  async audition(pitch: Pitch, instrument: Instrument): Promise<void> {
+  /** Plays a note or chord briefly, as feedback while editing. */
+  async audition(pitches: Pitch[], instrument: Instrument): Promise<void> {
     if (this.playing) return
     const { Tone, voice } = await this.voice(instrument)
-    voice.triggerAttackRelease(this.frequency(Tone, pitch, instrument), 0.45, Tone.now(), 0.8)
+    const now = Tone.now()
+    for (const pitch of pitches) voice.triggerAttackRelease(this.frequency(Tone, pitch, instrument), 0.45, now, 0.8)
   }
 
   get isPlaying(): boolean {
@@ -122,30 +145,27 @@ class Player {
     const transport = Tone.getTransport()
     const draw = Tone.getDraw()
     const spt = secondsPerTick(score.bpm, score.timeSignature)
-    const all = locateAll(score)
     let end = 0
     // Draw callbacks already queued can still fire after a stop; drop them.
     const live = (fn: () => void) => () => {
       if (run === this.run) fn()
     }
 
-    all.forEach((located, i) => {
-      const { event, start } = located
-      if (start < fromTick) return
+    for (const { event, start } of locateAll(score)) {
+      if (start < fromTick) continue
       const at = (start - fromTick) * spt
       end = Math.max(end, at + eventTicks(event) * spt)
       transport.schedule((time) => draw.schedule(live(() => handlers.onEvent(event.id, start)), time), at)
-
-      const prev = all[i - 1]
-      const continuesTie = prev?.event.tie && prev.start >= fromTick
-      if (event.kind !== 'note' || !event.pitch || continuesTie) return
-      // Tied notes sound as one: add up the chain.
-      let ticks = eventTicks(event)
-      for (let j = i; all[j].event.tie && all[j + 1]; j++) ticks += eventTicks(all[j + 1].event)
-      const freq = this.frequency(Tone, event.pitch, score.instrument)
+    }
+    for (const note of soundingNotes(score)) {
+      // A tie held over from before the start sounds for what is left of it.
+      const begin = Math.max(note.start, fromTick)
+      const ticks = note.start + note.ticks - begin
+      if (ticks <= 0) continue
+      const freq = this.frequency(Tone, note.pitch, score.instrument)
       const length = ticks * spt * 0.92
-      transport.schedule((time) => voice.triggerAttackRelease(freq, length, time, 0.8), at)
-    })
+      transport.schedule((time) => voice.triggerAttackRelease(freq, length, time, 0.8), (begin - fromTick) * spt)
+    }
 
     transport.schedule(
       (time) =>

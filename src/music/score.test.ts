@@ -2,25 +2,30 @@ import { describe, expect, it } from 'vitest'
 import { EXAMPLES, exampleScore } from '../examples'
 import { decompose, eventTicks, measureTicks } from './duration'
 import { parseMusic } from './parse'
-import { keyAlter, nearestPitch, parsePitch, toMidi, toVexKey } from './pitch'
+import { diatonicIndex, keyAlter, nearestPitch, parsePitch, pitchAbove, toMidi, toVexKey } from './pitch'
 import {
+  addPitch,
   entryTick,
   locateAll,
   moveSteps,
   placeAt,
+  removeNote,
   setAlter,
   setTimeSignature,
   setValue,
   toRest,
   toggleDot,
+  soundingNotes,
   toggleTie,
 } from './score'
 import { decodeShare, encodeShare, newScore, readScore } from './serialize'
-import type { Score, TimeSignature } from './types'
+import type { Pitch, Score, TimeSignature } from './types'
 
 const FOUR: TimeSignature = { beats: 4, beatValue: 4 }
 const THREE: TimeSignature = { beats: 3, beatValue: 4 }
 const SIX_EIGHT: TimeSignature = { beats: 6, beatValue: 8 }
+
+const name = (p: Pitch) => `${p.step}${['bb', 'b', '', '#', '##'][p.alter + 2]}${p.octave}`
 
 /** Renders measures back to the compact notation, for readable assertions. */
 function notation(score: Score): string {
@@ -28,7 +33,7 @@ function notation(score: Score): string {
     .map((m) =>
       m.events
         .map((e) => {
-          const head = e.kind === 'rest' ? 'r' : `${e.pitch!.step}${['bb', 'b', '', '#', '##'][e.pitch!.alter + 2]}${e.pitch!.octave}`
+          const head = e.kind === 'rest' ? 'r' : e.pitches!.map(name).join('+')
           return `${head}:${e.duration}${e.dots ? '.' : ''}${e.tie ? '~' : ''}`
         })
         .join(' '),
@@ -42,6 +47,7 @@ function scoreOf(music: string, ts: TimeSignature = FOUR, keySignature = 'C'): S
 
 const idAt = (score: Score, index: number) => locateAll(score)[index].event.id
 const C4 = parsePitch('C4')!
+const line = (text: string) => diatonicIndex(parsePitch(text)!)
 
 describe('decompose', () => {
   it('writes rests on the beat in 4/4', () => {
@@ -180,6 +186,65 @@ describe('editing', () => {
   })
 })
 
+describe('chords', () => {
+  it('reads a chord lowest note first', () => {
+    expect(notation(scoreOf('G4+C4+E4:2 r:2'))).toBe('C4+E4+G4:2 r:2')
+  })
+
+  it('stacks a typed letter in the next octave up that the chord has free', () => {
+    expect(name(pitchAbove('E', line('C4'), [C4], 'C')!)).toBe('E4')
+    expect(name(pitchAbove('C', line('C4'), [C4], 'C')!)).toBe('C5')
+    expect(name(pitchAbove('G', line('E4'), scoreOf('C4+E4+G4:1').measures[0].events[0].pitches!, 'D')!)).toBe('G5')
+    expect(pitchAbove('D', line('C7'), [parsePitch('C7')!], 'C')).toBeNull()
+  })
+
+  it('adds a note, keeping one per staff position', () => {
+    const score = scoreOf('C4:4 r:4 r:2')
+    const added = addPitch(score, idAt(score, 0), parsePitch('E4')!)
+    expect(notation(added.score)).toBe('C4+E4:4 r:4 r:2')
+    expect(added.head).toBe(line('E4'))
+    expect(addPitch(added.score, idAt(score, 0), parsePitch('Eb4')!).score).toBe(added.score)
+  })
+
+  it('moves the picked note, stepping over the others', () => {
+    const score = scoreOf('C4+D4+G4:2 r:2')
+    const moved = moveSteps(score, idAt(score, 0), 1, line('C4'))
+    expect(notation(moved.score)).toBe('D4+E4+G4:2 r:2')
+    expect(moved.head).toBe(line('E4'))
+    // Without a picked note it's the top one.
+    expect(notation(moveSteps(score, idAt(score, 0), -1).score)).toBe('C4+D4+F4:2 r:2')
+  })
+
+  it('changes the accidental of the picked note only', () => {
+    const score = scoreOf('C4+E4+G4:2 r:2')
+    expect(notation(setAlter(score, idAt(score, 0), 1, line('E4')).score)).toBe('C4+E#4+G4:2 r:2')
+  })
+
+  it('removes the picked note, and a last note becomes a rest', () => {
+    const score = scoreOf('C4+E4:2 D4:2')
+    const { score: single } = removeNote(score, idAt(score, 0), line('E4'))
+    expect(notation(single)).toBe('C4:2 D4:2')
+    expect(notation(removeNote(single, idAt(single, 0)).score)).toBe('r:2 D4:2')
+  })
+
+  it('ties the pitches two chords share, and drops the tie when they share none', () => {
+    const score = scoreOf('C4+E4:2~ C4+E4:2')
+    const { score: one } = moveSteps(score, idAt(score, 1), 1, line('C4'))
+    expect(notation(one)).toBe('C4+E4:2~ D4+E4:2')
+    expect(notation(moveSteps(one, idAt(one, 1), 1, line('E4')).score)).toBe('C4+E4:2 D4+F4:2')
+  })
+
+  it('ties a chord into a copy of itself', () => {
+    const score = scoreOf('C4+E4:2 r:2')
+    expect(notation(toggleTie(score, idAt(score, 0)).score)).toBe('C4+E4:2~ C4+E4:2')
+  })
+
+  it('sounds a tied pitch once and the others afresh', () => {
+    const sounding = soundingNotes(scoreOf('C4+E4:2~ C4+G4:2'))
+    expect(sounding.map((s) => `${name(s.pitch)}@${s.start}/${s.ticks}`)).toEqual(['C4@0/32', 'E4@0/16', 'G4@16/16'])
+  })
+})
+
 describe('serialization', () => {
   it('round-trips through a share link as a new copy', () => {
     const score = scoreOf('C#4:4. D4:8 E4:2~ | E4:4 r:4 Bb4:2', FOUR, 'F')
@@ -189,7 +254,21 @@ describe('serialization', () => {
     expect(copy.id).not.toBe(score.id)
   })
 
-  it('rejects or repairs garbage', () => {
+  it('round-trips chords', () => {
+    const score = scoreOf('C4+E4+G4:2~ C4+F4+A4:2', FOUR)
+    expect(notation(decodeShare(encodeShare(score))!)).toBe('C4+E4+G4:2~ C4+F4+A4:2')
+  })
+
+  it('sorts a chord and keeps one note per staff position', () => {
+    const repaired = readScore({
+      measures: [
+        { events: [{ kind: 'note', duration: '2', dots: 0, pitches: [{ step: 'G', octave: 4 }, { step: 'C', octave: 4 }, { step: 'C', octave: 4, alter: 1 }, 'x'] }] },
+      ],
+    })!
+    expect(notation(repaired)).toBe('C#4+G4:2 r:2')
+  })
+
+  it('rejects or repairs garbage, reading the single pitch of older saves', () => {
     expect(decodeShare('not-a-score')).toBeNull()
     expect(readScore({ measures: 'nope' })).toBeNull()
     const repaired = readScore({

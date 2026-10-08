@@ -1,5 +1,5 @@
 import { canDot } from '../music/duration'
-import { type EditResult, entryTick, eventStart, locate, locateAll, scoreTicks } from '../music/score'
+import { type EditResult, entryTick, eventStart, headOf, locate, locateAll, scoreTicks } from '../music/score'
 import type { Duration, Score } from '../music/types'
 
 const HISTORY_LIMIT = 200
@@ -24,6 +24,8 @@ export interface EditorState {
   past: Snapshot[]
   future: Snapshot[]
   selectedId: string | null
+  /** Staff position (diatonic index) of the selected chord note that edits apply to; null for a rest or no selection. */
+  head: number | null
   /**
    * The selection is the note just written rather than one picked to edit. Value
    * keys then set the next note's value instead of changing this one.
@@ -50,12 +52,14 @@ export type EditorAction =
   | {
       type: 'edit'
       label: string
-      edit: (score: Score, selectedId: string | null) => EditResult | Score
+      edit: (score: Score, selectedId: string | null, head: number | null) => EditResult | Score
       /** The edit wrote the note it selects. Left out, an edit to the note just written keeps it that. */
       written?: boolean
     }
   | { type: 'meta'; patch: Partial<Pick<Score, 'title' | 'composer'>> }
-  | { type: 'select'; id: string | null }
+  | { type: 'select'; id: string | null; head?: number | null }
+  /** Selects another note of the selected chord. */
+  | { type: 'head'; head: number }
   | { type: 'duration'; duration: Duration; dots?: 0 | 1 }
   | { type: 'tool'; tool: Tool }
   | { type: 'seek'; tick: number }
@@ -73,6 +77,7 @@ export function initEditor(score: Score, persisted: boolean, saveAs: string | nu
     past: [],
     future: [],
     selectedId: null,
+    head: null,
     written: false,
     duration: '4',
     dots: 0,
@@ -87,15 +92,16 @@ export function initEditor(score: Score, persisted: boolean, saveAs: string | nu
  * it. A picked note also sets the input value, and a picked event moves the
  * playhead; a note just written does neither. Otherwise the playhead stays put,
  * snapped to whatever event now covers it, and so does the caret unless `cursor`
- * moves it.
+ * moves it. A chord keeps its selected note if it still has it, else selects its top one.
  */
 function withSelection(
   state: EditorState,
   score: Score,
   id: string | null,
-  { cursor, written = false }: { cursor?: number; written?: boolean } = {},
+  { cursor, written = false, head }: { cursor?: number; written?: boolean; head?: number | null } = {},
 ): EditorState {
   const found = locate(score, id)
+  const pitches = found?.event.pitches
   const picked = found && !written ? found : null
   // A selected rest is a gap to fill, so the value being written stays.
   const note = picked?.event.kind === 'note' ? picked.event : null
@@ -103,6 +109,7 @@ function withSelection(
     ...state,
     score,
     selectedId: found ? id : null,
+    head: pitches ? headOf(pitches, head ?? (id === state.selectedId ? state.head : null)) : null,
     written: !!found && written,
     duration: note ? note.duration : state.duration,
     dots: note ? note.dots : state.dots,
@@ -124,11 +131,16 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return initEditor(action.score, action.persisted, action.saveAs)
 
     case 'edit': {
-      const out = action.edit(state.score, state.selectedId)
-      const { score, selectedId, cursor } = 'score' in out ? out : { score: out, selectedId: state.selectedId, cursor: undefined }
+      const out = action.edit(state.score, state.selectedId, state.head)
+      const { score, selectedId, cursor, head }: EditResult =
+        'score' in out ? out : { score: out, selectedId: state.selectedId }
       const same = selectedId === state.selectedId
       // An edit to the selected note leaves the caret where it was.
-      const options = { cursor: cursor ?? (same ? state.cursor : undefined), written: action.written ?? (same && state.written) }
+      const options = {
+        cursor: cursor ?? (same ? state.cursor : undefined),
+        written: action.written ?? (same && state.written),
+        head,
+      }
       if (score === state.score) return withSelection(state, score, selectedId, options)
       // A draft's first edit saves it, under its own name.
       const titled = state.saveAs ? { ...score, title: state.saveAs } : score
@@ -149,7 +161,13 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     }
 
     case 'select':
-      return withSelection(state, state.score, action.id)
+      return withSelection(state, state.score, action.id, { head: action.head })
+
+    case 'head': {
+      const pitches = locate(state.score, state.selectedId)?.event.pitches
+      if (!pitches || headOf(pitches, action.head) !== action.head) return state
+      return { ...state, head: action.head }
+    }
 
     case 'duration': {
       // A new value starts undotted unless it says otherwise.

@@ -16,8 +16,9 @@ import {
   Voice,
 } from 'vexflow/core'
 import { eventTicks, measureTicks } from '../music/duration'
-import { KEY_SIGNATURES, keyAlter, toVexKey } from '../music/pitch'
-import type { Duration, Measure, NoteEvent, Score } from '../music/types'
+import { diatonicIndex, toMidi, toVexKey } from '../music/pitch'
+import type { Duration, NoteEvent, Score } from '../music/types'
+import { MARGIN, type Placed, breakRows, fitScale } from './layout'
 
 let fontsReady: Promise<void> | undefined
 
@@ -73,6 +74,7 @@ export interface ScoreLayout {
 export interface RenderOptions {
   /** Available width in CSS pixels. */
   width: number
+  /** Preferred CSS pixels per layout unit; drawn smaller if the widest bar would not fit `width`. */
   scale?: number
   /** Draw a faint extra measure to click into. */
   ghostMeasure?: boolean
@@ -81,53 +83,13 @@ export interface RenderOptions {
   maxRows?: number
 }
 
-const MARGIN = 14
 export const ROW_HEIGHT = 124
 export const STAVE_OFFSET = 4
 const HEADER_HEIGHT = 74
-const EVENT_WIDTH: Record<Duration, number> = { '1': 48, '2': 40, '4': 34, '8': 28, '16': 24 }
 
-function naturalWidth(measure: Measure, keySignature: string, rowStart: boolean, first: boolean): number {
-  let width = 26
-  for (const e of measure.events) {
-    width += EVENT_WIDTH[e.duration] + (e.dots ? 6 : 0)
-    if (e.pitch && e.pitch.alter !== keyAlter(keySignature, e.pitch.step)) width += 10
-  }
-  if (rowStart) {
-    const accidentals = Math.abs(KEY_SIGNATURES.find((k) => k.id === keySignature)?.accidentals ?? 0)
-    width += 42 + accidentals * 11
-  }
-  if (first) width += 30
-  return width
-}
-
-interface Placed {
-  index: number
-  measure: Measure
-  ghost: boolean
-  rowStart: boolean
-  natural: number
-}
-
-/** Greedy line breaking, then each row is stretched to the full width. */
-function breakRows(measures: Placed[], available: number, keySignature: string): Placed[][] {
-  const rows: Placed[][] = []
-  let row: Placed[] = []
-  let used = 0
-  for (const m of measures) {
-    const inline = naturalWidth(m.measure, keySignature, false, m.index === 0)
-    if (row.length > 0 && used + inline > available) {
-      rows.push(row)
-      row = []
-      used = 0
-    }
-    const rowStart = row.length === 0
-    const natural = rowStart ? naturalWidth(m.measure, keySignature, true, m.index === 0) : inline
-    row.push({ ...m, rowStart, natural })
-    used += natural
-  }
-  if (row.length > 0) rows.push(row)
-  return rows
+/** Id VexFlow gives the notehead of a chord's note at staff position `line`; the SVG element is `vf-<headId>`. */
+export function headId(eventId: string, line: number): string {
+  return `${eventId}-${line}`
 }
 
 function restKey(duration: Duration): string {
@@ -135,9 +97,9 @@ function restKey(duration: Duration): string {
 }
 
 function makeNote(event: NoteEvent): StaveNote {
-  const rest = event.kind === 'rest' || !event.pitch
+  const rest = event.kind === 'rest' || !event.pitches
   const note = new StaveNote({
-    keys: [rest ? restKey(event.duration) : toVexKey(event.pitch!)],
+    keys: rest ? [restKey(event.duration)] : event.pitches!.map(toVexKey),
     duration: `${event.duration}${rest ? 'r' : ''}`,
     dots: event.dots,
     autoStem: !rest,
@@ -152,8 +114,8 @@ function makeNote(event: NoteEvent): StaveNote {
  * event landed, for hit testing. Colours are `currentColor`, so CSS themes it.
  */
 export function renderScore(container: HTMLElement, score: Score, options: RenderOptions): ScoreLayout {
-  const scale = options.scale ?? 1
-  const width = Math.max(260, options.width / scale)
+  const scale = fitScale(score.measures, score.keySignature, options.width, options.scale ?? 1)
+  const width = options.width / scale
   const available = width - MARGIN * 2
   const ts = score.timeSignature
   const tsLabel = `${ts.beats}/${ts.beatValue}`
@@ -237,6 +199,13 @@ export function renderScore(container: HTMLElement, score: Score, options: Rende
       Accidental.applyAccidentals([voice], score.keySignature)
       const beams = fullRest ? [] : Beam.generateBeams(notes, { groups: Beam.getDefaultBeamGroups(tsLabel) })
       new Formatter().joinVoices([voice]).formatToStave([voice], stave)
+      // Ids for each notehead so a chord's selected note can be highlighted. Set after
+      // formatting: VexFlow rebuilds the noteheads if it has to move a key.
+      if (!fullRest && !m.ghost) {
+        events.forEach((event, i) =>
+          event.pitches?.forEach((p, k) => notes[i].noteHeads[k].setAttribute('id', headId(event.id, diatonicIndex(p)))),
+        )
+      }
       voice.draw(ctx, stave)
       for (const beam of beams) beam.setContext(ctx).draw()
       if (m.ghost) ctx.closeGroup()
@@ -290,13 +259,23 @@ export function renderScore(container: HTMLElement, score: Score, options: Rende
     const a = staveNotes.get(event.id)
     const b = staveNotes.get(next.id)
     if (!a && !b) return
+    // Only the pitches the two notes share are tied.
+    const firstIndexes: number[] = []
+    const lastIndexes: number[] = []
+    event.pitches?.forEach((p, k) => {
+      const j = next.pitches?.findIndex((q) => toMidi(q) === toMidi(p)) ?? -1
+      if (j < 0) return
+      firstIndexes.push(k)
+      lastIndexes.push(j)
+    })
+    if (firstIndexes.length === 0) return
     if (a && b && a.row === b.row) {
-      new StaveTie({ firstNote: a.note, lastNote: b.note, firstIndexes: [0], lastIndexes: [0] }).setContext(ctx).draw()
+      new StaveTie({ firstNote: a.note, lastNote: b.note, firstIndexes, lastIndexes }).setContext(ctx).draw()
       return
     }
     // Across a line break the tie is drawn as two halves, one at each end.
-    if (a) new StaveTie({ firstNote: a.note, firstIndexes: [0] }).setContext(ctx).draw()
-    if (b) new StaveTie({ lastNote: b.note, lastIndexes: [0] }).setContext(ctx).draw()
+    if (a) new StaveTie({ firstNote: a.note, firstIndexes, lastIndexes: firstIndexes }).setContext(ctx).draw()
+    if (b) new StaveTie({ lastNote: b.note, firstIndexes: lastIndexes, lastIndexes }).setContext(ctx).draw()
   })
 
   return layout

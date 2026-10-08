@@ -2,19 +2,21 @@ import { type Dispatch, useEffect, useEffectEvent, useState } from 'react'
 import { player } from '../audio/player'
 import { downloadBlob, fileName } from '../download'
 import { type DurationValue, DURATIONS, aValue, canDot, measureTicks, valueName, valueTicks } from '../music/duration'
-import { fromDiatonic, nearestPitch, pitchLabel } from '../music/pitch'
+import { diatonicIndex, fromDiatonic, nearestPitch, pitchAbove, pitchLabel } from '../music/pitch'
 import {
   type EditResult,
   addMeasure,
+  addPitch,
+  headOf,
   locate,
   locateAll,
   moveSteps,
   placeAt,
   removeLastMeasure,
+  removeNote,
   setAlter,
   setTimeSignature,
   setValue,
-  toRest,
   toggleDot,
   toggleTie,
 } from '../music/score'
@@ -26,8 +28,9 @@ import { type StaffHit, ScoreView } from './ScoreView'
 import { ShortcutsDialog } from './ShortcutsDialog'
 import { StatusBar } from './StatusBar'
 import { Toolbar } from './Toolbar'
+import { useMediaQuery } from './useMediaQuery'
 
-type Edit = (score: Score, id: string) => EditResult | Score
+type Edit = (score: Score, id: string, head: number | null) => EditResult | Score
 
 const MIDDLE_LINE: Pitch = { step: 'B', octave: 4, alter: 0 }
 
@@ -43,10 +46,10 @@ function ownsKey(target: EventTarget | null, key: string): boolean {
   return !!target.closest('input, textarea, [contenteditable="true"]')
 }
 
-/** The pitch typed letters are placed nearest to: the last note before the caret. */
+/** The pitch typed letters are placed nearest to: the last note before the caret, or a chord's lowest note. */
 function referencePitch(score: Score, tick: number): Pitch {
-  const before = locateAll(score).filter((l) => l.event.pitch && l.start < tick)
-  return before.at(-1)?.event.pitch ?? MIDDLE_LINE
+  const before = locateAll(score).filter((l) => l.event.pitches && l.start < tick)
+  return before.at(-1)?.event.pitches?.[0] ?? MIDDLE_LINE
 }
 
 /** The event being heard; `id` is null until the first one sounds. */
@@ -74,6 +77,9 @@ export function Editor({ state, dispatch }: Props) {
   const selected = located?.event ?? null
   // A note picked to edit, as opposed to one just written: value keys change it.
   const pickedNote = selected?.kind === 'note' && !state.written ? selected : null
+  // The note of the selection that arrows, accidentals and Del change: in a chord, the one picked out.
+  const headPitch = selected?.pitches?.find((p) => diatonicIndex(p) === state.head) ?? null
+  const inChord = (selected?.pitches?.length ?? 0) > 1
   // Non-null while playing.
   const [sounding, setSounding] = useState<Sounding | null>(null)
   const playing = sounding !== null
@@ -85,6 +91,8 @@ export function Editor({ state, dispatch }: Props) {
   // and a click on the staff, Esc or playing hides it. A mouse user already sees where a click writes.
   const [typing, setTyping] = useState(false)
   const showCaret = tool === 'write' && typing && !playing
+  // A finger rather than a mouse: the status bar talks about taps and the toolbar instead of keys.
+  const touch = useMediaQuery('(pointer: coarse)')
 
   const notify = (text: string) => setToast({ text, at: Date.now() })
 
@@ -138,14 +146,18 @@ export function Editor({ state, dispatch }: Props) {
   }
 
   const auditionSelected = useEffectEvent(() => {
-    if (selected?.pitch) void player.audition(selected.pitch, score.instrument)
+    if (selected?.pitches) void player.audition(selected.pitches, score.instrument)
   })
   useEffect(() => {
     if (auditionCount) auditionSelected()
   }, [auditionCount])
 
   /** `label` names the edit in undo messages, in lower case: "write C5 quarter". */
-  const edit = (label: string, fn: (score: Score, selectedId: string | null) => EditResult | Score, options: EditOptions = {}) => {
+  const edit = (
+    label: string,
+    fn: (score: Score, selectedId: string | null, head: number | null) => EditResult | Score,
+    options: EditOptions = {},
+  ) => {
     change({ type: 'edit', label, edit: fn, written: options.written })
     if (options.audition) setAuditionCount((n) => n + 1)
   }
@@ -153,7 +165,7 @@ export function Editor({ state, dispatch }: Props) {
   /** Edits the selected event; does nothing without a selection. */
   const editSelected = (label: string, fn: Edit, options: EditOptions = {}) => {
     if (!selectedId) return
-    edit(label, (s, id) => (id ? fn(s, id) : s), options)
+    edit(label, (s, id, head) => (id ? fn(s, id, head) : s), options)
   }
 
   const undo = () => {
@@ -170,13 +182,26 @@ export function Editor({ state, dispatch }: Props) {
     notify(`Redid: ${next.label}`)
   }
 
-  const select = (id: string | null) => {
-    dispatch({ type: 'select', id })
+  /** Selects an event; `head` picks a note of a chord, else it's the top one. */
+  const select = (id: string | null, head?: number | null) => {
+    dispatch({ type: 'select', id, head })
     const found = locate(score, id)
     if (!found) return
     // The marker follows the selection, so mid-playback this jumps there.
     if (playing) return playFrom(found.start)
-    if (found.event.pitch) void player.audition(found.event.pitch, score.instrument)
+    if (found.event.pitches) void player.audition(found.event.pitches, score.instrument)
+  }
+
+  /** Picks the next note up or down in the selected chord. Returns whether there is a chord to move in. */
+  const moveHead = (delta: 1 | -1): boolean => {
+    const pitches = selected?.pitches
+    if (!pitches || pitches.length < 2) return false
+    const next = pitches[pitches.findIndex((p) => diatonicIndex(p) === state.head) + delta]
+    if (next) {
+      dispatch({ type: 'head', head: diatonicIndex(next) })
+      void player.audition([next], score.instrument)
+    }
+    return true
   }
 
   const chooseTool = (next: Tool) => dispatch({ type: 'tool', tool: next })
@@ -201,18 +226,22 @@ export function Editor({ state, dispatch }: Props) {
 
   const step = (steps: number) => {
     if (selected?.kind !== 'note') return
-    const label = `move ${steps > 0 ? 'up' : 'down'} ${Math.abs(steps) === 7 ? 'an octave' : 'a step'}`
-    editSelected(label, (s, id) => moveSteps(s, id, steps), { audition: true })
+    const which = inChord && headPitch ? `${pitchLabel(headPitch)} ` : ''
+    const label = `move ${which}${steps > 0 ? 'up' : 'down'} ${Math.abs(steps) === 7 ? 'an octave' : 'a step'}`
+    editSelected(label, (s, id, head) => moveSteps(s, id, steps, head), { audition: true })
   }
 
   const alter = (next: number) => {
     const clamped = Math.max(-2, Math.min(2, next))
-    editSelected(`make ${ALTER_NAMES[clamped]}`, (s, id) => setAlter(s, id, clamped), { audition: true })
+    const which = inChord && headPitch ? `${headPitch.step} ` : ''
+    editSelected(`make ${which}${ALTER_NAMES[clamped]}`, (s, id, head) => setAlter(s, id, clamped, head), { audition: true })
   }
 
   const tie = () => editSelected(selected?.tie ? 'remove tie' : 'tie to next note', toggleTie)
 
-  const toRestSelected = () => editSelected('turn into a rest', toRest)
+  /** Deletes the picked note of a chord, or turns a single note into a rest. */
+  const removeSelected = () =>
+    editSelected(inChord && headPitch ? `remove ${pitchLabel(headPitch)} from chord` : 'turn into a rest', removeNote)
 
   /** Writes a note (or a rest when `letter` is null) at the caret, which moves past it. Typing is writing, so it leaves the select tool. */
   const write = (letter: Step | null) => {
@@ -231,6 +260,17 @@ export function Editor({ state, dispatch }: Props) {
     )
   }
 
+  /** Adds `letter` to the selected note, above it (in a chord, above its picked note). Without a note, it's written. */
+  const addToChord = (letter: Step) => {
+    const pitches = selected?.pitches
+    if (!pitches) return write(letter)
+    if (tool !== 'write') chooseTool('write')
+    setTyping(true)
+    const pitch = pitchAbove(letter, headOf(pitches, state.head), pitches, score.keySignature)
+    if (!pitch) return notify(`No ${letter} fits above: C7 is the highest note`)
+    editSelected(`add ${pitchLabel(pitch)} to chord`, (s, id) => addPitch(s, id, pitch), { audition: true })
+  }
+
   const moveSelection = (delta: 1 | -1) => {
     const all = locateAll(score)
     const index = all.findIndex((l) => l.event.id === selectedId)
@@ -241,9 +281,13 @@ export function Editor({ state, dispatch }: Props) {
   const onStaffClick = (hit: StaffHit) => {
     player.preload(score.instrument)
     setTyping(false)
-    if (hit.noteId) return select(hit.noteId)
+    if (hit.noteId) return select(hit.noteId, hit.head)
     if (tool === 'select') return select(null)
     const pitch = fromDiatonic(hit.diatonic, score.keySignature)
+    const chord = hit.addTo
+    if (chord) {
+      return edit(`add ${pitchLabel(pitch)} to chord`, (s) => addPitch(s, chord, pitch), { audition: true, written: true })
+    }
     edit(`write ${pitchLabel(pitch)} ${valueName(value)}`, (s) => placeAt(s, hit.box.tick, value, pitch), {
       audition: true,
       written: true,
@@ -274,9 +318,16 @@ export function Editor({ state, dispatch }: Props) {
   }
 
   const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
-    if (shortcutsOpen || e.altKey || ownsKey(e.target, e.key)) return
+    if (shortcutsOpen || ownsKey(e.target, e.key)) return
     const key = e.key
     const mod = e.ctrlKey || e.metaKey
+
+    // Alt is left to the browser, except to move around a chord.
+    if (e.altKey) {
+      if ((key !== 'ArrowUp' && key !== 'ArrowDown') || mod || !moveHead(key === 'ArrowUp' ? 1 : -1)) return
+      e.preventDefault()
+      return
+    }
 
     if (mod) {
       const lower = key.toLowerCase()
@@ -289,7 +340,8 @@ export function Editor({ state, dispatch }: Props) {
 
     const letter = key.toUpperCase()
     if (/^[A-G]$/.test(letter) && !e.repeat) {
-      write(letter as Step)
+      if (e.shiftKey) addToChord(letter as Step)
+      else write(letter as Step)
     } else if (letter === 'R' && !e.repeat) {
       write(null)
     } else if (letter === 'S' && !e.repeat) {
@@ -305,15 +357,14 @@ export function Editor({ state, dispatch }: Props) {
       moveSelection(key === 'ArrowRight' ? 1 : -1)
       setTyping(true)
     } else if (key === '+' || key === '=' || key === '-' || letter === 'N') {
-      const pitch = selected?.pitch
-      if (!pitch) return
-      alter(letter === 'N' ? 0 : pitch.alter + (key === '-' ? -1 : 1))
+      if (!headPitch) return
+      alter(letter === 'N' ? 0 : headPitch.alter + (key === '-' ? -1 : 1))
     } else if (key === '.') {
       toggleDots()
     } else if (letter === 'T') {
       tie()
     } else if (key === 'Delete' || key === 'Backspace') {
-      toRestSelected()
+      removeSelected()
     } else if (key === ' ') {
       // Handled here even on a focused button, which would otherwise take Space as a click.
       if (e.shiftKey) playFrom(0)
@@ -362,6 +413,7 @@ export function Editor({ state, dispatch }: Props) {
         tool={tool}
         value={value}
         selected={selected}
+        pitch={headPitch}
         keySignature={score.keySignature}
         playing={playing}
         atStart={!playing && playhead === 0}
@@ -377,7 +429,7 @@ export function Editor({ state, dispatch }: Props) {
         onStep={step}
         onAlter={alter}
         onTie={tie}
-        onDelete={toRestSelected}
+        onDelete={removeSelected}
         onUndo={undo}
         onRedo={redo}
         onAddBar={() => edit('add bar', addMeasure)}
@@ -390,15 +442,18 @@ export function Editor({ state, dispatch }: Props) {
         tool={tool}
         value={value}
         selected={located}
+        head={headPitch}
         written={state.written}
         cursor={showCaret ? cursor : null}
         marker={marker}
         playing={playing}
+        touch={touch}
       />
 
       <ScoreView
         score={score}
         selectedId={selectedId}
+        head={state.head}
         playingId={sounding?.id ?? null}
         playhead={marker}
         cursor={showCaret ? cursor : null}

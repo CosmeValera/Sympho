@@ -1,8 +1,8 @@
 import { Midi } from '@tonejs/midi'
-import { TICKS_PER_WHOLE, eventTicks, secondsPerTick } from '../music/duration'
+import { TICKS_PER_WHOLE, secondsPerTick } from '../music/duration'
 import { instrumentInfo } from '../music/instruments'
 import { toMidi } from '../music/pitch'
-import { locateAll } from '../music/score'
+import { soundingNotes } from '../music/score'
 import type { Score } from '../music/types'
 
 export function scoreToMidi(score: Score): Uint8Array {
@@ -22,17 +22,13 @@ export function scoreToMidi(score: Score): Uint8Array {
   const instrument = instrumentInfo(score.instrument)
   track.instrument.number = instrument.program
 
-  const all = locateAll(score)
-  all.forEach(({ event, start }, i) => {
-    if (event.kind !== 'note' || !event.pitch || all[i - 1]?.event.tie) return
-    let ticks = eventTicks(event)
-    for (let j = i; all[j].event.tie && all[j + 1]; j++) ticks += eventTicks(all[j + 1].event)
+  for (const { pitch, start, ticks } of soundingNotes(score)) {
     track.addNote({
-      midi: toMidi(event.pitch) + instrument.transpose,
+      midi: toMidi(pitch) + instrument.transpose,
       ticks: start * perTick,
       durationTicks: ticks * perTick,
       velocity: 0.8,
     })
-  })
+  }
   return midi.toArray()
 }

@@ -7,7 +7,7 @@ import {
   measureTicks,
   valueTicks,
 } from './duration'
-import { clampDiatonic, diatonicIndex, fromDiatonic, samePitch } from './pitch'
+import { chordOf, clampDiatonic, diatonicIndex, fromDiatonic, includesPitch, sharesPitch } from './pitch'
 import type { Measure, NoteEvent, Pitch, Score, TimeSignature } from './types'
 
 let counter = 0
@@ -21,7 +21,7 @@ export interface Segment {
   start: number
   ticks: number
   kind: 'note' | 'rest'
-  pitch?: Pitch
+  pitches?: Pitch[]
   tie?: boolean
   id?: string
 }
@@ -37,6 +37,8 @@ export interface EditResult {
   selectedId: string | null
   /** Where typing should continue, when the edit knows better than the selection does. */
   cursor?: number
+  /** Staff position of the chord note to select, when the edit moved or added one. */
+  head?: number
 }
 
 export function locateAll(score: Score): Located[] {
@@ -72,12 +74,36 @@ export function scoreTicks(score: Score): number {
   return score.measures.length * measureTicks(score.timeSignature)
 }
 
+/** A pitch as heard: a note tied on sounds once, for the whole tied length. */
+export interface Sounding {
+  pitch: Pitch
+  start: number
+  ticks: number
+}
+
+/** Every pitch the score sounds, ties joined, for playback and MIDI. */
+export function soundingNotes(score: Score): Sounding[] {
+  const all = locateAll(score)
+  const out: Sounding[] = []
+  all.forEach(({ event, start }, i) => {
+    const prev = all[i - 1]?.event
+    for (const pitch of event.pitches ?? []) {
+      // Held over from the previous note.
+      if (prev?.tie && includesPitch(prev.pitches, pitch)) continue
+      let ticks = eventTicks(event)
+      for (let j = i; all[j].event.tie && includesPitch(all[j + 1]?.event.pitches, pitch); j++) ticks += eventTicks(all[j + 1].event)
+      out.push({ pitch, start, ticks })
+    }
+  })
+  return out
+}
+
 export function toSegments(score: Score): Segment[] {
   return locateAll(score).map(({ event, start }) => ({
     start,
     ticks: eventTicks(event),
     kind: event.kind,
-    pitch: event.pitch,
+    pitches: event.pitches,
     tie: event.tie,
     id: event.id,
   }))
@@ -85,7 +111,7 @@ export function toSegments(score: Score): Segment[] {
 
 function makeEvent(segment: Segment, value: DurationValue, id: string, tie: boolean): NoteEvent {
   if (segment.kind === 'rest') return { id, kind: 'rest', ...value }
-  const event: NoteEvent = { id, kind: 'note', ...value, pitch: segment.pitch }
+  const event: NoteEvent = { id, kind: 'note', ...value, pitches: segment.pitches }
   if (tie) event.tie = true
   return event
 }
@@ -150,13 +176,13 @@ export function buildMeasures(segments: Segment[], ts: TimeSignature, minMeasure
   return fixTies(measures)
 }
 
-/** Drops ties that no longer lead into a note of the same pitch. */
+/** Drops ties that no longer lead into a note sharing one of their pitches. */
 function fixTies(measures: Measure[]): Measure[] {
   const flat = measures.flatMap((m) => m.events)
   flat.forEach((event, i) => {
     if (!event.tie) return
     const next = flat[i + 1]
-    if (!next || next.kind !== 'note' || !samePitch(event.pitch, next.pitch)) delete event.tie
+    if (!next || next.kind !== 'note' || !sharesPitch(event.pitches, next.pitches)) delete event.tie
   })
   return measures
 }
@@ -199,7 +225,7 @@ export function placeAt(score: Score, tick: number, value: DurationValue, pitch:
     start: tick,
     ticks: valueTicks(value),
     kind: pitch ? 'note' : 'rest',
-    pitch: pitch ?? undefined,
+    pitches: pitch ? [pitch] : undefined,
   })
 }
 
@@ -223,7 +249,7 @@ export function setValue(score: Score, id: string, value: DurationValue): EditRe
     start,
     ticks: valueTicks(value),
     kind: event.kind,
-    pitch: event.pitch,
+    pitches: event.pitches,
     tie: event.tie,
     id,
   })
@@ -243,30 +269,64 @@ function mapEvent(score: Score, id: string, fn: (e: NoteEvent) => NoteEvent): Sc
   return { ...score, measures: fixTies(measures) }
 }
 
-export function setPitch(score: Score, id: string, pitch: Pitch): EditResult {
-  const next = mapEvent(score, id, (e) => ({ ...e, kind: 'note', pitch }))
+function setPitches(score: Score, id: string, pitches: Pitch[]): EditResult {
+  const next = mapEvent(score, id, (e) => ({ ...e, kind: 'note', pitches }))
   return { score: next, selectedId: id }
 }
 
 /**
- * Moves a note by diatonic steps, taking the key signature's accidental. A whole
- * octave keeps the note's own accidental, so F♯ stays F♯ in C major.
+ * Staff position of a chord's selected note: `head` if the chord has a note
+ * there, else its top note. A single note is its own head.
  */
-export function moveSteps(score: Score, id: string, steps: number): EditResult {
-  const pitch = locate(score, id)?.event.pitch
-  if (!pitch) return { score, selectedId: id }
-  const from = diatonicIndex(pitch)
-  const index = clampDiatonic(from + steps)
-  if (index === from) return { score, selectedId: id }
-  const moved = (index - from) % 7 === 0 ? { ...pitch, octave: pitch.octave + (index - from) / 7 } : fromDiatonic(index, score.keySignature)
-  return setPitch(score, id, moved)
+export function headOf(pitches: Pitch[], head?: number | null): number {
+  const lines = pitches.map(diatonicIndex)
+  return head != null && lines.includes(head) ? head : lines[lines.length - 1]
 }
 
-export function setAlter(score: Score, id: string, alter: number): EditResult {
-  const pitch = locate(score, id)?.event.pitch
+/**
+ * Moves a note (in a chord, the note at `head`) by diatonic steps, taking the
+ * key signature's accidental. A whole octave keeps the note's own accidental,
+ * so F♯ stays F♯ in C major. It steps over the chord's other notes.
+ */
+export function moveSteps(score: Score, id: string, steps: number, head?: number | null): EditResult {
+  const pitches = locate(score, id)?.event.pitches
+  if (!pitches) return { score, selectedId: id }
+  const from = headOf(pitches, head)
+  const pitch = pitches.find((p) => diatonicIndex(p) === from)!
+  const others = new Set(pitches.map(diatonicIndex).filter((line) => line !== from))
+  let index = clampDiatonic(from + steps)
+  while (others.has(index)) index += Math.sign(steps)
+  if (index === from || index !== clampDiatonic(index)) return { score, selectedId: id }
+  const moved = (index - from) % 7 === 0 ? { ...pitch, octave: pitch.octave + (index - from) / 7 } : fromDiatonic(index, score.keySignature)
+  return { ...setPitches(score, id, chordOf([...pitches.filter((p) => p !== pitch), moved])), head: index }
+}
+
+/** Sets the accidental of a note, or of the chord note at `head`. */
+export function setAlter(score: Score, id: string, alter: number, head?: number | null): EditResult {
+  const pitches = locate(score, id)?.event.pitches
+  if (!pitches) return { score, selectedId: id }
+  const line = headOf(pitches, head)
   const clamped = Math.max(-2, Math.min(2, alter))
-  if (!pitch || pitch.alter === clamped) return { score, selectedId: id }
-  return setPitch(score, id, { ...pitch, alter: clamped })
+  const pitch = pitches.find((p) => diatonicIndex(p) === line)!
+  if (pitch.alter === clamped) return { score, selectedId: id }
+  return { ...setPitches(score, id, pitches.map((p) => (p === pitch ? { ...p, alter: clamped } : p))), head: line }
+}
+
+/** Adds `pitch` to a note, making or growing a chord. A staff position the chord already has stays as it is. */
+export function addPitch(score: Score, id: string, pitch: Pitch): EditResult {
+  const pitches = locate(score, id)?.event.pitches
+  const line = diatonicIndex(pitch)
+  if (!pitches) return { score, selectedId: id }
+  if (pitches.some((p) => diatonicIndex(p) === line)) return { score, selectedId: id, head: line }
+  return { ...setPitches(score, id, chordOf([...pitches, pitch])), head: line }
+}
+
+/** Deletes the note at `head` from a chord; a single note becomes a rest. */
+export function removeNote(score: Score, id: string, head?: number | null): EditResult {
+  const pitches = locate(score, id)?.event.pitches
+  if (!pitches || pitches.length < 2) return toRest(score, id)
+  const line = headOf(pitches, head)
+  return setPitches(score, id, pitches.filter((p) => diatonicIndex(p) !== line))
 }
 
 /** Turns a note into a rest; typing then writes where the note was. */
@@ -280,14 +340,14 @@ export function toRest(score: Score, id: string): EditResult {
 }
 
 /**
- * Ties the selected note to the next one. If the next event isn't the same
- * pitch, a note of the same pitch and value is written there first.
+ * Ties the selected note or chord to the next one. If the next event shares no
+ * pitch with it, a copy of the same pitches and value is written there first.
  */
 export function toggleTie(score: Score, id: string): EditResult {
   const all = locateAll(score)
   const index = all.findIndex((l) => l.event.id === id)
   const current = all[index]
-  if (!current || current.event.kind !== 'note' || !current.event.pitch) return { score, selectedId: id }
+  if (!current || current.event.kind !== 'note' || !current.event.pitches) return { score, selectedId: id }
   if (current.event.tie) {
     const untied = mapEvent(score, id, (e) => {
       const copy = { ...e }
@@ -299,13 +359,9 @@ export function toggleTie(score: Score, id: string): EditResult {
 
   const next = all[index + 1]
   let base = score
-  if (!next || next.event.kind !== 'note' || !samePitch(next.event.pitch, current.event.pitch)) {
-    base = placeAt(
-      score,
-      current.start + eventTicks(current.event),
-      { duration: current.event.duration, dots: current.event.dots },
-      current.event.pitch,
-    ).score
+  if (!next || next.event.kind !== 'note' || !sharesPitch(next.event.pitches, current.event.pitches)) {
+    const ticks = eventTicks(current.event)
+    base = writeSegment(score, { start: current.start + ticks, ticks, kind: 'note', pitches: current.event.pitches }).score
   }
   return { score: mapEvent(base, id, (e) => ({ ...e, tie: true })), selectedId: id }
 }
