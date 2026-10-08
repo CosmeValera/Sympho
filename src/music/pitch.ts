@@ -87,16 +87,25 @@ export function clampDiatonic(index: number): number {
 /** Treble clef: the top staff line is F5. */
 export const TREBLE_TOP_LINE = diatonicIndex({ step: 'F', octave: 5, alter: 0 })
 
-/** `step` in whichever octave lands closest to `reference`, as when typing letters. */
+/** Treble clef: the bottom staff line is E4. */
+const TREBLE_BOTTOM_LINE = diatonicIndex({ step: 'E', octave: 4, alter: 0 })
+
+/**
+ * `step` in whichever octave lands closest to `reference`, as when typing
+ * letters. Steps off the staff count half again, so near-ties go towards the
+ * staff and a run of typed notes doesn't drift up onto ledger lines.
+ */
 export function nearestPitch(step: Step, reference: Pitch, keySignature: string): Pitch {
   const ref = diatonicIndex(reference)
   const base = STEPS.indexOf(step)
-  let best = base + 7 * reference.octave
-  for (const octave of [reference.octave - 1, reference.octave + 1]) {
-    const candidate = base + 7 * octave
-    if (Math.abs(candidate - ref) < Math.abs(best - ref)) best = candidate
-  }
-  return fromDiatonic(clampDiatonic(best), keySignature)
+  const cost = (index: number) =>
+    Math.abs(index - ref) + 0.5 * Math.max(0, TREBLE_BOTTOM_LINE - index, index - TREBLE_TOP_LINE)
+  const candidates = [-1, 0, 1]
+    .map((d) => base + 7 * (reference.octave + d))
+    .filter((index) => index >= LOWEST && index <= HIGHEST)
+  if (candidates.length === 0) return fromDiatonic(clampDiatonic(base + 7 * reference.octave), keySignature)
+  const best = candidates.reduce((a, b) => (cost(b) < cost(a) ? b : a))
+  return fromDiatonic(best, keySignature)
 }
 
 export function samePitch(a: Pitch | undefined, b: Pitch | undefined): boolean {

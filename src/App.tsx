@@ -8,6 +8,7 @@ import { decodeShare, newScore } from './music/serialize'
 import type { Score } from './music/types'
 import { editorReducer, initEditor } from './state/editor'
 import { lastOpenedId, loadLibrary, readFlag, rememberOpened, saveScore, writeFlag } from './state/storage'
+import { uniqueTitle } from './state/titles'
 
 type View = 'editor' | 'library'
 type Theme = 'light' | 'dark' | 'solar'
@@ -22,20 +23,38 @@ const REPO_URL = 'https://github.com/CosmeValera/Sympho'
 
 const viewOf = (hash: string): View => (hash === '#/library' ? 'library' : 'editor')
 
+interface Draft {
+  score: Score
+  /** The title it's saved under once edited, so it can't be mistaken for another card in the library. */
+  saveAs: string
+}
+
+const libraryTitles = () => loadLibrary().map((s) => s.title)
+
+/** An example is always saved as a copy; a shared link keeps its title unless the library already has one like it. */
+function exampleDraft(slug: string): Draft | null {
+  const score = exampleScore(slug)
+  return score && { score, saveAs: uniqueTitle(score.title, [...libraryTitles(), score.title], 'copy') }
+}
+
 /** Shared links (#/s/…) and examples (#/example/…) open as unsaved drafts. */
-function scoreFromHash(hash: string): Score | null {
-  if (hash.startsWith('#/s/')) return decodeShare(hash.slice(4))
-  if (hash.startsWith('#/example/')) return exampleScore(decodeURIComponent(hash.slice(10)))
+function draftFromHash(hash: string): Draft | null {
+  if (hash.startsWith('#/s/')) {
+    const score = decodeShare(hash.slice(4))
+    return score && { score, saveAs: uniqueTitle(score.title, libraryTitles(), 'copy') }
+  }
+  if (hash.startsWith('#/example/')) return exampleDraft(decodeURIComponent(hash.slice(10)))
   return null
 }
 
 function initialEditor() {
-  const linked = scoreFromHash(location.hash)
-  if (linked) return initEditor(linked, false)
+  const draft = draftFromHash(location.hash)
+  if (draft) return initEditor(draft.score, false, draft.saveAs)
   const lastId = lastOpenedId()
   const last = lastId ? loadLibrary().find((s) => s.id === lastId) : undefined
   if (last) return initEditor(last, true)
-  return initEditor(exampleScore('ode-to-joy')!, false)
+  const ode = exampleDraft('ode-to-joy')!
+  return initEditor(ode.score, false, ode.saveAs)
 }
 
 function initialTheme(): Theme {
@@ -52,8 +71,8 @@ export function App() {
   useEffect(() => {
     const onHashChange = () => {
       setView(viewOf(location.hash))
-      const linked = scoreFromHash(location.hash)
-      if (linked) dispatch({ type: 'load', score: linked, persisted: false })
+      const draft = draftFromHash(location.hash)
+      if (draft) dispatch({ type: 'load', score: draft.score, persisted: false, saveAs: draft.saveAs })
     }
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
@@ -72,8 +91,10 @@ export function App() {
     document.documentElement.dataset.theme = theme
   }, [theme])
 
-  const nextTheme = THEMES[(THEMES.findIndex((t) => t.id === theme) + 1) % THEMES.length]
-  const ThemeIcon = THEMES.find((t) => t.id === theme)!.icon
+  const themeIndex = THEMES.findIndex((t) => t.id === theme)
+  const current = THEMES[themeIndex]
+  const nextTheme = THEMES[(themeIndex + 1) % THEMES.length]
+  const ThemeIcon = current.icon
 
   const openEditor = (score: Score, persisted: boolean) => {
     dispatch({ type: 'load', score, persisted })
@@ -100,7 +121,7 @@ export function App() {
             type="button"
             className="icon-button"
             aria-label={`Switch to ${nextTheme.label.toLowerCase()} theme`}
-            data-tip={`${nextTheme.label} theme`}
+            data-tip={`Theme: ${current.label} · next: ${nextTheme.label}`}
             onClick={() => {
               setTheme(nextTheme.id)
               writeFlag('theme', nextTheme.id)
@@ -118,7 +139,7 @@ export function App() {
         <Library
           currentId={state.score.id}
           onOpen={(score) => openEditor(score, true)}
-          onNew={() => openEditor(newScore(), false)}
+          onNew={() => openEditor(newScore(uniqueTitle('Untitled score', libraryTitles(), 'number')), false)}
           onDeleted={(id) => {
             // Keep the open score on screen, but stop saving it back.
             if (id === state.score.id) dispatch({ type: 'load', score: state.score, persisted: false })

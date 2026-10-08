@@ -35,6 +35,8 @@ export interface Located {
 export interface EditResult {
   score: Score
   selectedId: string | null
+  /** Where typing should continue, when the edit knows better than the selection does. */
+  cursor?: number
 }
 
 export function locateAll(score: Score): Located[] {
@@ -63,6 +65,11 @@ export function eventAt(score: Score, tick: number): Located | undefined {
 /** Start of the event covering `tick`, or 0 when `tick` is past the end. */
 export function eventStart(score: Score, tick: number): number {
   return eventAt(score, tick)?.start ?? 0
+}
+
+/** Length of the whole piece, in ticks. */
+export function scoreTicks(score: Score): number {
+  return score.measures.length * measureTicks(score.timeSignature)
 }
 
 export function toSegments(score: Score): Segment[] {
@@ -164,7 +171,11 @@ function result(score: Score, id: string | null, tick: number): EditResult {
   return { score, selectedId: eventAt(score, tick)?.event.id ?? null }
 }
 
-/** Writes `segment` at its start, overwriting what was there (the cut-off tail of a note becomes rest). */
+/**
+ * Writes `segment` at its start, overwriting what was there (the cut-off tail of
+ * a note becomes rest). Typing continues where it ends, even if it was a rest
+ * that merged into its neighbours.
+ */
 export function writeSegment(score: Score, segment: Segment): EditResult {
   const end = segment.start + segment.ticks
   const kept: Segment[] = []
@@ -179,7 +190,7 @@ export function writeSegment(score: Score, segment: Segment): EditResult {
   }
   const id = segment.id ?? newId()
   kept.push({ ...segment, id })
-  return result(rebuild(score, kept), id, segment.start)
+  return { ...result(rebuild(score, kept), id, segment.start), cursor: end }
 }
 
 /** Places a note (or a rest when `pitch` is null) of `value` starting at `tick`. */
@@ -192,11 +203,14 @@ export function placeAt(score: Score, tick: number, value: DurationValue, pitch:
   })
 }
 
-/** Tick where typed notes go: after the selection, else after the last note. */
+/**
+ * Tick where typed notes go for a selection: after a selected note, at the start
+ * of a selected rest (to fill it), else after the last note.
+ */
 export function entryTick(score: Score, selectedId: string | null): number {
   const all = locateAll(score)
   const selected = all.find((l) => l.event.id === selectedId)
-  if (selected) return selected.start + eventTicks(selected.event)
+  if (selected) return selected.event.kind === 'rest' ? selected.start : selected.start + eventTicks(selected.event)
   const lastNote = all.filter((l) => l.event.kind === 'note').pop()
   return lastNote ? lastNote.start + eventTicks(lastNote.event) : 0
 }
@@ -217,7 +231,8 @@ export function setValue(score: Score, id: string, value: DurationValue): EditRe
 
 export function toggleDot(score: Score, id: string): EditResult {
   const found = locate(score, id)
-  if (!found || !canDot(found.event.duration)) return { score, selectedId: id }
+  // A rest is just the gap before the next note, so dotting one would change nothing.
+  if (!found || found.event.kind === 'rest' || !canDot(found.event.duration)) return { score, selectedId: id }
   return setValue(score, id, { duration: found.event.duration, dots: found.event.dots ? 0 : 1 })
 }
 
@@ -233,28 +248,35 @@ export function setPitch(score: Score, id: string, pitch: Pitch): EditResult {
   return { score: next, selectedId: id }
 }
 
-/** Moves a note by diatonic steps, taking the key signature's accidental. */
+/**
+ * Moves a note by diatonic steps, taking the key signature's accidental. A whole
+ * octave keeps the note's own accidental, so F♯ stays F♯ in C major.
+ */
 export function moveSteps(score: Score, id: string, steps: number): EditResult {
-  const found = locate(score, id)
-  if (!found?.event.pitch) return { score, selectedId: id }
-  const index = clampDiatonic(diatonicIndex(found.event.pitch) + steps)
-  return setPitch(score, id, fromDiatonic(index, score.keySignature))
+  const pitch = locate(score, id)?.event.pitch
+  if (!pitch) return { score, selectedId: id }
+  const from = diatonicIndex(pitch)
+  const index = clampDiatonic(from + steps)
+  if (index === from) return { score, selectedId: id }
+  const moved = (index - from) % 7 === 0 ? { ...pitch, octave: pitch.octave + (index - from) / 7 } : fromDiatonic(index, score.keySignature)
+  return setPitch(score, id, moved)
 }
 
 export function setAlter(score: Score, id: string, alter: number): EditResult {
-  const found = locate(score, id)
-  if (!found?.event.pitch) return { score, selectedId: id }
+  const pitch = locate(score, id)?.event.pitch
   const clamped = Math.max(-2, Math.min(2, alter))
-  return setPitch(score, id, { ...found.event.pitch, alter: clamped })
+  if (!pitch || pitch.alter === clamped) return { score, selectedId: id }
+  return setPitch(score, id, { ...pitch, alter: clamped })
 }
 
+/** Turns a note into a rest; typing then writes where the note was. */
 export function toRest(score: Score, id: string): EditResult {
   const found = locate(score, id)
   if (!found || found.event.kind === 'rest') return { score, selectedId: id }
   const segments = toSegments(score).map((s) =>
     s.id === id ? { start: s.start, ticks: s.ticks, kind: 'rest' as const, id } : s,
   )
-  return result(rebuild(score, segments), id, found.start)
+  return { ...result(rebuild(score, segments), id, found.start), cursor: found.start }
 }
 
 /**

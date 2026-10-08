@@ -1,4 +1,4 @@
-import { type MouseEvent, type PointerEvent, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { type MouseEvent, type PointerEvent, type RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   TREBLE_TOP_LINE,
   clampDiatonic,
@@ -6,6 +6,7 @@ import {
   fromDiatonic,
   pitchLabel,
 } from '../music/pitch'
+import { type DurationValue, measureTicks, valueTicks } from '../music/duration'
 import { locate } from '../music/score'
 import type { Duration, Score } from '../music/types'
 import {
@@ -31,10 +32,13 @@ interface Props {
   playingId: string | null
   /** Tick the playback marker is drawn at. */
   playhead: number
+  /** Tick of the caret, or null to hide it. */
+  cursor: number | null
   playing: boolean
   editable: boolean
   tool: Tool
-  duration: Duration
+  /** Value of the next note written, which sets the caret's width and the ghost note. */
+  value: DurationValue
   onStaffClick: (hit: StaffHit) => void
   /** The marker was dragged to the event starting at `tick`. */
   onSeek: (tick: number) => void
@@ -49,10 +53,25 @@ const NOTEHEAD: Record<Duration, string> = {
   '8': '\uE0A4',
   '16': '\uE0A4',
 }
-const REST: Record<Duration, string> = { '1': '\uE4E3', '2': '\uE4E4', '4': '\uE4E5', '8': '\uE4E6', '16': '\uE4E7' }
 
-/** In note mode a click this many steps from a notehead picks the note rather than writing over it. */
+/** While writing, a click this many steps from a notehead picks the note rather than writing over it. */
 const NOTE_REACH = 1
+
+/**
+ * Scrolls the window just enough to show `el` when it's hidden behind the
+ * sticky toolbar or below the bottom edge. Unlike scrollIntoView it leaves the
+ * page alone while `el` is visible, so keyboard work doesn't nudge it.
+ */
+function reveal(el: Element) {
+  const margin = 16
+  const rect = el.getBoundingClientRect()
+  const top = (document.querySelector('.toolbar')?.getBoundingClientRect().bottom ?? 0) + margin
+  const bottom = window.innerHeight - margin
+  const by = rect.top < top ? rect.top - top : rect.bottom > bottom ? Math.min(rect.bottom - bottom, rect.top - top) : 0
+  if (by === 0) return
+  const instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  window.scrollBy({ top: by, behavior: instant ? 'auto' : 'smooth' })
+}
 
 function scaleFor(width: number): number {
   if (width >= 1000) return 1.2
@@ -85,6 +104,29 @@ function markerAt(layout: ScoreLayout, tick: number): { box: EventBox; measure: 
   return found
 }
 
+/**
+ * Where `tick` is drawn: just before the event starting there, or in proportion
+ * across a long rest it falls inside. Past the end it's the ghost bar. As an
+ * `end`, a tick on a barline belongs to the bar before it.
+ */
+function caretAt(layout: ScoreLayout, tick: number, cap: number, end = false): { x: number; measure: MeasureBox } | null {
+  const index = end ? Math.ceil(tick / cap) - 1 : Math.floor(tick / cap)
+  const measure = layout.measures.find((m) => m.index === index)
+  if (!measure) return null
+  if (tick === (index + 1) * cap) return { x: measure.x + measure.width, measure }
+  const boxes = measure.events
+  for (let i = boxes.length - 1; i >= 0; i--) {
+    const box = boxes[i]
+    if (box.tick > tick) continue
+    if (box.tick === tick) return { x: box.left, measure }
+    const next = boxes[i + 1]
+    const endTick = next ? next.tick : (index + 1) * cap
+    const endX = next ? next.left : box.x1
+    return { x: box.left + ((tick - box.tick) / (endTick - box.tick)) * (endX - box.left), measure }
+  }
+  return null
+}
+
 /** Tick of the event start nearest a point: the row is picked by height, then the closest note in it. */
 function snapTick(layout: ScoreLayout, x: number, y: number): number | null {
   const real = layout.measures.filter((m) => !m.ghost)
@@ -100,8 +142,9 @@ function snapTick(layout: ScoreLayout, x: number, y: number): number | null {
 }
 
 export function ScoreView(props: Props) {
-  const { score, selectedId, playingId, playhead, playing, editable, tool, duration, onStaffClick, onSeek, onLayout } = props
+  const { score, selectedId, playingId, playhead, cursor, playing, editable, tool, value, onStaffClick, onSeek, onLayout } = props
   const paperRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLDivElement>(null)
   const hostRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(0)
   const [fontsReady, setFontsReady] = useState(false)
@@ -109,12 +152,29 @@ export function ScoreView(props: Props) {
   const [hover, setHover] = useState<StaffHit | null>(null)
   // A drag that ends off the marker sends its click to the staff underneath, which mustn't write a note.
   const swallowClick = useRef(false)
+  // The last change came from a click on the staff, where the user is already looking: don't scroll for it.
+  const byPointer = useRef(false)
 
   useEffect(() => {
     let live = true
     void loadMusicFonts().then(() => live && setFontsReady(true))
     return () => {
       live = false
+    }
+  }, [])
+
+  useEffect(() => {
+    const onPointerDown = (e: globalThis.PointerEvent) => {
+      byPointer.current = !!canvasRef.current?.contains(e.target as Node)
+    }
+    const onKeyDown = () => {
+      byPointer.current = false
+    }
+    window.addEventListener('pointerdown', onPointerDown, true)
+    window.addEventListener('keydown', onKeyDown, true)
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown, true)
+      window.removeEventListener('keydown', onKeyDown, true)
     }
   }, [])
 
@@ -149,11 +209,12 @@ export function ScoreView(props: Props) {
     mark(hoverNoteId, 'is-hover')
   }, [layout, selectedId, playingId, hoverNoteId])
 
+  // Playback is always followed; a selection only when it moved off screen by keyboard.
   useEffect(() => {
     const id = playingId ?? selectedId
-    if (!id) return
+    if (!id || (!playingId && byPointer.current)) return
     const el = hostRef.current?.querySelector(`#${CSS.escape(`vf-${id}`)}`)
-    el?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' })
+    if (el) reveal(el)
   }, [playingId, selectedId])
 
   /** Converts a pointer position to layout units. */
@@ -171,10 +232,8 @@ export function ScoreView(props: Props) {
     if (!hit) return null
     const target = locate(score, hit.box.id)?.event
     if (tool === 'select') return { ...hit, noteId: target?.id ?? null }
-    const nearNote =
-      tool === 'note' && target?.kind === 'note' && target.pitch && Math.abs(diatonicIndex(target.pitch) - hit.diatonic) <= NOTE_REACH
-    const sameRest = tool === 'rest' && target?.kind === 'rest' && target.duration === duration
-    return { ...hit, noteId: target && (nearNote || sameRest) ? target.id : null }
+    const nearNote = target?.pitch && Math.abs(diatonicIndex(target.pitch) - hit.diatonic) <= NOTE_REACH
+    return { ...hit, noteId: target && nearNote ? target.id : null }
   }
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -192,7 +251,7 @@ export function ScoreView(props: Props) {
     if (hit) onStaffClick(hit)
   }
 
-  const writing = tool !== 'select'
+  const writing = tool === 'write'
   const canvasClass = [
     'score-canvas',
     editable && (writing ? 'is-writing' : 'is-selecting'),
@@ -204,6 +263,7 @@ export function ScoreView(props: Props) {
   return (
     <div className="paper" ref={paperRef}>
       <div
+        ref={canvasRef}
         className={canvasClass}
         onPointerDown={() => (swallowClick.current = false)}
         onPointerMove={onPointerMove}
@@ -212,8 +272,15 @@ export function ScoreView(props: Props) {
       >
         <div ref={hostRef} className="score-svg" />
         {!fontsReady && <div className="score-loading">Loading engraver…</div>}
-        {layout && hover && !hover.noteId && writing && (
-          <Ghost layout={layout} hover={hover} rest={tool === 'rest'} duration={duration} score={score} />
+        {layout && hover && !hover.noteId && writing && <Ghost layout={layout} hover={hover} duration={value.duration} score={score} />}
+        {layout && editable && cursor !== null && (
+          <Caret
+            layout={layout}
+            tick={cursor}
+            ticks={valueTicks(value)}
+            cap={measureTicks(score.timeSignature)}
+            byPointer={byPointer}
+          />
         )}
         {layout && editable && (
           <Playhead
@@ -288,12 +355,60 @@ function Playhead({ layout, tick, playing, toLayout, onEnter, onSeek }: Playhead
       onPointerCancel={() => setDrag(null)}
       onClick={(e) => e.stopPropagation()}
     >
-      <span className="playhead-handle" aria-hidden="true" />
     </div>
   )
 }
 
-function Ghost({ layout, hover, rest, duration, score }: { layout: ScoreLayout; hover: StaffHit; rest: boolean; duration: Duration; score: Score }) {
+/**
+ * The caret: a shaded slot on the staff covering what the next typed note (or
+ * rest) of `ticks` will fill, so it reads as a space to write in rather than a
+ * second marker line. It stops at the end of the row.
+ */
+interface CaretProps {
+  layout: ScoreLayout
+  tick: number
+  ticks: number
+  cap: number
+  byPointer: RefObject<boolean>
+}
+
+function Caret({ layout, tick, ticks, cap, byPointer }: CaretProps) {
+  const ref = useRef<HTMLDivElement>(null)
+  const shownAt = useRef(tick)
+  // Typing rests moves the caret without selecting anything, so it keeps itself in view. Not on mount, which would scroll a long score on open.
+  useEffect(() => {
+    if (shownAt.current === tick) return
+    shownAt.current = tick
+    if (byPointer.current) return
+    // After the re-render that draws the caret at its new place.
+    const frame = requestAnimationFrame(() => ref.current && reveal(ref.current))
+    return () => cancelAnimationFrame(frame)
+  }, [tick, byPointer])
+
+  const start = caretAt(layout, tick, cap)
+  if (!start) return null
+  const { measure } = start
+  const end = caretAt(layout, tick + ticks, cap, true)
+  const rowEnd = end && end.measure.y === measure.y ? end.x : measure.x + measure.width
+  const x0 = start.x - 6
+  const x1 = Math.max(rowEnd - 4, x0 + 18)
+  const s = layout.scale
+  return (
+    <div
+      ref={ref}
+      className="caret"
+      style={{
+        left: x0 * s,
+        width: (x1 - x0) * s,
+        top: (measure.topLineY - 1.25 * measure.spacing) * s,
+        height: 6.5 * measure.spacing * s,
+      }}
+      aria-hidden="true"
+    />
+  )
+}
+
+function Ghost({ layout, hover, duration, score }: { layout: ScoreLayout; hover: StaffHit; duration: Duration; score: Score }) {
   const { measure, box, diatonic } = hover
   const { topLineY, spacing } = measure
   const x = measure.fullRest ? measure.noteStartX + 10 : box.cx
@@ -302,11 +417,8 @@ function Ghost({ layout, hover, rest, duration, score }: { layout: ScoreLayout; 
   const fontSize = spacing * 4
 
   const ledgers: number[] = []
-  if (!rest) {
-    for (let n = -2; n >= halfSpaces; n -= 2) ledgers.push(n)
-    for (let n = 10; n <= halfSpaces; n += 2) ledgers.push(n)
-  }
-  const restY = topLineY + (duration === '1' ? 1 : 2) * spacing
+  for (let n = -2; n >= halfSpaces; n -= 2) ledgers.push(n)
+  for (let n = 10; n <= halfSpaces; n += 2) ledgers.push(n)
   const s = layout.scale
 
   return (
@@ -321,15 +433,13 @@ function Ghost({ layout, hover, rest, duration, score }: { layout: ScoreLayout; 
         {ledgers.map((n) => (
           <line key={n} x1={x - 11} x2={x + 11} y1={topLineY + (n * spacing) / 2} y2={topLineY + (n * spacing) / 2} />
         ))}
-        <text x={x} y={rest ? restY : y} fontSize={fontSize} textAnchor="middle">
-          {rest ? REST[duration] : NOTEHEAD[duration]}
+        <text x={x} y={y} fontSize={fontSize} textAnchor="middle">
+          {NOTEHEAD[duration]}
         </text>
       </svg>
-      {!rest && (
-        <span className="ghost-label" style={{ left: (x + 12) * s, top: (y - 30) * s }}>
-          {pitchLabel(fromDiatonic(diatonic, score.keySignature))}
-        </span>
-      )}
+      <span className="ghost-label" style={{ left: (x + 12) * s, top: (y - 30) * s }}>
+        {pitchLabel(fromDiatonic(diatonic, score.keySignature))}
+      </span>
     </>
   )
 }

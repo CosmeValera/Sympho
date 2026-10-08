@@ -8,6 +8,7 @@ import {
   locateAll,
   moveSteps,
   placeAt,
+  setAlter,
   setTimeSignature,
   setValue,
   toRest,
@@ -75,6 +76,11 @@ describe('pitch', () => {
     expect(nearestPitch('A', parsePitch('C5')!, 'C')).toEqual({ step: 'A', octave: 4, alter: 0 })
     expect(nearestPitch('F', parsePitch('E4')!, 'D')).toEqual({ step: 'F', octave: 4, alter: 1 })
   })
+
+  it('leans towards the staff when two octaves are nearly as close', () => {
+    // D6 is a step closer to A5, but D5 sits on the staff.
+    expect(nearestPitch('D', parsePitch('A5')!, 'C')).toEqual({ step: 'D', octave: 5, alter: 0 })
+  })
 })
 
 describe('editing', () => {
@@ -132,10 +138,40 @@ describe('editing', () => {
     expect(notation(next)).toBe('C4:2 D4:2')
   })
 
-  it('types new notes after the selection, or after the last note', () => {
-    const score = scoreOf('C4:4 D4:4 r:2')
-    expect(entryTick(score, idAt(score, 0))).toBe(8)
-    expect(entryTick(score, null)).toBe(16)
+  it('keeps the accidental when moving an octave', () => {
+    const score = scoreOf('F#5:4 r:4 r:2')
+    expect(notation(moveSteps(score, idAt(score, 0), -7).score)).toBe('F#4:4 r:4 r:2')
+    expect(notation(moveSteps(score, idAt(score, 0), -1).score)).toBe('E5:4 r:4 r:2')
+  })
+
+  it('returns the same score for edits that change nothing', () => {
+    const score = scoreOf('C7:4 F#4:4 r:2')
+    expect(moveSteps(score, idAt(score, 0), 1).score).toBe(score)
+    expect(setAlter(score, idAt(score, 1), 1).score).toBe(score)
+  })
+
+  it('leaves a rest alone when asked to dot it', () => {
+    const score = scoreOf('C4:4 r:4 r:2')
+    expect(toggleDot(score, idAt(score, 1)).score).toBe(score)
+  })
+
+  it('types after a selected note, into a selected rest, or after the last note', () => {
+    const score = scoreOf('r:4 C4:4 D4:2')
+    expect(entryTick(score, idAt(score, 0))).toBe(0)
+    expect(entryTick(score, idAt(score, 1))).toBe(16)
+    expect(entryTick(score, null)).toBe(32)
+  })
+
+  it('continues typing where a written rest ends, even once it merged away', () => {
+    const score = scoreOf('C4:4 r:4 r:2')
+    const { score: next, cursor } = placeAt(score, 8, { duration: '4', dots: 0 }, null)
+    expect(notation(next)).toBe('C4:4 r:4 r:2')
+    expect(cursor).toBe(16)
+  })
+
+  it('types where a deleted note was', () => {
+    const score = scoreOf('C4:4 D4:4 E4:2')
+    expect(toRest(score, idAt(score, 1)).cursor).toBe(8)
   })
 
   it('re-bars the piece when the meter changes', () => {

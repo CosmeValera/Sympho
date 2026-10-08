@@ -26,6 +26,18 @@ export interface DurationValue {
   dots: 0 | 1
 }
 
+/** "quarter", "dotted half". */
+export function valueName({ duration, dots }: DurationValue): string {
+  const name = DURATION_NAMES[duration].toLowerCase()
+  return dots ? `dotted ${name}` : name
+}
+
+/** "a quarter", "an eighth", "a dotted half": the name with its article. */
+export function aValue(value: DurationValue): string {
+  const name = valueName(value)
+  return `${/^[aeiou]/.test(name) ? 'an' : 'a'} ${name}`
+}
+
 export function valueTicks({ duration, dots }: DurationValue): number {
   const base = DURATION_TICKS[duration]
   return dots ? base * 1.5 : base

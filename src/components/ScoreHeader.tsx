@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { INSTRUMENTS } from '../music/instruments'
+import { useRef, useState } from 'react'
+import { INSTRUMENTS, instrumentInfo } from '../music/instruments'
 import { KEY_SIGNATURES } from '../music/pitch'
 import { MAX_BPM, MIN_BPM, TIME_SIGNATURES, timeSignatureLabel } from '../music/serialize'
 import type { Instrument, Score, TimeSignature } from '../music/types'
@@ -53,29 +53,69 @@ function BpmInput({ bpm, onBpm }: { bpm: number; onBpm: (bpm: number) => void })
   )
 }
 
+/**
+ * A title or composer field. Clicking in selects the whole text, ready to
+ * replace, and Enter or Escape hands the keyboard back to the score.
+ */
+function MetaInput({ className, value, label, placeholder, onChange }: {
+  className: string
+  value: string
+  label: string
+  placeholder: string
+  onChange: (value: string) => void
+}) {
+  // The mouseup that ends the focusing click would otherwise put the caret back and drop the selection.
+  const justFocused = useRef(false)
+  return (
+    <input
+      className={className}
+      value={value}
+      maxLength={120}
+      placeholder={placeholder}
+      aria-label={label}
+      onChange={(e) => onChange(e.target.value)}
+      onFocus={(e) => {
+        e.currentTarget.select()
+        justFocused.current = true
+      }}
+      onMouseUp={(e) => {
+        if (justFocused.current) e.preventDefault()
+        justFocused.current = false
+      }}
+      onBlur={() => (justFocused.current = false)}
+      onKeyDown={(e) => {
+        justFocused.current = false
+        if (e.key === 'Enter' || e.key === 'Escape') e.currentTarget.blur()
+      }}
+    />
+  )
+}
+
+/** Guitar and bass are written higher than they sound, as on their real parts. */
+const OCTAVES_DOWN: Record<number, string> = { [-12]: 'sounds an octave lower', [-24]: 'sounds two octaves lower' }
+
 export function ScoreHeader(props: Props) {
   const { score } = props
   const tsValue = timeSignatureLabel(score.timeSignature)
+  const transposition = OCTAVES_DOWN[instrumentInfo(score.instrument).transpose]
 
   return (
     <section className="score-header">
       <div className="score-titles">
-        <input
+        <MetaInput
           className="title-input"
           value={score.title}
-          maxLength={120}
+          label="Title"
           placeholder="Untitled score"
-          aria-label="Title"
-          onChange={(e) => props.onMeta({ title: e.target.value })}
+          onChange={(title) => props.onMeta({ title })}
         />
         <div className="subtitle-row">
-          <input
+          <MetaInput
             className="composer-input"
             value={score.composer}
-            maxLength={120}
+            label="Composer"
             placeholder="Composer"
-            aria-label="Composer"
-            onChange={(e) => props.onMeta({ composer: e.target.value })}
+            onChange={(composer) => props.onMeta({ composer })}
           />
           <span className="save-status">{props.status}</span>
         </div>
@@ -83,7 +123,10 @@ export function ScoreHeader(props: Props) {
 
       <div className="score-settings">
         <label className="field">
-          <span className="field-label">Instrument</span>
+          <span className="field-label">
+            Instrument
+            {transposition && <span className="field-note">{transposition}</span>}
+          </span>
           <select value={score.instrument} onChange={(e) => props.onInstrument(e.target.value as Instrument)}>
             {INSTRUMENTS.map((i) => (
               <option key={i.id} value={i.id}>

@@ -1,50 +1,59 @@
 import { useEffect, useRef } from 'react'
 import { CloseIcon } from './Icons'
 
-const GROUPS: { title: string; items: [string[], string][] }[] = [
-  {
-    title: 'Writing',
-    items: [
-      [['Click'], 'Write a note (or rest) there; clicking on a note selects it'],
-      [['A', '–', 'G'], 'Add a note after the selection, in the nearest octave'],
-      [['R'], 'Add a rest after the selection'],
-      [['1', '–', '5'], 'Whole, half, quarter, eighth, sixteenth'],
-      [['W'], 'Notes tool: clicks write notes'],
-      [['Shift', 'R'], 'Rests tool: clicks write rests'],
-      [['S'], 'Select tool: clicks only pick notes (press again to go back)'],
-    ],
-  },
-  {
-    title: 'Selected note',
-    items: [
-      [['+'], 'Sharpen'],
-      [['−'], 'Flatten'],
-      [['N'], 'Natural'],
-      [['↑', '↓'], 'Move a step'],
-      [['Shift', '↑ ↓'], 'Move an octave'],
-      [['.'], 'Dot'],
-      [['T'], 'Tie to the next note'],
-      [['Del'], 'Turn into a rest'],
-      [['←', '→'], 'Select the previous / next note'],
-      [['Esc'], 'Clear the selection'],
-    ],
-  },
-  {
-    title: 'Playback',
-    items: [
-      [['Space'], 'Play from the marker / pause (playing again resumes)'],
-      [['Shift', 'Space'], 'Play from the beginning, leaving the marker where it is'],
-      [['Home'], 'Move the marker back to the beginning'],
-    ],
-  },
-  {
-    title: 'General',
-    items: [
-      [['Ctrl', 'Z'], 'Undo'],
-      [['Ctrl', 'Y'], 'Redo'],
-      [['?'], 'This list'],
-    ],
-  },
+interface Group {
+  title: string
+  items: [string[], string][]
+}
+
+/** Two columns on wide screens: writing and listening on the left, fixing a note on the right. */
+const COLUMNS: Group[][] = [
+  [
+    {
+      title: 'Writing',
+      items: [
+        [['A', '–', 'G'], 'Write a note in the blue box, in the nearest octave'],
+        [['R'], 'Write a rest in the blue box'],
+        [['Click'], 'Write a note there; clicking on a note selects it'],
+        [['1', '–', '5'], 'Value of the next note: whole to sixteenth (changes a note you clicked)'],
+        [['.'], 'Dotted value'],
+        [['W'], 'Write tool: clicks write notes'],
+        [['S'], 'Select tool: clicks only pick notes. S again goes back to writing'],
+      ],
+    },
+    {
+      title: 'Playback',
+      items: [
+        [['Space'], 'Play from the orange line / pause (playing again resumes)'],
+        [['Shift', 'Space'], 'Play from the beginning, leaving the line where it is'],
+        [['Home'], 'Move the orange line back to the beginning'],
+      ],
+    },
+  ],
+  [
+    {
+      title: 'Selected note',
+      items: [
+        [['+'], 'Sharpen'],
+        [['−'], 'Flatten'],
+        [['N'], 'Natural'],
+        [['↑', '↓'], 'Move a step'],
+        [['Shift', '↑ ↓'], 'Move an octave'],
+        [['T'], 'Tie to the next note'],
+        [['Del'], 'Turn into a rest'],
+        [['←', '→'], 'Select the previous / next note'],
+        [['Esc'], 'Clear the selection'],
+      ],
+    },
+    {
+      title: 'General',
+      items: [
+        [['Ctrl', 'Z'], 'Undo'],
+        [['Ctrl', 'Y'], 'Redo'],
+        [['?'], 'This list'],
+      ],
+    },
+  ],
 ]
 
 export function ShortcutsDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -75,23 +84,31 @@ export function ShortcutsDialog({ open, onClose }: { open: boolean; onClose: () 
             <CloseIcon />
           </button>
         </header>
-        {GROUPS.map((group) => (
-          <section key={group.title} className="shortcut-group">
-            <h3>{group.title}</h3>
-            <dl className="shortcut-list">
-              {group.items.map(([keys, action]) => (
-                <div key={action} className="shortcut">
-                  <dt>
-                    {keys.map((k) => (k === '–' ? <span key={k}>–</span> : <kbd key={k}>{k}</kbd>))}
-                  </dt>
-                  <dd>{action}</dd>
-                </div>
+        <div className="shortcut-columns">
+          {COLUMNS.map((groups) => (
+            <div key={groups[0].title}>
+              {groups.map((group) => (
+                <section key={group.title} className="shortcut-group">
+                  <h3>{group.title}</h3>
+                  <dl className="shortcut-list">
+                    {group.items.map(([keys, action]) => (
+                      <div key={action} className="shortcut">
+                        <dt>
+                          {keys.map((k) => (k === '–' ? <span key={k}>–</span> : <kbd key={k}>{k}</kbd>))}
+                        </dt>
+                        <dd>{action}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
               ))}
-            </dl>
-          </section>
-        ))}
+            </div>
+          ))}
+        </div>
         <p className="muted shortcut-note">
-          The orange marker is where playback starts. Drag it, or select a note to move it there.
+          Value keys set the value of the next note you write; after clicking a note they change that note instead.
+          The blue box is where the next typed note goes: after the note you just wrote, or into a selected rest. The
+          orange line with the play button is where playback starts. Drag it, or click a note to move it there.
         </p>
       </div>
     </dialog>

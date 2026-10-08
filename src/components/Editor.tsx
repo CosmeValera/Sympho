@@ -1,12 +1,11 @@
 import { type Dispatch, useEffect, useEffectEvent, useState } from 'react'
 import { player } from '../audio/player'
 import { downloadBlob, fileName } from '../download'
-import { DURATIONS, canDot } from '../music/duration'
-import { fromDiatonic, nearestPitch } from '../music/pitch'
+import { type DurationValue, DURATIONS, aValue, canDot, measureTicks, valueName, valueTicks } from '../music/duration'
+import { fromDiatonic, nearestPitch, pitchLabel } from '../music/pitch'
 import {
   type EditResult,
   addMeasure,
-  entryTick,
   locate,
   locateAll,
   moveSteps,
@@ -32,14 +31,20 @@ type Edit = (score: Score, id: string) => EditResult | Score
 
 const MIDDLE_LINE: Pitch = { step: 'B', octave: 4, alter: 0 }
 
-function isTyping(target: EventTarget | null): boolean {
-  return target instanceof HTMLElement && !!target.closest('input, select, textarea, [contenteditable="true"]')
+const ALTER_NAMES: Record<number, string> = { [-2]: 'double flat', [-1]: 'flat', 0: 'natural', 1: 'sharp', 2: 'double sharp' }
+
+/** Keys a focused dropdown uses itself. Any other key is a shortcut, not a jump to a matching option ("4" picking 4/4). */
+const SELECT_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' ', 'Home', 'End', 'PageUp', 'PageDown', 'Tab', 'Escape'])
+
+/** Whether the focused field needs `key` for itself, so it isn't a shortcut. */
+function ownsKey(target: EventTarget | null, key: string): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  if (target instanceof HTMLSelectElement) return SELECT_KEYS.has(key)
+  return !!target.closest('input, textarea, [contenteditable="true"]')
 }
 
-/** The pitch typed letters are placed nearest to: the selected note, else the last note before the entry point. */
-function referencePitch(score: Score, selectedId: string | null, tick: number): Pitch {
-  const selected = locate(score, selectedId)?.event
-  if (selected?.pitch) return selected.pitch
+/** The pitch typed letters are placed nearest to: the last note before the caret. */
+function referencePitch(score: Score, tick: number): Pitch {
   const before = locateAll(score).filter((l) => l.event.pitch && l.start < tick)
   return before.at(-1)?.event.pitch ?? MIDDLE_LINE
 }
@@ -50,21 +55,38 @@ interface Sounding {
   tick: number
 }
 
+interface EditOptions {
+  /** Play the selected note afterwards. */
+  audition?: boolean
+  /** The edit writes the note it selects. */
+  written?: boolean
+}
+
 interface Props {
   state: EditorState
   dispatch: Dispatch<EditorAction>
 }
 
 export function Editor({ state, dispatch }: Props) {
-  const { score, selectedId, duration, tool, playhead } = state
+  const { score, selectedId, duration, dots, tool, playhead, cursor } = state
+  const value: DurationValue = { duration, dots }
   const located = locate(score, selectedId) ?? null
   const selected = located?.event ?? null
+  // A note picked to edit, as opposed to one just written: value keys change it.
+  const pickedNote = selected?.kind === 'note' && !state.written ? selected : null
   // Non-null while playing.
   const [sounding, setSounding] = useState<Sounding | null>(null)
   const playing = sounding !== null
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
-  const [toast, setToast] = useState<string | null>(null)
+  // `at` makes the same message twice in a row count as a new one.
+  const [toast, setToast] = useState<{ text: string; at: number } | null>(null)
   const [auditionCount, setAuditionCount] = useState(0)
+  // Like a focus ring, the caret only shows for keyboard work: typing a note or moving with ← → shows it,
+  // and a click on the staff, Esc or playing hides it. A mouse user already sees where a click writes.
+  const [typing, setTyping] = useState(false)
+  const showCaret = tool === 'write' && typing && !playing
+
+  const notify = (text: string) => setToast({ text, at: Date.now() })
 
   useEffect(() => {
     if (!toast) return
@@ -81,6 +103,7 @@ export function Editor({ state, dispatch }: Props) {
    */
   const playFrom = (from: number) => {
     setSounding({ id: null, tick: from })
+    setTyping(false)
     player
       .play(score, from, {
         onEvent: (id, tick) => setSounding({ id, tick }),
@@ -89,7 +112,7 @@ export function Editor({ state, dispatch }: Props) {
       .catch(() => {
         player.stop()
         setSounding(null)
-        setToast("Couldn't start audio in this browser")
+        notify("Couldn't start audio in this browser")
       })
   }
 
@@ -121,15 +144,30 @@ export function Editor({ state, dispatch }: Props) {
     if (auditionCount) auditionSelected()
   }, [auditionCount])
 
-  const edit = (fn: (score: Score, selectedId: string | null) => EditResult | Score, audition = false) => {
-    change({ type: 'edit', edit: fn })
-    if (audition) setAuditionCount((n) => n + 1)
+  /** `label` names the edit in undo messages, in lower case: "write C5 quarter". */
+  const edit = (label: string, fn: (score: Score, selectedId: string | null) => EditResult | Score, options: EditOptions = {}) => {
+    change({ type: 'edit', label, edit: fn, written: options.written })
+    if (options.audition) setAuditionCount((n) => n + 1)
   }
 
   /** Edits the selected event; does nothing without a selection. */
-  const editSelected = (fn: Edit, audition = false) => {
+  const editSelected = (label: string, fn: Edit, options: EditOptions = {}) => {
     if (!selectedId) return
-    edit((s, id) => (id ? fn(s, id) : s), audition)
+    edit(label, (s, id) => (id ? fn(s, id) : s), options)
+  }
+
+  const undo = () => {
+    const last = state.past.at(-1)
+    if (!last) return
+    change({ type: 'undo' })
+    notify(`Undid: ${last.label}`)
+  }
+
+  const redo = () => {
+    const next = state.future[0]
+    if (!next) return
+    change({ type: 'redo' })
+    notify(`Redid: ${next.label}`)
   }
 
   const select = (id: string | null) => {
@@ -143,18 +181,54 @@ export function Editor({ state, dispatch }: Props) {
 
   const chooseTool = (next: Tool) => dispatch({ type: 'tool', tool: next })
 
+  /** Changes a picked note's value, or else sets the value of the next note written. */
   const chooseDuration = (d: Duration) => {
-    dispatch({ type: 'duration', duration: d })
-    editSelected((s, id) => {
-      const dots = canDot(d) ? (locate(s, id)?.event.dots ?? 0) : 0
-      return setValue(s, id, { duration: d, dots })
-    })
+    if (!pickedNote || !located) return dispatch({ type: 'duration', duration: d })
+    if (pickedNote.duration === d && !pickedNote.dots) return
+    const next: DurationValue = { duration: d, dots: 0 }
+    editSelected(`change to ${valueName(next)}`, (s, id) => setValue(s, id, next))
+    const cap = measureTicks(score.timeSignature)
+    if ((located.start % cap) + valueTicks(next) > cap) {
+      const name = aValue(next)
+      notify(`${name[0].toUpperCase()}${name.slice(1)} doesn't fit in the bar, so it's tied across the barline`)
+    }
   }
 
-  const typeNote = (step: Step | null) => {
-    const tick = entryTick(score, selectedId)
-    const pitch = step ? nearestPitch(step, referencePitch(score, selectedId, tick), score.keySignature) : null
-    edit((s) => placeAt(s, tick, { duration, dots: 0 }, pitch), !!pitch)
+  const toggleDots = () => {
+    if (pickedNote) return editSelected(pickedNote.dots ? 'remove dot' : 'add dot', toggleDot)
+    if (canDot(duration)) dispatch({ type: 'duration', duration, dots: dots ? 0 : 1 })
+  }
+
+  const step = (steps: number) => {
+    if (selected?.kind !== 'note') return
+    const label = `move ${steps > 0 ? 'up' : 'down'} ${Math.abs(steps) === 7 ? 'an octave' : 'a step'}`
+    editSelected(label, (s, id) => moveSteps(s, id, steps), { audition: true })
+  }
+
+  const alter = (next: number) => {
+    const clamped = Math.max(-2, Math.min(2, next))
+    editSelected(`make ${ALTER_NAMES[clamped]}`, (s, id) => setAlter(s, id, clamped), { audition: true })
+  }
+
+  const tie = () => editSelected(selected?.tie ? 'remove tie' : 'tie to next note', toggleTie)
+
+  const toRestSelected = () => editSelected('turn into a rest', toRest)
+
+  /** Writes a note (or a rest when `letter` is null) at the caret, which moves past it. Typing is writing, so it leaves the select tool. */
+  const write = (letter: Step | null) => {
+    if (tool !== 'write') chooseTool('write')
+    setTyping(true)
+    const pitch = letter ? nearestPitch(letter, referencePitch(score, cursor), score.keySignature) : null
+    const label = pitch ? `write ${pitchLabel(pitch)} ${valueName(value)}` : `write ${valueName(value)} rest`
+    edit(
+      label,
+      (s) => {
+        const out = placeAt(s, cursor, value, pitch)
+        // A rest merges into the rests around it, so there's nothing to select; the caret shows where it ended.
+        return pitch ? out : { ...out, selectedId: null }
+      },
+      { audition: !!pitch, written: true },
+    )
   }
 
   const moveSelection = (delta: 1 | -1) => {
@@ -166,18 +240,20 @@ export function Editor({ state, dispatch }: Props) {
 
   const onStaffClick = (hit: StaffHit) => {
     player.preload(score.instrument)
+    setTyping(false)
     if (hit.noteId) return select(hit.noteId)
     if (tool === 'select') return select(null)
-    const value = { duration, dots: 0 as const }
-    if (tool === 'rest') return edit((s) => placeAt(s, hit.box.tick, value, null))
     const pitch = fromDiatonic(hit.diatonic, score.keySignature)
-    edit((s) => placeAt(s, hit.box.tick, value, pitch), true)
+    edit(`write ${pitchLabel(pitch)} ${valueName(value)}`, (s) => placeAt(s, hit.box.tick, value, pitch), {
+      audition: true,
+      written: true,
+    })
   }
 
   const share = () => {
     const url = `${location.origin}${location.pathname}#/s/${encodeShare(score)}`
     navigator.clipboard.writeText(url).then(
-      () => setToast('Share link copied'),
+      () => notify('Share link copied'),
       () => window.prompt('Copy this link to share the score', url),
     )
   }
@@ -193,19 +269,19 @@ export function Editor({ state, dispatch }: Props) {
       const { scoreToSvg } = await import('../render/exportSvg')
       downloadBlob(new Blob([await scoreToSvg(score)], { type: 'image/svg+xml' }), fileName(score.title, 'svg'))
     } catch {
-      setToast("Couldn't export the SVG")
+      notify("Couldn't export the SVG")
     }
   }
 
   const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
-    if (shortcutsOpen || e.altKey || isTyping(e.target)) return
+    if (shortcutsOpen || e.altKey || ownsKey(e.target, e.key)) return
     const key = e.key
     const mod = e.ctrlKey || e.metaKey
 
     if (mod) {
       const lower = key.toLowerCase()
-      if (lower === 'z' && !e.shiftKey) change({ type: 'undo' })
-      else if (lower === 'y' || (lower === 'z' && e.shiftKey)) change({ type: 'redo' })
+      if (lower === 'z' && !e.shiftKey) undo()
+      else if (lower === 'y' || (lower === 'z' && e.shiftKey)) redo()
       else return
       e.preventDefault()
       return
@@ -213,33 +289,31 @@ export function Editor({ state, dispatch }: Props) {
 
     const letter = key.toUpperCase()
     if (/^[A-G]$/.test(letter) && !e.repeat) {
-      typeNote(letter as Step)
+      write(letter as Step)
     } else if (letter === 'R' && !e.repeat) {
-      if (e.shiftKey) chooseTool('rest')
-      else typeNote(null)
+      write(null)
     } else if (letter === 'S' && !e.repeat) {
-      chooseTool(tool === 'select' ? 'note' : 'select')
+      chooseTool(tool === 'select' ? 'write' : 'select')
     } else if (letter === 'W' && !e.repeat) {
-      chooseTool('note')
+      chooseTool('write')
     } else if (/^[1-5]$/.test(key)) {
       chooseDuration(DURATIONS[Number(key) - 1])
     } else if (key === 'ArrowUp' || key === 'ArrowDown') {
       if (selected?.kind !== 'note') return
-      const steps = (key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 7 : 1)
-      editSelected((s, id) => moveSteps(s, id, steps), true)
+      step((key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 7 : 1))
     } else if (key === 'ArrowLeft' || key === 'ArrowRight') {
       moveSelection(key === 'ArrowRight' ? 1 : -1)
+      setTyping(true)
     } else if (key === '+' || key === '=' || key === '-' || letter === 'N') {
       const pitch = selected?.pitch
       if (!pitch) return
-      const alter = letter === 'N' ? 0 : pitch.alter + (key === '-' ? -1 : 1)
-      editSelected((s, id) => setAlter(s, id, alter), true)
+      alter(letter === 'N' ? 0 : pitch.alter + (key === '-' ? -1 : 1))
     } else if (key === '.') {
-      editSelected(toggleDot)
+      toggleDots()
     } else if (letter === 'T') {
-      editSelected(toggleTie)
+      tie()
     } else if (key === 'Delete' || key === 'Backspace') {
-      editSelected(toRest)
+      toRestSelected()
     } else if (key === ' ') {
       // Handled here even on a focused button, which would otherwise take Space as a click.
       if (e.shiftKey) playFrom(0)
@@ -248,12 +322,15 @@ export function Editor({ state, dispatch }: Props) {
       seek(0)
     } else if (key === 'Escape') {
       dispatch({ type: 'select', id: null })
+      setTyping(false)
     } else if (key === '?') {
       setShortcutsOpen(true)
     } else {
       return
     }
     e.preventDefault()
+    // A shortcut typed on a focused dropdown was meant for the score, and so are the keys after it.
+    if (e.target instanceof HTMLSelectElement) e.target.blur()
   })
 
   useEffect(() => {
@@ -264,18 +341,18 @@ export function Editor({ state, dispatch }: Props) {
   const marker = sounding?.tick ?? playhead
 
   return (
-    <main className="editor" onPointerDown={() => player.preload(score.instrument)}>
+    <main className="editor" data-tool={tool} onPointerDown={() => player.preload(score.instrument)}>
       <ScoreHeader
         score={score}
         status={state.persisted ? 'Saved in your library' : 'Draft · saves when you edit'}
         onMeta={(patch) => dispatch({ type: 'meta', patch })}
         onInstrument={(instrument) => {
           player.preload(instrument)
-          edit((s) => ({ ...s, instrument }))
+          edit('change instrument', (s) => ({ ...s, instrument }))
         }}
-        onKeySignature={(keySignature) => edit((s) => ({ ...s, keySignature }))}
-        onTimeSignature={(ts) => edit((s) => setTimeSignature(s, ts))}
-        onBpm={(bpm) => edit((s) => ({ ...s, bpm }))}
+        onKeySignature={(keySignature) => edit('change key', (s) => ({ ...s, keySignature }))}
+        onTimeSignature={(ts) => edit('change time signature', (s) => setTimeSignature(s, ts))}
+        onBpm={(bpm) => edit('change tempo', (s) => (s.bpm === bpm ? s : { ...s, bpm }))}
         onShare={share}
         onExportMidi={() => void exportMidi()}
         onExportSvg={() => void exportSvg()}
@@ -283,39 +360,52 @@ export function Editor({ state, dispatch }: Props) {
 
       <Toolbar
         tool={tool}
-        duration={duration}
+        value={value}
         selected={selected}
+        keySignature={score.keySignature}
         playing={playing}
         atStart={!playing && playhead === 0}
-        canUndo={state.past.length > 0}
-        canRedo={state.future.length > 0}
+        undoLabel={state.past.at(-1)?.label ?? null}
+        redoLabel={state.future[0]?.label ?? null}
         canRemoveBar={score.measures.length > 1}
         onPlay={togglePlay}
         onToStart={() => seek(0)}
         onTool={chooseTool}
         onDuration={chooseDuration}
-        onDot={() => editSelected(toggleDot)}
-        onAlter={(alter) => editSelected((s, id) => setAlter(s, id, alter), true)}
-        onTie={() => editSelected(toggleTie)}
-        onDelete={() => editSelected(toRest)}
-        onUndo={() => change({ type: 'undo' })}
-        onRedo={() => change({ type: 'redo' })}
-        onAddBar={() => edit(addMeasure)}
-        onRemoveBar={() => edit(removeLastMeasure)}
+        onRest={() => write(null)}
+        onDot={toggleDots}
+        onStep={step}
+        onAlter={alter}
+        onTie={tie}
+        onDelete={toRestSelected}
+        onUndo={undo}
+        onRedo={redo}
+        onAddBar={() => edit('add bar', addMeasure)}
+        onRemoveBar={() => edit('remove last bar', removeLastMeasure)}
         onShortcuts={() => setShortcutsOpen(true)}
       />
 
-      <StatusBar score={score} tool={tool} duration={duration} selected={located} marker={marker} playing={playing} />
+      <StatusBar
+        score={score}
+        tool={tool}
+        value={value}
+        selected={located}
+        written={state.written}
+        cursor={showCaret ? cursor : null}
+        marker={marker}
+        playing={playing}
+      />
 
       <ScoreView
         score={score}
         selectedId={selectedId}
         playingId={sounding?.id ?? null}
         playhead={marker}
+        cursor={showCaret ? cursor : null}
         playing={playing}
         editable
         tool={tool}
-        duration={duration}
+        value={value}
         onStaffClick={onStaffClick}
         onSeek={seek}
       />
@@ -323,7 +413,7 @@ export function Editor({ state, dispatch }: Props) {
       <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
       <div className="toast" role="status" aria-live="polite">
-        {toast && <span>{toast}</span>}
+        {toast && <span key={toast.at}>{toast.text}</span>}
       </div>
     </main>
   )

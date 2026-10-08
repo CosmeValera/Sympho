@@ -9,7 +9,8 @@ import type { Score } from '../music/types'
 import { loadMusicFonts, renderScore } from '../render/renderScore'
 import { describeMerge, libraryFile, mergeBackup } from '../state/backup'
 import { deleteScore, loadLibrary, replaceLibrary, saveScore } from '../state/storage'
-import { CopyIcon, DownloadIcon, PlusIcon, TrashIcon, UploadIcon } from './Icons'
+import { uniqueTitle } from '../state/titles'
+import { CloseIcon, CopyIcon, DownloadIcon, PlusIcon, TrashIcon, UploadIcon } from './Icons'
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 
@@ -48,8 +49,10 @@ export function Library({ currentId, onOpen, onNew, onDeleted, onImported }: Pro
   const examples = useMemo(() => EXAMPLES.map((e) => ({ slug: e.slug, score: exampleScore(e.slug)! })), [])
 
   const duplicate = (score: Score) => {
-    saveScore({ ...score, id: newId(), title: `${score.title} (copy)`, updatedAt: Date.now() })
+    const title = uniqueTitle(score.title, scores.map((s) => s.title), 'copy')
+    saveScore({ ...score, id: newId(), title, updatedAt: Date.now() })
     setScores(loadLibrary())
+    setNotice(`Duplicated as “${title}”`)
   }
 
   const remove = (score: Score) => {
@@ -83,10 +86,19 @@ export function Library({ currentId, onOpen, onNew, onDeleted, onImported }: Pro
         <div className="library-head">
           <div>
             <h1>Your scores</h1>
-            <p className="muted">Saved in this browser as you edit. Export a backup to keep them safe or move them to another device.</p>
+            <p className="muted">
+              Saved in this browser as you edit, newest first. Export a backup to keep them safe or move them to another
+              device.
+            </p>
           </div>
           <div className="library-actions">
-            <button type="button" className="button" onClick={exportLibrary} disabled={scores.length === 0}>
+            <button
+              type="button"
+              className="button"
+              onClick={exportLibrary}
+              disabled={scores.length === 0}
+              data-tip={scores.length === 0 ? 'Nothing to export yet' : undefined}
+            >
               <DownloadIcon />
               Export
             </button>
@@ -112,9 +124,12 @@ export function Library({ currentId, onOpen, onNew, onDeleted, onImported }: Pro
           </div>
         </div>
         {notice && (
-          <p className="library-notice" role="status">
-            {notice}
-          </p>
+          <div className="library-notice" role="status">
+            <span>{notice}</span>
+            <button type="button" className="icon-button" aria-label="Dismiss" onClick={() => setNotice(null)}>
+              <CloseIcon />
+            </button>
+          </div>
         )}
         {scores.length === 0 ? (
           <p className="empty-state">Nothing here yet. Open an example below or start a new score, and your edits will show up here.</p>

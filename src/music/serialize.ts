@@ -111,12 +111,12 @@ export function timeSignatureLabel(ts: TimeSignature): string {
   return `${ts.beats}/${ts.beatValue}`
 }
 
-export function newScore(): Score {
+export function newScore(title = 'Untitled score'): Score {
   const timeSignature = TIME_SIGNATURES[0]
   return {
     v: 1,
     id: newId(),
-    title: 'Untitled score',
+    title,
     composer: '',
     instrument: 'piano',
     keySignature: 'C',

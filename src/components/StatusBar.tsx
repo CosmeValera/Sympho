@@ -1,87 +1,102 @@
-import { DURATION_NAMES, beatTicks, measureTicks } from '../music/duration'
+import { type DurationValue, TICKS_PER_WHOLE, aValue, measureTicks, valueName } from '../music/duration'
 import { pitchLabel } from '../music/pitch'
 import type { Located } from '../music/score'
-import type { Duration, NoteEvent, Score } from '../music/types'
+import type { Score } from '../music/types'
 import type { Tool } from '../state/editor'
 
 interface Props {
   score: Score
   tool: Tool
-  duration: Duration
+  /** Value of the next note written. */
+  value: DurationValue
   selected: Located | null
+  /** The selection is the note just written. */
+  written: boolean
+  /** Where typed notes go, while the caret is shown. */
+  cursor: number | null
   /** Where the marker is: the sounding event while playing, else where playback will start. */
   marker: number
   playing: boolean
 }
 
-function valueName(event: Pick<NoteEvent, 'duration' | 'dots'>): string {
-  const name = DURATION_NAMES[event.duration].toLowerCase()
-  return event.dots ? `dotted ${name}` : name
-}
-
-/** `bar 3, beat 2.5` for a tick. */
+/** `bar 3, beat 2.5` for a tick, counting the beats the time signature names (eighths in 6/8). */
 function position(score: Score, tick: number): string {
   const cap = measureTicks(score.timeSignature)
   const bar = Math.floor(tick / cap) + 1
-  const beat = 1 + (tick % cap) / beatTicks(score.timeSignature)
+  const beat = 1 + (tick % cap) / (TICKS_PER_WHOLE / score.timeSignature.beatValue)
   return `bar ${bar}, beat ${Number(beat.toFixed(2))}`
 }
 
-/** One line under the toolbar saying what a click does now, and what the selection is. */
-export function StatusBar({ score, tool, duration, selected, marker, playing }: Props) {
+/**
+ * One line under the toolbar: which tool is on, what a click does now or what
+ * the selection is, and where the caret and the playback marker are.
+ */
+export function StatusBar({ score, tool, value, selected, written, cursor, marker, playing }: Props) {
   return (
     <div className="status-bar" aria-live="polite">
-      <p className="status-help">{selected ? <SelectionHelp selected={selected} /> : <ToolHelp tool={tool} duration={duration} />}</p>
-      <p className="status-marker">
-        <span className="marker-dot" aria-hidden="true" />
-        {playing ? 'Playing ' : 'Plays from '}
-        {marker === 0 && !playing ? 'the start' : position(score, marker)}
+      <p className="status-help">
+        <span className="mode-chip">{tool === 'write' ? 'Write' : 'Select'}</span>
+        {selected ? <SelectionHelp selected={selected} written={written} /> : <ToolHelp tool={tool} value={value} />}
       </p>
+      <div className="status-markers">
+        {cursor !== null && (
+          <p className="status-marker">
+            <span className="caret-dot" aria-hidden="true" />
+            Writes at {position(score, cursor)}
+          </p>
+        )}
+        <p className="status-marker">
+          <span className="marker-dot" aria-hidden="true" />
+          {playing ? 'Playing ' : 'Plays from '}
+          {marker === 0 && !playing ? 'the start' : position(score, marker)}
+        </p>
+      </div>
     </div>
   )
 }
 
-function ToolHelp({ tool, duration }: { tool: Tool; duration: Duration }) {
-  const value = DURATION_NAMES[duration].toLowerCase()
+function ToolHelp({ tool, value }: { tool: Tool; value: DurationValue }) {
   if (tool === 'select') {
     return (
       <>
-        <strong>Select</strong> Click a note or rest to edit it. <kbd>W</kbd> goes back to writing.
-      </>
-    )
-  }
-  if (tool === 'rest') {
-    return (
-      <>
-        <strong>Rests</strong> Click the staff to write a {value} rest, or type <kbd>R</kbd>.
+        Click a note or rest to edit it. <kbd>W</kbd> goes back to writing.
       </>
     )
   }
   return (
     <>
-      <strong>Notes</strong> Click the staff to write a {value} note, or type <kbd>A</kbd>–<kbd>G</kbd>. Click on a note to select it.
+      Type <kbd>A</kbd>–<kbd>G</kbd> or click the staff to write {aValue(value)} note,{' '}
+      <kbd>R</kbd> for a rest. Click a note to change it.
     </>
   )
 }
 
-function SelectionHelp({ selected }: { selected: Located }) {
+function SelectionHelp({ selected, written }: { selected: Located; written: boolean }) {
   const { event, measureIndex } = selected
   const bar = `bar ${measureIndex + 1}`
   if (event.kind === 'rest' || !event.pitch) {
     const name = valueName(event)
     return (
       <>
-        <strong>{name[0].toUpperCase() + name.slice(1)} rest</strong> {bar} · <kbd>A</kbd>–<kbd>G</kbd> write after it · <kbd>Esc</kbd> deselect
+        <strong>{name[0].toUpperCase() + name.slice(1)} rest</strong> {bar} · <kbd>A</kbd>–<kbd>G</kbd> fill it ·{' '}
+        <kbd>Esc</kbd> deselect
+      </>
+    )
+  }
+  const name = `${pitchLabel(event.pitch)} ${valueName(event)}${event.tie ? ', tied' : ''}`
+  if (written) {
+    return (
+      <>
+        Wrote <strong>{name}</strong> · <kbd>↑</kbd>
+        <kbd>↓</kbd> fix its pitch · <kbd>1</kbd>–<kbd>5</kbd> next value · keep typing to go on
       </>
     )
   }
   return (
     <>
-      <strong>
-        {pitchLabel(event.pitch)} {valueName(event)}
-      </strong>{' '}
-      {bar} · <kbd>+</kbd> sharp · <kbd>−</kbd> flat · <kbd>↑</kbd>
-      <kbd>↓</kbd> pitch · <kbd>Esc</kbd> deselect
+      <strong>{name}</strong> {bar} · <kbd>↑</kbd>
+      <kbd>↓</kbd> pitch · <kbd>+</kbd> <kbd>−</kbd> sharp, flat · <kbd>1</kbd>–<kbd>5</kbd> value · <kbd>Del</kbd> rest ·{' '}
+      <kbd>Esc</kbd> deselect
     </>
   )
 }

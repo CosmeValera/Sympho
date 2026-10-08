@@ -59,6 +59,18 @@ export const RedoIcon = () => (
   </Icon>
 )
 
+export const StepUpIcon = () => (
+  <Icon>
+    <path d="M12 19V5M6 11l6-6 6 6" />
+  </Icon>
+)
+
+export const StepDownIcon = () => (
+  <Icon>
+    <path d="M12 5v14M6 13l6 6 6-6" />
+  </Icon>
+)
+
 export const TrashIcon = () => (
   <Icon>
     <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />

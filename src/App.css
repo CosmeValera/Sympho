@@ -172,6 +172,13 @@
   text-transform: uppercase;
 }
 
+.field-note {
+  margin-left: 6px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .tempo-input {
   display: inline-flex;
   align-items: center;
@@ -321,7 +328,7 @@
 .tool {
   display: grid;
   place-items: center;
-  width: 38px;
+  width: 34px;
   height: 36px;
   padding: 0;
   border: 0;
@@ -347,7 +354,7 @@
 
 .tool:disabled {
   cursor: default;
-  opacity: 0.32;
+  opacity: 0.42;
 }
 
 /* SMuFL glyphs sit on the baseline with the notehead centred on it; nudge them into the button's middle. */
@@ -364,6 +371,12 @@
 
 .tool.is-secondary {
   width: 30px;
+}
+
+.tool-divider {
+  width: 1px;
+  margin: 7px 3px;
+  background: var(--line-strong);
 }
 
 .tool.is-secondary .glyph {
@@ -404,6 +417,33 @@
   font-weight: 600;
 }
 
+/* Names the tool in force, coloured like the paper it tints. */
+.mode-chip {
+  display: inline-block;
+  margin-right: 9px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--line);
+  color: var(--ink);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.6;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
+.editor[data-tool='write'] .mode-chip {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.status-markers {
+  display: flex;
+  flex-shrink: 0;
+  gap: 18px;
+}
+
 .status-marker {
   display: inline-flex;
   flex-shrink: 0;
@@ -412,11 +452,20 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Small copies of the slot and the play badge, keying the two readouts to what's on the staff. */
 .marker-dot {
-  width: 3px;
-  height: 14px;
-  border-radius: 2px;
-  background: var(--play);
+  position: relative;
+  width: 15px;
+  height: 15px;
+}
+
+.caret-dot {
+  width: 12px;
+  height: 15px;
+  border: 1.5px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
 }
 
 .toast {
@@ -454,6 +503,19 @@
   border-radius: 6px;
   background: var(--paper);
   box-shadow: var(--shadow);
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    box-shadow 0.15s;
+}
+
+/* Writing tints and rings the paper, so the tool reads at a glance without looking at the toolbar. */
+.editor[data-tool='write'] .paper {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: color-mix(in srgb, var(--accent) 3%, var(--paper));
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    var(--shadow);
 }
 
 .score-canvas {
@@ -496,16 +558,30 @@
   translate: -50% 0;
 }
 
+/* A play badge, not a flag, so it can't be mistaken for the caret: this line is about listening, not writing. */
 .playhead-handle {
   position: absolute;
-  top: -11px;
+  top: -15px;
   left: 50%;
-  width: 14px;
-  height: 13px;
-  background: var(--play);
-  clip-path: polygon(0 0, 100% 0, 100% 58%, 50% 100%, 0 58%);
+  width: 18px;
+  height: 18px;
   translate: -50% 0;
   transition: scale 0.12s;
+}
+
+.playhead-handle,
+.marker-dot {
+  border-radius: 50%;
+  background: var(--play);
+}
+
+.playhead-handle::before,
+.marker-dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  clip-path: polygon(38% 27%, 38% 73%, 75% 50%);
 }
 
 .playhead:hover .playhead-handle,
@@ -515,6 +591,34 @@
 
 .playhead.is-dragging {
   cursor: grabbing;
+}
+
+/* Where typed notes go: a shaded slot as long as the next note, with a solid edge where it starts. */
+.caret {
+  position: absolute;
+  z-index: 1;
+  border: 1.5px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-left: 3px solid var(--accent);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  pointer-events: none;
+  transition:
+    left 0.12s ease-out,
+    top 0.12s ease-out,
+    width 0.12s ease-out;
+  animation: caret-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes caret-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    animation: none;
+  }
 }
 
 .score-svg {
@@ -532,7 +636,7 @@
 }
 
 .score-svg .vf-ghost {
-  opacity: 0.28;
+  opacity: 0.4;
 }
 
 .score-svg .is-hover {
@@ -595,7 +699,7 @@
 /* ---------- Shortcuts dialog ---------- */
 
 .dialog {
-  width: min(560px, calc(100vw - 32px));
+  width: min(880px, calc(100vw - 32px));
   max-height: min(84dvh, 760px);
   padding: 0;
   border: 0;
@@ -623,6 +727,17 @@
 
 .dialog-header h2 {
   font-size: 1.3rem;
+}
+
+.shortcut-columns {
+  display: grid;
+  gap: 0 40px;
+}
+
+@media (min-width: 760px) {
+  .shortcut-columns {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .shortcut-group h3 {
@@ -695,8 +810,12 @@
 }
 
 .library-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: -6px 0 16px;
-  padding: 10px 14px;
+  padding: 6px 6px 6px 14px;
   border-radius: 10px;
   background: var(--accent-soft);
   color: var(--ink);
@@ -844,10 +963,13 @@
   }
 
   /* One scrollable row keeps the sticky toolbar from eating half the screen. */
+  /* The fade at the right edge says there are more tools to scroll to. */
   .toolbar {
     flex-wrap: nowrap;
     overflow-x: auto;
-    scrollbar-width: none;
+    padding-right: 30px;
+    scrollbar-width: thin;
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
   }
 
   .toolbar > * {
@@ -878,6 +1000,12 @@
     white-space: normal;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+  }
+
+  .status-markers {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
   }
 
   .shortcut {

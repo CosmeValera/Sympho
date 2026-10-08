@@ -1,86 +1,161 @@
-import { type EditResult, eventStart, locate } from '../music/score'
+import { canDot } from '../music/duration'
+import { type EditResult, entryTick, eventStart, locate, locateAll, scoreTicks } from '../music/score'
 import type { Duration, Score } from '../music/types'
 
 const HISTORY_LIMIT = 200
 
-/** What a click on the staff does: pick an event, write a note, or write a rest. */
-export type Tool = 'select' | 'note' | 'rest'
+/** What a click on the staff does: pick an event, or write a note. */
+export type Tool = 'select' | 'write'
+
+/** A version of the score in the undo history, with the caret it had and the edit that left it. */
+interface Snapshot {
+  score: Score
+  cursor: number
+  /** Lower-case description of the edit, e.g. "write C5 quarter". */
+  label: string
+}
 
 export interface EditorState {
   score: Score
   /** Whether edits autosave to the library. Examples and shared links stay drafts until first edited. */
   persisted: boolean
-  past: Score[]
-  future: Score[]
+  /** Title a draft takes when it's first saved, so the copy doesn't share the original's name. */
+  saveAs: string | null
+  past: Snapshot[]
+  future: Snapshot[]
   selectedId: string | null
-  /** Value used for new notes; mirrors the selected note's. */
+  /**
+   * The selection is the note just written rather than one picked to edit. Value
+   * keys then set the next note's value instead of changing this one.
+   */
+  written: boolean
+  /** Value used for new notes and rests; mirrors a picked note's. */
   duration: Duration
+  dots: 0 | 1
   tool: Tool
   /**
-   * Tick playback starts from, always the start of an event. It follows the
+   * Tick playback starts from, always the start of an event. It follows a picked
    * selection, and pausing or dragging the marker moves it.
    */
   playhead: number
+  /**
+   * Tick of the caret, where typed notes and rests are written: after a selected
+   * note, at the start of a selected rest, and after whatever was just written.
+   */
+  cursor: number
 }
 
 export type EditorAction =
-  | { type: 'load'; score: Score; persisted: boolean }
-  | { type: 'edit'; edit: (score: Score, selectedId: string | null) => EditResult | Score }
+  | { type: 'load'; score: Score; persisted: boolean; saveAs?: string }
+  | {
+      type: 'edit'
+      label: string
+      edit: (score: Score, selectedId: string | null) => EditResult | Score
+      /** The edit wrote the note it selects. Left out, an edit to the note just written keeps it that. */
+      written?: boolean
+    }
   | { type: 'meta'; patch: Partial<Pick<Score, 'title' | 'composer'>> }
   | { type: 'select'; id: string | null }
-  | { type: 'duration'; duration: Duration }
+  | { type: 'duration'; duration: Duration; dots?: 0 | 1 }
   | { type: 'tool'; tool: Tool }
   | { type: 'seek'; tick: number }
   | { type: 'undo' }
   | { type: 'redo' }
 
-export function initEditor(score: Score, persisted: boolean): EditorState {
-  return { score, persisted, past: [], future: [], selectedId: null, duration: '4', tool: 'note', playhead: 0 }
+const isBlank = (score: Score) => locateAll(score).every((l) => l.event.kind === 'rest')
+
+/** A score of your own, or a blank one, opens ready to write; an example or shared link opens to look at. */
+export function initEditor(score: Score, persisted: boolean, saveAs: string | null = null): EditorState {
+  return {
+    score,
+    persisted,
+    saveAs: persisted ? null : saveAs,
+    past: [],
+    future: [],
+    selectedId: null,
+    written: false,
+    duration: '4',
+    dots: 0,
+    tool: persisted || isBlank(score) ? 'write' : 'select',
+    playhead: 0,
+    cursor: entryTick(score, null),
+  }
 }
 
 /**
- * Keeps the selection only if that event still exists, and syncs the input
- * duration and the playhead to it. Without a selection the playhead stays put,
- * snapped to whatever event now covers it.
+ * Keeps the selection only if that event still exists, and syncs the caret to
+ * it. A picked note also sets the input value, and a picked event moves the
+ * playhead; a note just written does neither. Otherwise the playhead stays put,
+ * snapped to whatever event now covers it, and so does the caret unless `cursor`
+ * moves it.
  */
-function withSelection(state: EditorState, score: Score, id: string | null): EditorState {
+function withSelection(
+  state: EditorState,
+  score: Score,
+  id: string | null,
+  { cursor, written = false }: { cursor?: number; written?: boolean } = {},
+): EditorState {
   const found = locate(score, id)
+  const picked = found && !written ? found : null
+  // A selected rest is a gap to fill, so the value being written stays.
+  const note = picked?.event.kind === 'note' ? picked.event : null
   return {
     ...state,
     score,
     selectedId: found ? id : null,
-    duration: found ? found.event.duration : state.duration,
-    playhead: found ? found.start : eventStart(score, state.playhead),
+    written: !!found && written,
+    duration: note ? note.duration : state.duration,
+    dots: note ? note.dots : state.dots,
+    playhead: picked ? picked.start : eventStart(score, state.playhead),
+    cursor: Math.min(cursor ?? (found ? entryTick(score, id) : state.cursor), scoreTicks(score)),
   }
+}
+
+/** The title and composer aren't part of the undo history, so going back keeps the current ones. */
+function restore(state: EditorState, snapshot: Snapshot): EditorState {
+  const { title, composer } = state.score
+  const score = { ...snapshot.score, title, composer, updatedAt: Date.now() }
+  return withSelection(state, score, state.selectedId, { cursor: snapshot.cursor, written: state.written })
 }
 
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
   switch (action.type) {
     case 'load':
-      return initEditor(action.score, action.persisted)
+      return initEditor(action.score, action.persisted, action.saveAs)
 
     case 'edit': {
       const out = action.edit(state.score, state.selectedId)
-      const { score, selectedId } = 'score' in out ? out : { score: out, selectedId: state.selectedId }
-      if (score === state.score) return withSelection(state, score, selectedId)
-      const next = withSelection(state, { ...score, updatedAt: Date.now() }, selectedId)
+      const { score, selectedId, cursor } = 'score' in out ? out : { score: out, selectedId: state.selectedId, cursor: undefined }
+      const same = selectedId === state.selectedId
+      // An edit to the selected note leaves the caret where it was.
+      const options = { cursor: cursor ?? (same ? state.cursor : undefined), written: action.written ?? (same && state.written) }
+      if (score === state.score) return withSelection(state, score, selectedId, options)
+      // A draft's first edit saves it, under its own name.
+      const titled = state.saveAs ? { ...score, title: state.saveAs } : score
+      const next = withSelection(state, { ...titled, updatedAt: Date.now() }, selectedId, options)
       return {
         ...next,
         persisted: true,
-        past: [...state.past, state.score].slice(-HISTORY_LIMIT),
+        saveAs: null,
+        past: [...state.past, { score: state.score, cursor: state.cursor, label: action.label }].slice(-HISTORY_LIMIT),
         future: [],
       }
     }
 
-    case 'meta':
+    case 'meta': {
       // Typing a title isn't worth an undo step per keystroke.
-      return { ...state, persisted: true, score: { ...state.score, ...action.patch, updatedAt: Date.now() } }
+      const titled = state.saveAs ? { ...state.score, title: state.saveAs } : state.score
+      return { ...state, persisted: true, saveAs: null, score: { ...titled, ...action.patch, updatedAt: Date.now() } }
+    }
 
     case 'select':
       return withSelection(state, state.score, action.id)
 
-    case 'duration':
-      return { ...state, duration: action.duration }
+    case 'duration': {
+      // A new value starts undotted unless it says otherwise.
+      const dots = canDot(action.duration) ? (action.dots ?? 0) : 0
+      return { ...state, duration: action.duration, dots }
+    }
 
     case 'tool':
       return { ...state, tool: action.tool }
@@ -92,9 +167,9 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       const previous = state.past.at(-1)
       if (!previous) return state
       return {
-        ...withSelection(state, previous, state.selectedId),
+        ...restore(state, previous),
         past: state.past.slice(0, -1),
-        future: [state.score, ...state.future],
+        future: [{ score: state.score, cursor: state.cursor, label: previous.label }, ...state.future],
       }
     }
 
@@ -102,8 +177,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       const [next, ...rest] = state.future
       if (!next) return state
       return {
-        ...withSelection(state, next, state.selectedId),
-        past: [...state.past, state.score],
+        ...restore(state, next),
+        past: [...state.past, { score: state.score, cursor: state.cursor, label: next.label }],
         future: rest,
       }
     }
