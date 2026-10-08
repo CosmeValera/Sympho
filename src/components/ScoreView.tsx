@@ -239,14 +239,6 @@ export function ScoreView(props: Props) {
     onLayout?.(next)
   }, [score, width, scale, fontsReady, editable, onLayout])
 
-  // A click that adds a chord note leaves the mouse on it: the ghost now stands on a real note.
-  const refreshHover = useEffectEvent(() => {
-    if (hover && mouse.current) setHover(toHit(mouse.current))
-  })
-  useEffect(() => {
-    if (layout) refreshHover()
-  }, [layout])
-
   const hoverNoteId = hover?.noteId ?? null
   useEffect(() => {
     const svg = hostRef.current?.querySelector('svg')
@@ -308,6 +300,14 @@ export function ScoreView(props: Props) {
       addTo: !near && nearest !== null ? target!.id : null,
     }
   }
+
+  // A click that adds a chord note leaves the mouse on it: the ghost now stands on a real note.
+  const refreshHover = useEffectEvent(() => {
+    if (hover && mouse.current) setHover(toHit(mouse.current))
+  })
+  useEffect(() => {
+    if (layout) refreshHover()
+  }, [layout])
 
   const endAim = () => {
     clearTimeout(aim.current?.timer)

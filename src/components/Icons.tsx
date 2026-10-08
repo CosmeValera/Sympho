@@ -32,10 +32,11 @@ export const PauseIcon = () => (
   </Icon>
 )
 
-export const ToStartIcon = () => (
+/** A play triangle starting from a bar: play from the beginning. */
+export const PlayFromStartIcon = () => (
   <Icon>
-    <path d="M6 5v14" />
-    <path d="M18.5 5.5v13a.6.6 0 0 1-.93.5L9.2 12.5a.6.6 0 0 1 0-1l8.37-6.5a.6.6 0 0 1 .93.5Z" fill="currentColor" stroke="none" />
+    <path d="M5.5 5v14" />
+    <path d="M9.5 5.5v13a.6.6 0 0 0 .93.5L18.8 12.5a.6.6 0 0 0 0-1l-8.37-6.5a.6.6 0 0 0-.93.5Z" fill="currentColor" stroke="none" />
   </Icon>
 )
 

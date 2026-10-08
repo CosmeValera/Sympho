@@ -59,7 +59,7 @@ Layers, from pure to impure: `src/music/` (framework-free engine, no DOM) → `s
 
 `player` is a singleton that lazy-imports Tone.js on first sound (largest dependency). Piano uses Salamander samples from `tonejs.github.io` with a synth fallback if the CDN fails; the monophonic guitar and bass synths are round-robin pools (`pool`) so chords sound, and a limiter on the output keeps chords from clipping. MIDI export (`midi.ts`) and SVG export are dynamically imported from `Editor.tsx`. `player.play` bumps a run counter so draw callbacks from a stopped run are ignored.
 
-Playback model in `Editor.tsx`: `sounding` (non-null while playing) holds the event being heard, and the marker shown is `sounding?.tick ?? playhead`. `playFrom(tick)` does not move the reducer playhead, so when the piece ends the marker returns to where it was. Pausing (`Space`) seeks the playhead to the sounding tick, so the next `Space` resumes there. `Shift Space` is `playFrom(0)`; `Home` and the toolbar button seek to 0. Seeking, or selecting with the Select tool, while playing restarts from the new tick, and any music edit (`change()`) pauses.
+Playback model in `Editor.tsx`: `sounding` (non-null while playing) holds the event being heard, and the marker shown is `sounding?.tick ?? playhead`. `playFrom(tick)` does not move the reducer playhead, so when the piece ends the marker returns to where it was. Pausing (`Space`) seeks the playhead to the sounding tick, so the next `Space` resumes there. `Shift Space` and the small button next to Play (`playFromStart`) seek to 0 and play; `Home` only seeks to 0. Seeking, or selecting with the Select tool, while playing restarts from the new tick, and any music edit (`change()`) pauses.
 
 ### App shell
 

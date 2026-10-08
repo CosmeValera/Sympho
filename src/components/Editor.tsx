@@ -133,6 +133,12 @@ export function Editor({ state, dispatch }: Props) {
 
   const togglePlay = () => (playing ? pause() : playFrom(playhead))
 
+  /** Moves the marker back to the beginning and plays from there. */
+  const playFromStart = () => {
+    dispatch({ type: 'seek', tick: 0 })
+    playFrom(0)
+  }
+
   /** Moves the marker; while playing, playback jumps there too. */
   const seek = (tick: number) => {
     dispatch({ type: 'seek', tick })
@@ -370,7 +376,7 @@ export function Editor({ state, dispatch }: Props) {
       removeSelected()
     } else if (key === ' ') {
       // Handled here even on a focused button, which would otherwise take Space as a click.
-      if (e.shiftKey) playFrom(0)
+      if (e.shiftKey) playFromStart()
       else togglePlay()
     } else if (key === 'Home') {
       seek(0)
@@ -419,12 +425,11 @@ export function Editor({ state, dispatch }: Props) {
         pitch={headPitch}
         keySignature={score.keySignature}
         playing={playing}
-        atStart={!playing && playhead === 0}
         undoLabel={state.past.at(-1)?.label ?? null}
         redoLabel={state.future[0]?.label ?? null}
         canRemoveBar={score.measures.length > 1}
         onPlay={togglePlay}
-        onToStart={() => seek(0)}
+        onPlayFromStart={playFromStart}
         onTool={chooseTool}
         onDuration={chooseDuration}
         onRest={() => write(null)}

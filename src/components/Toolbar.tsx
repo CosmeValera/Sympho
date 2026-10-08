@@ -8,13 +8,13 @@ import {
   BarRemoveIcon,
   KeyboardIcon,
   PauseIcon,
+  PlayFromStartIcon,
   PlayIcon,
   PointerIcon,
   RedoIcon,
   StepDownIcon,
   StepUpIcon,
   TieIcon,
-  ToStartIcon,
   TrashIcon,
   UndoIcon,
 } from './Icons'
@@ -76,14 +76,13 @@ interface Props {
   pitch: Pitch | null
   keySignature: string
   playing: boolean
-  /** Playback would already start from the beginning. */
-  atStart: boolean
   /** What undo and redo would do, if anything. */
   undoLabel: string | null
   redoLabel: string | null
   canRemoveBar: boolean
   onPlay: () => void
-  onToStart: () => void
+  /** Moves the marker back to the beginning and plays from there. */
+  onPlayFromStart: () => void
   onTool: (tool: Tool) => void
   onDuration: (d: Duration) => void
   /** Writes a rest of the current value at the caret. */
@@ -122,8 +121,8 @@ export function Toolbar(props: Props) {
           {playing ? <PauseIcon /> : <PlayIcon />}
           <span className="play-label">{playing ? 'Pause' : 'Play'}</span>
         </button>
-        <ToolButton label="Back to start" shortcut="Home" disabled={props.atStart} onClick={props.onToStart}>
-          <ToStartIcon />
+        <ToolButton label="Play from the beginning" shortcut="Shift Space" onClick={props.onPlayFromStart}>
+          <PlayFromStartIcon />
         </ToolButton>
       </div>
 

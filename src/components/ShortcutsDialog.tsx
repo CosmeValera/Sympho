@@ -26,7 +26,7 @@ const COLUMNS: Group[][] = [
       title: 'Playback',
       items: [
         [['Space'], 'Play from the orange line / pause (playing again resumes)'],
-        [['Shift', 'Space'], 'Play from the beginning, leaving the line where it is'],
+        [['Shift', 'Space'], 'Move the orange line back to the beginning and play'],
         [['Home'], 'Move the orange line back to the beginning'],
       ],
     },
