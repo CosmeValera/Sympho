@@ -452,11 +452,12 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Small copies of the slot and the play badge, keying the two readouts to what's on the staff. */
+/* Small copies of the slot and the orange line, keying the two readouts to what's on the staff. */
 .marker-dot {
-  position: relative;
-  width: 15px;
-  height: 15px;
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--play);
 }
 
 .caret-dot {
@@ -556,37 +557,14 @@
   border-radius: 1px;
   background: var(--play);
   translate: -50% 0;
+  transition: width 0.12s;
 }
 
-/* A play badge, not a flag, so it can't be mistaken for the caret: this line is about listening, not writing. */
-.playhead-handle {
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  width: 18px;
-  height: 18px;
-  translate: -50% 0;
-  transition: scale 0.12s;
-}
-
-.playhead-handle,
-.marker-dot {
-  border-radius: 50%;
-  background: var(--play);
-}
-
-.playhead-handle::before,
-.marker-dot::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--paper);
-  clip-path: polygon(38% 27%, 38% 73%, 75% 50%);
-}
-
-.playhead:hover .playhead-handle,
-.playhead.is-dragging .playhead-handle {
-  scale: 1.25;
+/* Thickens under the pointer, to say it can be dragged. */
+.playhead:hover::before,
+.playhead.is-dragging::before {
+  width: 4px;
+  border-radius: 2px;
 }
 
 .playhead.is-dragging {

@@ -107,8 +107,8 @@ export function ShortcutsDialog({ open, onClose }: { open: boolean; onClose: () 
         </div>
         <p className="muted shortcut-note">
           Value keys set the value of the next note you write; after clicking a note they change that note instead.
-          The blue box is where the next typed note goes: after the note you just wrote, or into a selected rest. The
-          orange line with the play button is where playback starts. Drag it, or click a note to move it there.
+          While you type, a blue box shows where the next note goes: after the note you just wrote, or into a selected
+          rest. The orange line is where playback starts. Drag it, or click a note to move it there.
         </p>
       </div>
     </dialog>

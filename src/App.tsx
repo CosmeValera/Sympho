@@ -53,8 +53,8 @@ function initialEditor() {
   const lastId = lastOpenedId()
   const last = lastId ? loadLibrary().find((s) => s.id === lastId) : undefined
   if (last) return initEditor(last, true)
-  const ode = exampleDraft('ode-to-joy')!
-  return initEditor(ode.score, false, ode.saveAs)
+  // First visit: a blank page to write on. It joins the library on the first edit.
+  return initEditor(newScore(uniqueTitle('Untitled score', libraryTitles(), 'number')), false)
 }
 
 function initialTheme(): Theme {
