@@ -5,6 +5,7 @@ const SHORTCUTS: [string[], string][] = [
   [['Click'], 'Place a note at that pitch, or select the note under the cursor'],
   [['A', '–', 'G'], 'Add a note after the selection, in the nearest octave'],
   [['R'], 'Add a rest after the selection'],
+  [['S'], 'Select mode: clicks pick notes without writing, ready for sharps, flats or dots'],
   [['1', '–', '5'], 'Whole, half, quarter, eighth, sixteenth'],
   [['↑', '↓'], 'Move the selected note a step'],
   [['Shift', '↑ ↓'], 'Move it an octave'],

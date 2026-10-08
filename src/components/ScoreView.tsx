@@ -30,6 +30,8 @@ interface Props {
   playingId: string | null
   editable: boolean
   restMode: boolean
+  /** Any click on a note's column picks it, whatever the pitch, and nothing is written. */
+  selectMode: boolean
   duration: Duration
   onStaffClick: (hit: StaffHit) => void
   onLayout?: (layout: ScoreLayout) => void
@@ -62,7 +64,7 @@ function hitTest(layout: ScoreLayout, x: number, y: number): Omit<StaffHit, 'not
   return null
 }
 
-export function ScoreView({ score, selectedId, playingId, editable, restMode, duration, onStaffClick, onLayout }: Props) {
+export function ScoreView({ score, selectedId, playingId, editable, restMode, selectMode, duration, onStaffClick, onLayout }: Props) {
   const paperRef = useRef<HTMLDivElement>(null)
   const hostRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(0)
@@ -123,6 +125,7 @@ export function ScoreView({ score, selectedId, playingId, editable, restMode, du
     const hit = hitTest(layout, (e.clientX - rect.left) / scale, (e.clientY - rect.top) / scale)
     if (!hit) return null
     const target = locate(score, hit.box.id)?.event
+    if (selectMode) return { ...hit, noteId: target?.id ?? null }
     const selects = target?.kind === 'note' && target.pitch && diatonicIndex(target.pitch) === hit.diatonic
     const selectsRest = restMode && target?.kind === 'rest' && target.duration === duration
     return { ...hit, noteId: target && (selects || selectsRest) ? target.id : null }
@@ -149,7 +152,7 @@ export function ScoreView({ score, selectedId, playingId, editable, restMode, du
       >
         <div ref={hostRef} className="score-svg" />
         {!fontsReady && <div className="score-loading">Loading engraver…</div>}
-        {layout && hover && !hover.noteId && <Ghost layout={layout} hover={hover} restMode={restMode} duration={duration} score={score} />}
+        {layout && hover && !hover.noteId && !selectMode && <Ghost layout={layout} hover={hover} restMode={restMode} duration={duration} score={score} />}
       </div>
     </div>
   )

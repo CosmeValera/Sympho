@@ -51,7 +51,7 @@ interface Props {
 }
 
 export function Editor({ state, dispatch }: Props) {
-  const { score, selectedId, duration, restMode } = state
+  const { score, selectedId, duration, restMode, selectMode } = state
   const selected = locate(score, selectedId)?.event ?? null
   const [playing, setPlaying] = useState(false)
   const [playingId, setPlayingId] = useState<string | null>(null)
@@ -147,6 +147,7 @@ export function Editor({ state, dispatch }: Props) {
   const onStaffClick = (hit: StaffHit) => {
     player.preload(score.instrument)
     if (hit.noteId) return select(hit.noteId)
+    if (selectMode) return select(null)
     const value = { duration, dots: 0 as const }
     if (restMode) return edit((s) => placeAt(s, hit.box.tick, value, null))
     const pitch = fromDiatonic(hit.diatonic, score.keySignature)
@@ -200,6 +201,8 @@ export function Editor({ state, dispatch }: Props) {
       typeNote(letter as Step)
     } else if (letter === 'R' && !e.repeat) {
       typeNote(null)
+    } else if (letter === 'S' && !e.repeat) {
+      dispatch({ type: 'selectMode', on: !selectMode })
     } else if (/^[1-5]$/.test(key)) {
       chooseDuration(DURATIONS[Number(key) - 1])
     } else if (key === 'ArrowUp' || key === 'ArrowDown') {
@@ -258,6 +261,7 @@ export function Editor({ state, dispatch }: Props) {
       <Toolbar
         duration={duration}
         restMode={restMode}
+        selectMode={selectMode}
         selected={selected}
         playing={playing}
         canUndo={state.past.length > 0}
@@ -266,6 +270,7 @@ export function Editor({ state, dispatch }: Props) {
         onPlay={play}
         onDuration={chooseDuration}
         onRestMode={() => dispatch({ type: 'restMode', on: !restMode })}
+        onSelectMode={() => dispatch({ type: 'selectMode', on: !selectMode })}
         onDot={() => editSelected(toggleDot)}
         onAlter={(alter) => editSelected((s, id) => setAlter(s, id, alter), true)}
         onTie={() => editSelected(toggleTie)}
@@ -295,6 +300,7 @@ export function Editor({ state, dispatch }: Props) {
         playingId={playingId}
         editable
         restMode={restMode}
+        selectMode={selectMode}
         duration={duration}
         onStaffClick={onStaffClick}
       />

@@ -8,7 +8,7 @@ Write sheet music in the browser, hear it played back, and share it with a link.
 
 ## Features
 
-- **Click to compose.** A ghost note follows the cursor and shows the pitch it will write. Click an existing note to select it.
+- **Click to compose.** A ghost note follows the cursor and shows the pitch it will write. Click an existing note to select it, or turn on the select tool (`S`) so any click on a note picks it without writing, ready for sharps, flats, dots or ties.
 - **Keyboard entry.** Type `A`–`G` to add notes, `1`–`5` for values, arrows to move and select, `Space` to play. Press `?` in the app for the full list.
 - **Correct notation.** Notes that cross a barline are split and tied, gaps fill with rests, and 6/8 groups in dotted quarters. Engraving is done by [VexFlow](https://www.vexflow.com/).
 - **Playback** with sampled piano, flute, guitar and synth bass ([Tone.js](https://tonejs.github.io/)). The playing note is highlighted as it sounds.

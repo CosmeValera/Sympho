@@ -106,6 +106,12 @@ export const KeyboardIcon = () => (
   </Icon>
 )
 
+export const PointerIcon = () => (
+  <Icon>
+    <path d="M4.04 4.69a.5.5 0 0 1 .65-.65l16 6.5a.5.5 0 0 1-.06.95l-6.13 1.58a2 2 0 0 0-1.43 1.43l-1.58 6.13a.5.5 0 0 1-.95.06z" />
+  </Icon>
+)
+
 export const SunIcon = () => (
   <Icon>
     <circle cx="12" cy="12" r="4" />

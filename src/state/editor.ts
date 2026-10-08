@@ -14,6 +14,8 @@ export interface EditorState {
   duration: Duration
   /** Clicking the staff places rests instead of notes. */
   restMode: boolean
+  /** Clicking the staff only selects, so a note can be picked to edit without overwriting it. */
+  selectMode: boolean
 }
 
 export type EditorAction =
@@ -23,11 +25,12 @@ export type EditorAction =
   | { type: 'select'; id: string | null }
   | { type: 'duration'; duration: Duration }
   | { type: 'restMode'; on: boolean }
+  | { type: 'selectMode'; on: boolean }
   | { type: 'undo' }
   | { type: 'redo' }
 
 export function initEditor(score: Score, persisted: boolean): EditorState {
-  return { score, persisted, past: [], future: [], selectedId: null, duration: '4', restMode: false }
+  return { score, persisted, past: [], future: [], selectedId: null, duration: '4', restMode: false, selectMode: false }
 }
 
 /** Keeps the selection only if that event still exists, and syncs the input duration to it. */
@@ -69,8 +72,12 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case 'duration':
       return { ...state, duration: action.duration }
 
+    // Writing rests and selecting are both click modes, so turning one on turns the other off.
     case 'restMode':
-      return { ...state, restMode: action.on }
+      return { ...state, restMode: action.on, selectMode: action.on ? false : state.selectMode }
+
+    case 'selectMode':
+      return { ...state, selectMode: action.on, restMode: action.on ? false : state.restMode }
 
     case 'undo': {
       const previous = state.past.at(-1)

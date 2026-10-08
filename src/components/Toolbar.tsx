@@ -6,6 +6,7 @@ import {
   BarRemoveIcon,
   KeyboardIcon,
   PlayIcon,
+  PointerIcon,
   RedoIcon,
   StopIcon,
   TieIcon,
@@ -52,6 +53,7 @@ function ToolButton({ label, shortcut, pressed, disabled, className, onClick, ch
 interface Props {
   duration: Duration
   restMode: boolean
+  selectMode: boolean
   selected: NoteEvent | null
   playing: boolean
   canUndo: boolean
@@ -60,6 +62,7 @@ interface Props {
   onPlay: () => void
   onDuration: (d: Duration) => void
   onRestMode: () => void
+  onSelectMode: () => void
   onDot: () => void
   onAlter: (alter: number) => void
   onTie: () => void
@@ -72,7 +75,7 @@ interface Props {
 }
 
 export function Toolbar(props: Props) {
-  const { duration, restMode, selected, playing } = props
+  const { duration, restMode, selectMode, selected, playing } = props
   const note = selected?.kind === 'note' ? selected : null
 
   return (
@@ -86,6 +89,12 @@ export function Toolbar(props: Props) {
         {playing ? <StopIcon /> : <PlayIcon />}
         <span>{playing ? 'Stop' : 'Play'}</span>
       </button>
+
+      <div className="tool-group">
+        <ToolButton label="Select notes" shortcut="S" pressed={selectMode} onClick={props.onSelectMode}>
+          <PointerIcon />
+        </ToolButton>
+      </div>
 
       <div className="tool-group" aria-label="Note value">
         {DURATIONS.map((d, i) => (
