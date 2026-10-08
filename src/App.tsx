@@ -123,6 +123,11 @@ export function App() {
             // Keep the open score on screen, but stop saving it back.
             if (id === state.score.id) dispatch({ type: 'load', score: state.score, persisted: false })
           }}
+          onImported={(scores) => {
+            // A newer copy of the open score came in: show it, or the next edit would save over it.
+            const fresh = scores.find((s) => s.id === state.score.id)
+            if (fresh && fresh.updatedAt > state.score.updatedAt) dispatch({ type: 'load', score: fresh, persisted: true })
+          }}
         />
       ) : (
         <Editor state={state} dispatch={dispatch} />

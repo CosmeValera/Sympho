@@ -2,19 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Sympho is a static, serverless sheet-music editor: React 19 + TypeScript + Vite, engraving by VexFlow 5, playback by Tone.js. No backend; scores live in `localStorage` and share links carry the whole score in the URL. Deployed on Vercel.
+Sympho is a static, serverless sheet-music editor: React 19 + TypeScript + Vite, engraving by VexFlow 5, playback by Tone.js. No backend; scores live in `localStorage`, share links carry the whole score in the URL, and the library can be exported/imported as a JSON file. Installable PWA that works offline. Deployed on Vercel; GitHub Actions (`.github/workflows/ci.yml`) runs lint, test and build on push and PR.
 
 ## Commands
 
-Node.js 20+.
+Node.js 22+ (CI uses 24).
 
 ```sh
 npm run dev                                  # Vite dev server, http://localhost:5173
 npm test                                     # vitest run (all tests)
 npx vitest run src/music/score.test.ts       # one test file
-npx vitest run -t "click modes"              # tests whose name matches
+npx vitest run -t "playhead"                 # tests whose name matches
 npm run lint                                 # oxlint (.oxlintrc.json)
-npm run build                                # tsc -b type-check, then vite build into dist/
+npm run build                                # tsc -b type-check, then vite build into dist/ (plus sw.js and manifest)
+npm run preview                              # serve dist/; the only way to exercise the service worker
 ```
 
 `npm run build` is the only type-check; Vite's dev server and Vitest do not type-check. TS config is strict with `noUnusedLocals`/`noUnusedParameters`, `verbatimModuleSyntax` (type-only imports need `import type`) and `erasableSyntaxOnly` (no enums, namespaces or constructor parameter properties). Unused destructured fields are named `_x` (e.g. `{ id: _id, ...e }`).
@@ -37,19 +38,24 @@ Layers, from pure to impure: `src/music/` (framework-free engine, no DOM) → `s
 - `editor.ts` reducer. Music changes are dispatched as `{ type: 'edit', edit: (score, selectedId) => EditResult | Score }`. An undo step is recorded only if the returned score is a **new object**, so no-op edits must return the same `score` reference. `meta` (title/composer) bypasses undo on purpose.
 - `persisted` flag: examples and shared links load as drafts (`persisted: false`) and become library scores on first edit. `App.tsx` saves to `localStorage` on every change once persisted and replaces the `#/s/…` / `#/example/…` hash with `#/`.
 - `storage.ts` wraps every `localStorage` access in try/catch; keys are prefixed `sympho:`.
-- `restMode` and `selectMode` are mutually exclusive click modes (covered by `editor.test.ts`).
+- `tool: 'select' | 'note' | 'rest'` is the click mode. `playhead` is the tick playback starts from: it follows the selection (`withSelection`), moves to newly written notes, and `seek` snaps it to the start of the event under it (`eventStart`). Covered by `editor.test.ts`.
+- `backup.ts` is the library file format (`{ app: 'sympho', version: 1, scores }`). `mergeBackup` accepts that, a bare array or one score, validates each with `readScore`, and only replaces a score with a newer `updatedAt`. `storage.replaceLibrary` writes the merged result.
 
 ### Rendering (`src/render/`)
 
 - `renderScore` imperatively engraves into a container (SVG backend) and returns a `ScoreLayout` (measure/event boxes in layout units plus `scale`) used by `ScoreView` for hit-testing clicks and positioning the ghost note. It does its own greedy line breaking and adds a faint "ghost" measure when editable.
 - Each VexFlow note gets the event id, so the SVG element id is `vf-<eventId>`; `ScoreView` toggles `is-selected` / `is-playing` / `is-hover` classes on those elements instead of re-rendering.
+- `EventBox.left` is a note's left edge including its accidental; the playback marker (`Playhead` in `ScoreView.tsx`) is drawn just before it. Dragging the marker snaps to event starts (`snapTick`) and calls `onSeek` only if it moved; `swallowClick` stops the click that ends a drag from writing a note.
+- Glyphs in TSX (noteheads, rests, toolbar note values) are SMuFL Private Use Area characters rendered with Bravura. Some editing tools silently strip PUA characters, so write them as `\uXXXX` escapes.
 - All strokes/fills use `currentColor` so CSS themes (`data-theme` = light/dark/solar on `<html>`) apply. VexFlow is imported from `vexflow/core` with fonts from `@vexflow-fonts/*`; `loadMusicFonts()` must resolve before rendering or glyphs are mis-measured.
 - `exportSvg.ts` embeds the woff2 fonts as data URLs so exported SVGs render elsewhere.
 
 ### Audio (`src/audio/`)
 
-`player` is a singleton that lazy-imports Tone.js on first sound (largest dependency). Piano uses Salamander samples from `tonejs.github.io` with a synth fallback if the CDN fails. MIDI export (`midi.ts`) and SVG export are dynamically imported from `Editor.tsx`. Any music edit while playing stops playback (`change()` in `Editor.tsx`).
+`player` is a singleton that lazy-imports Tone.js on first sound (largest dependency). Piano uses Salamander samples from `tonejs.github.io` with a synth fallback if the CDN fails. MIDI export (`midi.ts`) and SVG export are dynamically imported from `Editor.tsx`. `player.play` bumps a run counter so draw callbacks from a stopped run are ignored.
+
+Playback model in `Editor.tsx`: `sounding` (non-null while playing) holds the event being heard, and the marker shown is `sounding?.tick ?? playhead`. `playFrom(tick)` does not move the reducer playhead, so when the piece ends the marker returns to where it was. Pausing (`Space`) seeks the playhead to the sounding tick, so the next `Space` resumes there. `Shift Space` is `playFrom(0)`; `Home` and the toolbar button seek to 0. Seeking or selecting while playing restarts from the new tick, and any music edit (`change()`) pauses.
 
 ### App shell
 
-Hash routing in `App.tsx`: `#/` editor, `#/library`, `#/example/<slug>`, `#/s/<data>`. Keyboard shortcuts live in `Editor.tsx` `onKeyDown`; the user-facing list is `ShortcutsDialog.tsx`, so keep both in sync. `vite.config.ts` splits vexflow and react into their own chunks.
+Hash routing in `App.tsx`: `#/` editor, `#/library`, `#/example/<slug>`, `#/s/<data>`. Keyboard shortcuts live in `Editor.tsx` `onKeyDown`; the user-facing lists are `ShortcutsDialog.tsx` and the hints in `StatusBar.tsx` (what a click does in the current tool, or how to edit the selection), so keep all three in sync. `vite.config.ts` splits vexflow and react into their own chunks and configures `vite-plugin-pwa`: Workbox precaches the build (including the woff2 music fonts) and caches the Salamander piano samples CacheFirst. PWA icons in `public/icons/` were rendered from `public/favicon.svg`.

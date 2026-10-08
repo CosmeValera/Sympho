@@ -51,6 +51,11 @@ export function saveScore(score: Score): boolean {
   return write(SCORES, JSON.stringify([score, ...others]))
 }
 
+/** Overwrites the whole library, for restoring a backup. */
+export function replaceLibrary(scores: Score[]): boolean {
+  return write(SCORES, JSON.stringify(scores))
+}
+
 export function deleteScore(id: string): void {
   write(SCORES, JSON.stringify(readRaw().filter((s) => idOf(s) !== id)))
   if (lastOpenedId() === id) write(LAST, null)

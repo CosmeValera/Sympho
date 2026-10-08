@@ -25,9 +25,23 @@ export const PlayIcon = () => (
   </Icon>
 )
 
-export const StopIcon = () => (
+export const PauseIcon = () => (
   <Icon fill="currentColor" stroke="none">
-    <rect x="6" y="6" width="12" height="12" rx="2" />
+    <rect x="6" y="4.5" width="4.2" height="15" rx="1.2" />
+    <rect x="13.8" y="4.5" width="4.2" height="15" rx="1.2" />
+  </Icon>
+)
+
+export const ToStartIcon = () => (
+  <Icon>
+    <path d="M6 5v14" />
+    <path d="M18.5 5.5v13a.6.6 0 0 1-.93.5L9.2 12.5a.6.6 0 0 1 0-1l8.37-6.5a.6.6 0 0 1 .93.5Z" fill="currentColor" stroke="none" />
+  </Icon>
+)
+
+export const UploadIcon = () => (
+  <Icon>
+    <path d="M12 15V3M7 8l5-5 5 5M5 21h14" />
   </Icon>
 )
 

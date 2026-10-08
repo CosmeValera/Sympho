@@ -1,27 +1,36 @@
 import type { ReactNode } from 'react'
 import { DURATIONS, DURATION_NAMES, canDot } from '../music/duration'
 import type { Duration, NoteEvent } from '../music/types'
+import type { Tool } from '../state/editor'
 import {
   BarAddIcon,
   BarRemoveIcon,
   KeyboardIcon,
+  PauseIcon,
   PlayIcon,
   PointerIcon,
   RedoIcon,
-  StopIcon,
   TieIcon,
+  ToStartIcon,
   TrashIcon,
   UndoIcon,
 } from './Icons'
 
 /** SMuFL codepoints rendered with Bravura. */
-const NOTE_GLYPH: Record<Duration, string> = { '1': '', '2': '', '4': '', '8': '', '16': '' }
+const NOTE_GLYPH: Record<Duration, string> = { '1': '\uE1D2', '2': '\uE1D3', '4': '\uE1D5', '8': '\uE1D7', '16': '\uE1D9' }
+const REST_GLYPH: Record<Duration, string> = { '1': '\uE4E3', '2': '\uE4E4', '4': '\uE4E5', '8': '\uE4E6', '16': '\uE4E7' }
 const ACCIDENTALS = [
-  { alter: -2, glyph: '', label: 'Double flat', key: '' },
-  { alter: -1, glyph: '', label: 'Flat', key: '−' },
-  { alter: 0, glyph: '', label: 'Natural', key: 'N' },
-  { alter: 1, glyph: '', label: 'Sharp', key: '+' },
-  { alter: 2, glyph: '', label: 'Double sharp', key: '' },
+  { alter: -2, glyph: '\uE264', label: 'Double flat', key: '' },
+  { alter: -1, glyph: '\uE260', label: 'Flat', key: '−' },
+  { alter: 0, glyph: '\uE261', label: 'Natural', key: 'N' },
+  { alter: 1, glyph: '\uE262', label: 'Sharp', key: '+' },
+  { alter: 2, glyph: '\uE263', label: 'Double sharp', key: '' },
+]
+
+const TOOLS: { tool: Tool; label: string; key: string; tip: string; icon: ReactNode }[] = [
+  { tool: 'select', label: 'Select', key: 'S', tip: 'Click picks a note to edit', icon: <PointerIcon /> },
+  { tool: 'note', label: 'Notes', key: 'W', tip: 'Click writes a note', icon: <span className="glyph">{NOTE_GLYPH['4']}</span> },
+  { tool: 'rest', label: 'Rests', key: 'Shift R', tip: 'Click writes a rest', icon: <span className="glyph">{REST_GLYPH['4']}</span> },
 ]
 
 interface ToolButtonProps {
@@ -51,18 +60,19 @@ function ToolButton({ label, shortcut, pressed, disabled, className, onClick, ch
 }
 
 interface Props {
+  tool: Tool
   duration: Duration
-  restMode: boolean
-  selectMode: boolean
   selected: NoteEvent | null
   playing: boolean
+  /** Playback would already start from the beginning. */
+  atStart: boolean
   canUndo: boolean
   canRedo: boolean
   canRemoveBar: boolean
   onPlay: () => void
+  onToStart: () => void
+  onTool: (tool: Tool) => void
   onDuration: (d: Duration) => void
-  onRestMode: () => void
-  onSelectMode: () => void
   onDot: () => void
   onAlter: (alter: number) => void
   onTie: () => void
@@ -75,46 +85,60 @@ interface Props {
 }
 
 export function Toolbar(props: Props) {
-  const { duration, restMode, selectMode, selected, playing } = props
+  const { tool, duration, selected, playing } = props
   const note = selected?.kind === 'note' ? selected : null
+  const rests = tool === 'rest'
 
   return (
     <div className="toolbar" role="toolbar" aria-label="Notation tools">
-      <button
-        type="button"
-        className={`play-button${playing ? ' is-playing' : ''}`}
-        onClick={props.onPlay}
-        data-tip={playing ? 'Stop · Space' : selected ? 'Play from selection · Space' : 'Play · Space'}
-      >
-        {playing ? <StopIcon /> : <PlayIcon />}
-        <span>{playing ? 'Stop' : 'Play'}</span>
-      </button>
-
-      <div className="tool-group">
-        <ToolButton label="Select notes" shortcut="S" pressed={selectMode} onClick={props.onSelectMode}>
-          <PointerIcon />
+      <div className="transport">
+        <button
+          type="button"
+          className={`play-button${playing ? ' is-playing' : ''}`}
+          onClick={props.onPlay}
+          data-tip={playing ? 'Pause · Space' : 'Play from the marker · Space'}
+        >
+          {playing ? <PauseIcon /> : <PlayIcon />}
+          <span>{playing ? 'Pause' : 'Play'}</span>
+        </button>
+        <ToolButton label="Back to start" shortcut="Home" disabled={props.atStart} onClick={props.onToStart}>
+          <ToStartIcon />
         </ToolButton>
+      </div>
+
+      <div className="segmented" role="radiogroup" aria-label="Click on the staff to">
+        {TOOLS.map((t) => (
+          <button
+            key={t.tool}
+            type="button"
+            role="radio"
+            aria-checked={tool === t.tool}
+            className="segment"
+            data-tip={`${t.tip} · ${t.key}`}
+            onClick={() => props.onTool(t.tool)}
+          >
+            {t.icon}
+            <span className="segment-label">{t.label}</span>
+          </button>
+        ))}
       </div>
 
       <div className="tool-group" aria-label="Note value">
         {DURATIONS.map((d, i) => (
           <ToolButton
             key={d}
-            label={`${DURATION_NAMES[d]} ${restMode ? 'rest' : 'note'}`}
+            label={`${DURATION_NAMES[d]} ${rests ? 'rest' : 'note'}`}
             shortcut={String(i + 1)}
             pressed={duration === d}
             className="glyph-tool"
             onClick={() => props.onDuration(d)}
           >
-            <span className="glyph">{NOTE_GLYPH[d]}</span>
+            <span className="glyph">{rests ? REST_GLYPH[d] : NOTE_GLYPH[d]}</span>
           </ToolButton>
         ))}
       </div>
 
       <div className="tool-group">
-        <ToolButton label="Rest input" shortcut="R adds a rest" pressed={restMode} className="glyph-tool" onClick={props.onRestMode}>
-          <span className="glyph">{''}</span>
-        </ToolButton>
         <ToolButton
           label="Dotted"
           shortcut="."
@@ -123,7 +147,7 @@ export function Toolbar(props: Props) {
           className="glyph-tool"
           onClick={props.onDot}
         >
-          <span className="glyph glyph-dot">{''}</span>
+          <span className="glyph glyph-dot">{'\uE1E7'}</span>
         </ToolButton>
         <ToolButton label="Tie to next note" shortcut="T" pressed={!!note?.tie} disabled={!note} onClick={props.onTie}>
           <TieIcon />

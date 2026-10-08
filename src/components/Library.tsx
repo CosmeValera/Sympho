@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { downloadBlob } from '../download'
 import { EXAMPLES, exampleScore } from '../examples'
 import { instrumentInfo } from '../music/instruments'
 import { KEY_SIGNATURES } from '../music/pitch'
@@ -6,8 +7,9 @@ import { newId } from '../music/score'
 import { timeSignatureLabel } from '../music/serialize'
 import type { Score } from '../music/types'
 import { loadMusicFonts, renderScore } from '../render/renderScore'
-import { deleteScore, loadLibrary, saveScore } from '../state/storage'
-import { CopyIcon, PlusIcon, TrashIcon } from './Icons'
+import { describeMerge, libraryFile, mergeBackup } from '../state/backup'
+import { deleteScore, loadLibrary, replaceLibrary, saveScore } from '../state/storage'
+import { CopyIcon, DownloadIcon, PlusIcon, TrashIcon, UploadIcon } from './Icons'
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 
@@ -35,10 +37,14 @@ interface Props {
   onOpen: (score: Score) => void
   onNew: () => void
   onDeleted: (id: string) => void
+  /** A backup was imported; `scores` is the whole library after it. */
+  onImported: (scores: Score[]) => void
 }
 
-export function Library({ currentId, onOpen, onNew, onDeleted }: Props) {
+export function Library({ currentId, onOpen, onNew, onDeleted, onImported }: Props) {
   const [scores, setScores] = useState(loadLibrary)
+  const [notice, setNotice] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
   const examples = useMemo(() => EXAMPLES.map((e) => ({ slug: e.slug, score: exampleScore(e.slug)! })), [])
 
   const duplicate = (score: Score) => {
@@ -53,19 +59,63 @@ export function Library({ currentId, onOpen, onNew, onDeleted }: Props) {
     onDeleted(score.id)
   }
 
+  const exportLibrary = () => {
+    const json = JSON.stringify(libraryFile(loadLibrary()), null, 2)
+    const date = new Date().toISOString().slice(0, 10)
+    downloadBlob(new Blob([json], { type: 'application/json' }), `sympho-library-${date}.json`)
+  }
+
+  const importLibrary = async (file: File) => {
+    try {
+      const result = mergeBackup(loadLibrary(), await file.text())
+      if (!replaceLibrary(result.scores)) throw new Error("This browser's storage is full, so nothing was imported")
+      setScores(result.scores)
+      setNotice(describeMerge(result))
+      onImported(result.scores)
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "Couldn't read that file")
+    }
+  }
+
   return (
     <main className="library">
       <section className="library-section">
         <div className="library-head">
           <div>
             <h1>Your scores</h1>
-            <p className="muted">Saved automatically in this browser as you edit.</p>
+            <p className="muted">Saved in this browser as you edit. Export a backup to keep them safe or move them to another device.</p>
           </div>
-          <button type="button" className="button button-primary" onClick={onNew}>
-            <PlusIcon />
-            New score
-          </button>
+          <div className="library-actions">
+            <button type="button" className="button" onClick={exportLibrary} disabled={scores.length === 0}>
+              <DownloadIcon />
+              Export
+            </button>
+            <button type="button" className="button" onClick={() => fileRef.current?.click()}>
+              <UploadIcon />
+              Import
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".json,application/json"
+              hidden
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                e.target.value = ''
+                if (file) void importLibrary(file)
+              }}
+            />
+            <button type="button" className="button button-primary" onClick={onNew}>
+              <PlusIcon />
+              New score
+            </button>
+          </div>
         </div>
+        {notice && (
+          <p className="library-notice" role="status">
+            {notice}
+          </p>
+        )}
         {scores.length === 0 ? (
           <p className="empty-state">Nothing here yet. Open an example below or start a new score, and your edits will show up here.</p>
         ) : (

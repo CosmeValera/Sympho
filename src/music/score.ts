@@ -60,6 +60,11 @@ export function eventAt(score: Score, tick: number): Located | undefined {
   return locateAll(score).find((l) => l.start <= tick && tick < l.start + eventTicks(l.event))
 }
 
+/** Start of the event covering `tick`, or 0 when `tick` is past the end. */
+export function eventStart(score: Score, tick: number): number {
+  return eventAt(score, tick)?.start ?? 0
+}
+
 export function toSegments(score: Score): Segment[] {
   return locateAll(score).map(({ event, start }) => ({
     start,

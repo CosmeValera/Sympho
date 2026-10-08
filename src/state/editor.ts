@@ -1,7 +1,10 @@
-import { locate, type EditResult } from '../music/score'
+import { type EditResult, eventStart, locate } from '../music/score'
 import type { Duration, Score } from '../music/types'
 
 const HISTORY_LIMIT = 200
+
+/** What a click on the staff does: pick an event, write a note, or write a rest. */
+export type Tool = 'select' | 'note' | 'rest'
 
 export interface EditorState {
   score: Score
@@ -12,10 +15,12 @@ export interface EditorState {
   selectedId: string | null
   /** Value used for new notes; mirrors the selected note's. */
   duration: Duration
-  /** Clicking the staff places rests instead of notes. */
-  restMode: boolean
-  /** Clicking the staff only selects, so a note can be picked to edit without overwriting it. */
-  selectMode: boolean
+  tool: Tool
+  /**
+   * Tick playback starts from, always the start of an event. It follows the
+   * selection, and pausing or dragging the marker moves it.
+   */
+  playhead: number
 }
 
 export type EditorAction =
@@ -24,16 +29,20 @@ export type EditorAction =
   | { type: 'meta'; patch: Partial<Pick<Score, 'title' | 'composer'>> }
   | { type: 'select'; id: string | null }
   | { type: 'duration'; duration: Duration }
-  | { type: 'restMode'; on: boolean }
-  | { type: 'selectMode'; on: boolean }
+  | { type: 'tool'; tool: Tool }
+  | { type: 'seek'; tick: number }
   | { type: 'undo' }
   | { type: 'redo' }
 
 export function initEditor(score: Score, persisted: boolean): EditorState {
-  return { score, persisted, past: [], future: [], selectedId: null, duration: '4', restMode: false, selectMode: false }
+  return { score, persisted, past: [], future: [], selectedId: null, duration: '4', tool: 'note', playhead: 0 }
 }
 
-/** Keeps the selection only if that event still exists, and syncs the input duration to it. */
+/**
+ * Keeps the selection only if that event still exists, and syncs the input
+ * duration and the playhead to it. Without a selection the playhead stays put,
+ * snapped to whatever event now covers it.
+ */
 function withSelection(state: EditorState, score: Score, id: string | null): EditorState {
   const found = locate(score, id)
   return {
@@ -41,6 +50,7 @@ function withSelection(state: EditorState, score: Score, id: string | null): Edi
     score,
     selectedId: found ? id : null,
     duration: found ? found.event.duration : state.duration,
+    playhead: found ? found.start : eventStart(score, state.playhead),
   }
 }
 
@@ -72,12 +82,11 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case 'duration':
       return { ...state, duration: action.duration }
 
-    // Writing rests and selecting are both click modes, so turning one on turns the other off.
-    case 'restMode':
-      return { ...state, restMode: action.on, selectMode: action.on ? false : state.selectMode }
+    case 'tool':
+      return { ...state, tool: action.tool }
 
-    case 'selectMode':
-      return { ...state, selectMode: action.on, restMode: action.on ? false : state.restMode }
+    case 'seek':
+      return { ...state, playhead: eventStart(state.score, action.tick) }
 
     case 'undo': {
       const previous = state.past.at(-1)

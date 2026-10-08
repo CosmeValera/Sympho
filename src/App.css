@@ -229,11 +229,18 @@
   box-shadow: var(--shadow);
 }
 
+.transport {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .play-button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   height: 40px;
+  min-width: 98px;
   padding: 0 18px 0 15px;
   border: 0;
   border-radius: 10px;
@@ -251,6 +258,56 @@
 
 .play-button.is-playing {
   background: var(--play);
+}
+
+/* Which tool a click on the staff uses. Labelled, so it reads as a mode rather than one more toggle. */
+.segmented {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 11px;
+  background: var(--bg);
+}
+
+.segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 12px 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 500;
+  transition:
+    background-color 0.12s,
+    color 0.12s;
+}
+
+.segment:hover {
+  color: var(--ink);
+}
+
+.segment[aria-checked='true'] {
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--line-strong),
+    0 1px 2px rgb(0 0 0 / 0.08);
+  color: var(--accent);
+}
+
+.segment svg {
+  width: 16px;
+  height: 16px;
+}
+
+.segment .glyph {
+  width: 12px;
+  font-size: 22px;
+  line-height: 0;
+  text-align: center;
+  translate: 0 0.3em;
 }
 
 .tool-group {
@@ -317,21 +374,49 @@
   margin-left: auto;
 }
 
-/* ---------- Hint and toast ---------- */
+/* ---------- Status bar and toast ---------- */
 
-.hint {
+.status-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 6px 6px 16px;
-  border-radius: 12px;
-  background: var(--accent-soft);
-  font-size: 0.9rem;
+  justify-content: space-between;
+  gap: 8px 20px;
+  min-height: 26px;
+  padding: 0 6px;
+  color: var(--muted);
+  font-size: 0.86rem;
 }
 
-.hint p {
-  flex: 1;
+.status-bar p {
   margin: 0;
+}
+
+.status-help {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-help strong {
+  margin-right: 6px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.status-marker {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 7px;
+  font-variant-numeric: tabular-nums;
+}
+
+.marker-dot {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--play);
 }
 
 .toast {
@@ -374,10 +459,62 @@
 .score-canvas {
   position: relative;
   min-height: 140px;
+  /* The glyphs are SVG text; dragging the marker would otherwise select them. */
+  user-select: none;
+}
+
+.score-canvas.is-writing {
+  cursor: crosshair;
 }
 
 .score-canvas.is-over-note {
   cursor: pointer;
+}
+
+/* Where playback starts, or the note sounding while it plays. Wide enough to grab, drawn as a thin line. */
+.playhead {
+  position: absolute;
+  z-index: 2;
+  width: 12px;
+  margin-left: -6px;
+  cursor: grab;
+  touch-action: none;
+  transition:
+    left 0.12s ease-out,
+    top 0.12s ease-out;
+}
+
+.playhead::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--play);
+  translate: -50% 0;
+}
+
+.playhead-handle {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 14px;
+  height: 13px;
+  background: var(--play);
+  clip-path: polygon(0 0, 100% 0, 100% 58%, 50% 100%, 0 58%);
+  translate: -50% 0;
+  transition: scale 0.12s;
+}
+
+.playhead:hover .playhead-handle,
+.playhead.is-dragging .playhead-handle {
+  scale: 1.25;
+}
+
+.playhead.is-dragging {
+  cursor: grabbing;
 }
 
 .score-svg {
@@ -488,8 +625,23 @@
   font-size: 1.3rem;
 }
 
+.shortcut-group h3 {
+  margin: 14px 0 2px;
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
 .shortcut-list {
   margin: 0;
+}
+
+.shortcut-note {
+  margin-top: 16px;
+  font-size: 0.86rem;
 }
 
 .shortcut {
@@ -534,6 +686,20 @@
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
+}
+
+.library-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.library-notice {
+  margin: -6px 0 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--ink);
 }
 
 .library h1 {
@@ -690,6 +856,28 @@
 
   .score-actions {
     width: 100%;
+  }
+
+  .segment-label {
+    display: none;
+  }
+
+  .segment {
+    padding: 0 11px;
+  }
+
+  /* Room for two lines, so the score doesn't jump as the text changes. */
+  .status-bar {
+    align-items: flex-start;
+    min-height: 2.9em;
+    font-size: 0.8rem;
+  }
+
+  .status-help {
+    display: -webkit-box;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 
   .shortcut {

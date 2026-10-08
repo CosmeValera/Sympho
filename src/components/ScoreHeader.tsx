@@ -32,7 +32,7 @@ function BpmInput({ bpm, onBpm }: { bpm: number; onBpm: (bpm: number) => void })
       <span className="field-label">Tempo</span>
       <span className="tempo-input">
         <span className="glyph" aria-hidden="true">
-          {''}
+          {'\uE1D5'}
         </span>
         <span aria-hidden="true">=</span>
         <input

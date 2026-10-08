@@ -44,6 +44,8 @@ export interface EventBox {
   x0: number
   x1: number
   cx: number
+  /** Left edge of the note including its accidental, where the playback marker sits. */
+  left: number
 }
 
 export interface MeasureBox {
@@ -245,6 +247,11 @@ export function renderScore(container: HTMLElement, score: Score, options: Rende
         const box = n.getBoundingBox()
         return box ? box.getX() + box.getW() / 2 : n.getAbsoluteX()
       })
+      const lefts = notes.map((n) => {
+        if (fullRest) return startX
+        const { modLeftPx, leftDisplacedHeadPx } = n.getMetrics()
+        return n.getAbsoluteX() - modLeftPx - leftDisplacedHeadPx
+      })
       const boxes: EventBox[] = []
       let tick = m.index * cap
       events.forEach((event, i) => {
@@ -255,6 +262,7 @@ export function renderScore(container: HTMLElement, score: Score, options: Rende
           x0: i === 0 ? startX : (centers[i - 1] + centers[i]) / 2,
           x1: i === events.length - 1 ? endX : (centers[i] + centers[i + 1]) / 2,
           cx: centers[i],
+          left: lefts[i],
         })
         tick += eventTicks(event)
       })

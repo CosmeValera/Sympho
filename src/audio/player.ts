@@ -14,8 +14,8 @@ interface Voice {
 const PIANO_SAMPLES = ['A2', 'C3', 'D#3', 'F#3', 'A3', 'C4', 'D#4', 'F#4', 'A4', 'C5', 'D#5', 'F#5', 'A5', 'C6', 'D#6', 'F#6', 'A6', 'C7']
 
 export interface PlaybackHandlers {
-  /** Called in sync with the audio as each event (note or rest) starts. */
-  onEvent: (id: string) => void
+  /** Called in sync with the audio as each event (note or rest) starts, with its start tick. */
+  onEvent: (id: string, tick: number) => void
   onEnd: () => void
 }
 
@@ -27,6 +27,8 @@ class Player {
   private tone?: ToneModule
   private voices = new Map<Instrument, Promise<Voice>>()
   private playing = false
+  /** Bumped by every play and stop, so a play still waiting for its voice knows it was superseded. */
+  private run = 0
 
   private async load(): Promise<ToneModule> {
     this.tone ??= await import('tone')
@@ -112,22 +114,27 @@ class Player {
 
   async play(score: Score, fromTick: number, handlers: PlaybackHandlers): Promise<void> {
     this.stop()
+    const run = this.run
     this.playing = true
     const { Tone, voice } = await this.voice(score.instrument)
-    if (!this.playing) return
+    if (run !== this.run) return
 
     const transport = Tone.getTransport()
     const draw = Tone.getDraw()
     const spt = secondsPerTick(score.bpm, score.timeSignature)
     const all = locateAll(score)
     let end = 0
+    // Draw callbacks already queued can still fire after a stop; drop them.
+    const live = (fn: () => void) => () => {
+      if (run === this.run) fn()
+    }
 
     all.forEach((located, i) => {
       const { event, start } = located
       if (start < fromTick) return
       const at = (start - fromTick) * spt
       end = Math.max(end, at + eventTicks(event) * spt)
-      transport.schedule((time) => draw.schedule(() => handlers.onEvent(event.id), time), at)
+      transport.schedule((time) => draw.schedule(live(() => handlers.onEvent(event.id, start)), time), at)
 
       const prev = all[i - 1]
       const continuesTie = prev?.event.tie && prev.start >= fromTick
@@ -142,16 +149,20 @@ class Player {
 
     transport.schedule(
       (time) =>
-        draw.schedule(() => {
-          this.stop()
-          handlers.onEnd()
-        }, time),
+        draw.schedule(
+          live(() => {
+            this.stop()
+            handlers.onEnd()
+          }),
+          time,
+        ),
       end + 0.05,
     )
     transport.start('+0.08')
   }
 
   stop(): void {
+    this.run++
     this.playing = false
     if (!this.tone) return
     const transport = this.tone.getTransport()

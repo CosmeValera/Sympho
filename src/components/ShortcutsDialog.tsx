@@ -1,25 +1,50 @@
 import { useEffect, useRef } from 'react'
 import { CloseIcon } from './Icons'
 
-const SHORTCUTS: [string[], string][] = [
-  [['Click'], 'Place a note at that pitch, or select the note under the cursor'],
-  [['A', '–', 'G'], 'Add a note after the selection, in the nearest octave'],
-  [['R'], 'Add a rest after the selection'],
-  [['S'], 'Select mode: clicks pick notes without writing, ready for sharps, flats or dots'],
-  [['1', '–', '5'], 'Whole, half, quarter, eighth, sixteenth'],
-  [['↑', '↓'], 'Move the selected note a step'],
-  [['Shift', '↑ ↓'], 'Move it an octave'],
-  [['←', '→'], 'Select the previous / next note'],
-  [['+'], 'Sharpen'],
-  [['−'], 'Flatten'],
-  [['N'], 'Natural'],
-  [['.'], 'Dot'],
-  [['T'], 'Tie to the next note'],
-  [['Del'], 'Turn the selected note into a rest'],
-  [['Space'], 'Play from the selection / stop'],
-  [['Esc'], 'Clear the selection'],
-  [['Ctrl', 'Z'], 'Undo'],
-  [['Ctrl', 'Y'], 'Redo'],
+const GROUPS: { title: string; items: [string[], string][] }[] = [
+  {
+    title: 'Writing',
+    items: [
+      [['Click'], 'Write a note (or rest) there; clicking on a note selects it'],
+      [['A', '–', 'G'], 'Add a note after the selection, in the nearest octave'],
+      [['R'], 'Add a rest after the selection'],
+      [['1', '–', '5'], 'Whole, half, quarter, eighth, sixteenth'],
+      [['W'], 'Notes tool: clicks write notes'],
+      [['Shift', 'R'], 'Rests tool: clicks write rests'],
+      [['S'], 'Select tool: clicks only pick notes (press again to go back)'],
+    ],
+  },
+  {
+    title: 'Selected note',
+    items: [
+      [['+'], 'Sharpen'],
+      [['−'], 'Flatten'],
+      [['N'], 'Natural'],
+      [['↑', '↓'], 'Move a step'],
+      [['Shift', '↑ ↓'], 'Move an octave'],
+      [['.'], 'Dot'],
+      [['T'], 'Tie to the next note'],
+      [['Del'], 'Turn into a rest'],
+      [['←', '→'], 'Select the previous / next note'],
+      [['Esc'], 'Clear the selection'],
+    ],
+  },
+  {
+    title: 'Playback',
+    items: [
+      [['Space'], 'Play from the marker / pause (playing again resumes)'],
+      [['Shift', 'Space'], 'Play from the beginning, leaving the marker where it is'],
+      [['Home'], 'Move the marker back to the beginning'],
+    ],
+  },
+  {
+    title: 'General',
+    items: [
+      [['Ctrl', 'Z'], 'Undo'],
+      [['Ctrl', 'Y'], 'Redo'],
+      [['?'], 'This list'],
+    ],
+  },
 ]
 
 export function ShortcutsDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -50,16 +75,24 @@ export function ShortcutsDialog({ open, onClose }: { open: boolean; onClose: () 
             <CloseIcon />
           </button>
         </header>
-        <dl className="shortcut-list">
-          {SHORTCUTS.map(([keys, action]) => (
-            <div key={action} className="shortcut">
-              <dt>
-                {keys.map((k) => (k === '–' ? <span key={k}>–</span> : <kbd key={k}>{k}</kbd>))}
-              </dt>
-              <dd>{action}</dd>
-            </div>
-          ))}
-        </dl>
+        {GROUPS.map((group) => (
+          <section key={group.title} className="shortcut-group">
+            <h3>{group.title}</h3>
+            <dl className="shortcut-list">
+              {group.items.map(([keys, action]) => (
+                <div key={action} className="shortcut">
+                  <dt>
+                    {keys.map((k) => (k === '–' ? <span key={k}>–</span> : <kbd key={k}>{k}</kbd>))}
+                  </dt>
+                  <dd>{action}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        ))}
+        <p className="muted shortcut-note">
+          The orange marker is where playback starts. Drag it, or select a note to move it there.
+        </p>
       </div>
     </dialog>
   )
